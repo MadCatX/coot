@@ -309,6 +309,7 @@ widget "*.*.model_refine_dialog_fit_terminal_residue_togglebutton" style "model-
 widget "*.*.model_refine_dialog_rot_trans_togglebutton" style "model-fit-refine-rot-trans"
 widget "*.*.model_refine_dialog_db_main_togglebutton" style "model-fit-refine-db-main"
 widget "*.*.model_refine_dialog_rotamer_togglebutton" style "model-fit-refine-rotamer"
+widget "*.*.model_refine_dialog_ntc_conformations_togglebutton" style "model-fit-refine-ntc-conformations"
 widget "*.*.model_refine_dialog_mutate_togglebutton" style "model-fit-refine-mutate"
 widget "*.*.model_refine_dialog_mutate_auto_fit_togglebutton" style "model-fit-refine-mutate-auto-fit"
 widget "*.*.model_refine_dialog_auto_fit_rotamer_togglebutton" style "model-fit-refine-auto-fit-rotamer"

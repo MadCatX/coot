@@ -3345,6 +3345,17 @@ on_model_refine_dialog_rotamer_togglebutton_toggled_gtkbuilder_callback
       setup_rotamers(0);
 }
 
+extern "C" G_MODULE_EXPORT
+void
+on_model_refine_dialog_ntc_conformations_togglebutton_toggled_gtkbuilder_callback
+                                        (GtkToggleButton       *button,
+                                        gpointer         user_data)
+{
+  bool active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+  setup_ntc_conformations(active);
+}
+
+
 
 extern "C" G_MODULE_EXPORT
 void
@@ -12323,7 +12334,6 @@ on_cif_dictionary_filechooser_dialog_response_gtkbuilder_callback(GtkDialog     
    }
 }
 
-
 extern "C" G_MODULE_EXPORT
 gboolean
 on_keyboard_mutate_dialog_delete_event_gtkbuilder_callback(GtkWidget       *widget,
@@ -12332,6 +12342,46 @@ on_keyboard_mutate_dialog_delete_event_gtkbuilder_callback(GtkWidget       *widg
 
    gtk_widget_hide(widget);
    return TRUE;
+}
+
+extern "C" G_MODULE_EXPORT
+void
+on_ntc_conformations_dialog_close_gtkbuilder_callback (GtkDialog *dialog,
+                                                       gpointer  user_data)
+{
+    clear_up_moving_atoms();
+}
+
+extern "C" G_MODULE_EXPORT
+void
+on_ntc_conformations_dialog_response_gtkbuilder_callback (GtkDialog *dialog,
+		                                          gint response_id,
+                                                          gpointer  user_data)
+{
+    if (response_id == GTK_RESPONSE_OK) {
+	accept_regularizement();
+    }
+
+    clear_up_moving_atoms();
+    gtk_widget_hide(GTK_WIDGET(dialog));
+}
+
+extern "C" G_MODULE_EXPORT
+void
+on_ntc_conformations_dialog_cancel_button_clicked_gtkbuilder_callback (GtkButton *button,
+                                                               gpointer  user_data)
+{
+    GtkDialog *dialog = GTK_DIALOG(widget_from_builder("ntc_conformations_dialog"));
+    gtk_dialog_response(dialog, GTK_RESPONSE_CANCEL);
+}
+
+extern "C" G_MODULE_EXPORT
+void
+on_ntc_conformations_dialog_ok_button_clicked_gtkbuilder_callback (GtkButton *button,
+                                                           gpointer  user_data)
+{
+    GtkDialog *dialog = GTK_DIALOG(widget_from_builder("ntc_conformations_dialog"));
+    gtk_dialog_response(dialog, GTK_RESPONSE_OK);
 }
 
 extern "C" G_MODULE_EXPORT
@@ -12360,4 +12410,64 @@ on_keyboard_mutate_entry_key_release_event_gtkbuilder_callback (GtkWidget       
                                                                 GdkEventKey     *event,
                                                                 gpointer         user_data) {
    return FALSE;
+}
+
+extern "C" G_MODULE_EXPORT
+gboolean
+on_ntc_conformations_dialog_delete_event_gtkbuilder_callback (GtkWidget *widget,
+		                                              gpointer  user_data)
+{
+    gtk_widget_hide(widget);
+    return TRUE;
+}
+
+static
+int ntc_conformations_combobox_index(GtkComboBox *combo) {
+    int idx = gtk_combo_box_get_active(combo);
+    if (idx < 0)
+        return -1;
+
+    GtkTreeModel *model = gtk_combo_box_get_model(combo);
+    if (model == nullptr)
+        return -1;
+
+    gint comboIdx = -1;
+    GtkTreeIter iter;
+    GtkTreePath *path = gtk_tree_path_new_from_indices(idx, -1);
+    gtk_tree_model_get_iter(model, &iter, path);
+    gtk_tree_model_get(model, &iter, 1, &comboIdx, -1);
+
+    gtk_tree_path_free(path);
+
+    return comboIdx;
+}
+
+extern "C" G_MODULE_EXPORT
+void
+on_ntc_conformations_list_of_ntc_classes_changed_gtkbuilder_callback (GtkComboBox *combo,
+		                                                      gpointer user_data)
+{
+    auto clsIdx = ntc_conformations_combobox_index(combo);
+    if (clsIdx < 0)
+        return;
+
+    ntc_conformations_set_ntc_class(clsIdx);
+    GtkComboBox *listOfNtCs = GTK_COMBO_BOX(widget_from_builder("ntc_conformations_list_of_ntcs"));
+    auto ntcIdx = ntc_conformations_combobox_index(listOfNtCs);
+    if (ntcIdx < 0)
+        return;
+
+    ntc_conformations_set_ntc(ntcIdx);
+}
+
+extern "C" G_MODULE_EXPORT
+void
+on_ntc_conformations_list_of_ntcs_changed_gtkbuilder_callback (GtkComboBox *combo,
+		                                               gpointer user_data)
+{
+    auto ntcIdx = ntc_conformations_combobox_index(combo);
+    if (ntcIdx < 0)
+        return;
+
+    ntc_conformations_set_ntc(ntcIdx);
 }

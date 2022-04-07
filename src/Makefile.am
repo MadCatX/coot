@@ -724,7 +724,9 @@ libcootsumo_la_SOURCES = \
         widget-headers.hh        \
 	widget-from-builder.hh   \
 	widget-from-builder.cc   \
-        json.hpp
+        json.hpp                 \
+	ntcs.cc                  \
+	graphics-info-ntcs.cc
 
 
 # 20220228-PE this appeared in a merge - not sure if it's needed (or should be included directly)

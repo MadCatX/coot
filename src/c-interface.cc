@@ -115,7 +115,6 @@
 #include "cmtz-interface.hh"
 // #include "mtz-bits.h" stuff from here moved to cmtz-interface
 
-
 // This is (already) in git-revision-count.cc
 //
 int svn_revision() {
@@ -9348,3 +9347,19 @@ void load_tutorial_model_and_data() {
 
 }
 
+void ntc_conformations_set_ntc_class(int clsIdx) {
+    graphics_info_t g;
+
+    g.ntc_conformations_setup_ntc_combobox(clsIdx);
+}
+
+void ntc_conformations_set_ntc(int ntcIdx) {
+    graphics_info_t g;
+
+    g.ntc_conformations_show_actual(g.ntc_conformations_atom_index, g.ntc_conformations_imol);
+    if (ntcIdx >= 0)
+        g.ntc_conformations_show_prescribed(ntcIdx);
+    else
+        g.ntc_conformations_clear_prescribed();
+    g.ntc_conformations_generate_moving_atoms(g.ntc_conformations_atom_index, g.ntc_conformations_imol, ntcIdx);
+}

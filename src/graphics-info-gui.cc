@@ -2671,6 +2671,8 @@ graphics_info_t::model_fit_refine_unactive_togglebutton(const std::string &butto
       toolbar_button_name = "model_toolbar_auto_fit_rotamer_togglebutton";
    if (button_name == "model_refine_dialog_rotamer_togglebutton")
       toolbar_button_name = "model_toolbar_rotamers_togglebutton";
+   if (button_name == "model_refine_dialog_ntc_conformations_togglebutton")
+      toolbar_button_name = "model_toolbar_ntc_conformations_togglebutton";
    if (button_name == "model_refine_dialog_edit_chi_angles_togglebutton")
       toolbar_button_name = "model_toolbar_edit_chi_angles_togglebutton";
    if (button_name == "model_refine_dialog_torsion_general_togglebutton")

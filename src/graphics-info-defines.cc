@@ -59,6 +59,7 @@ graphics_info_t::clear_pending_picks() {
    in_angle_define = 0;
    in_torsion_define = 0;
    in_rotamer_define = 0;
+   in_ntc_conformations_define = 0;
    in_mutate_define = 0;
    in_mutate_auto_fit_define = 0;
    in_auto_fit_define = 0;
@@ -125,6 +126,7 @@ graphics_info_t::model_fit_refine_toggle_button_name_list() {
    names.push_back("model_refine_dialog_torsion_general_togglebutton");
    names.push_back("model_refine_dialog_do_180_degree_sidechain_flip_togglebutton");
    names.push_back("model_refine_dialog_edit_backbone_torsions_togglebutton");
+   names.push_back("model_refine_dialog_ntc_conformations_togglebutton");
    return names;
 }
 
@@ -256,6 +258,7 @@ graphics_info_t::check_if_in_range_defines(GdkEventButton *event,
    check_if_in_terminal_residue_define(event);
    check_if_in_delete_item_define(event, state);
    check_if_in_rotamer_define(event);
+   check_if_in_ntc_conformations_define(event);
    check_if_in_mutate_define(event); 
    check_if_in_mutate_auto_fit_define(event);
    check_if_in_auto_fit_define(event);
@@ -1504,6 +1507,25 @@ graphics_info_t::check_if_in_rotamer_define(GdkEventButton *event) {
 	 }
       }
    }
+}
+
+void
+graphics_info_t::check_if_in_ntc_conformations_define(GdkEventButton *event) {
+
+   graphics_info_t g;
+   if (!g.in_ntc_conformations_define)
+      return;
+
+    pick_info naii = atom_pick(event);
+    if (naii.success == GL_TRUE) {
+        if (g.do_ntc_conformations(naii.atom_index, naii.imol)) {
+		g.in_ntc_conformations_define = 0;
+		pick_pending_flag = 0;
+		normal_cursor();
+		model_fit_refine_unactive_togglebutton("model_refine_dialog_ntc_conformations_togglebutton");
+	}
+    }
+
 }
 
 void
