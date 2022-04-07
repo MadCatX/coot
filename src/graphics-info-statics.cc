@@ -950,6 +950,8 @@ int graphics_info_t::rotamer_residue_imol = -1;       // unset initially.
 int graphics_info_t::rotamer_fit_clash_flag = 1;      //  check clashes initially.
 short int graphics_info_t::in_auto_fit_define = 0;    // not in auto fit initially.
 
+short int graphics_info_t::in_ntc_conformations_define = 0;
+
 // mutation
 short int graphics_info_t::in_mutate_define = 0; // not, initially.
 int graphics_info_t::mutate_residue_atom_index = -1;

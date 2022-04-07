@@ -249,6 +249,17 @@ on_model_toolbar_rotamers_togglebutton_toggled_gtkbuilder_callback
 
 extern "C" G_MODULE_EXPORT
 void
+on_model_toolbar_ntc_conformations_togglebutton_toggled_gtkbuilder_callback
+                                        (GtkToggleToolButton *toggletoolbutton,
+                                        gpointer         user_data)
+{
+  short int active = gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(toggletoolbutton));
+  setup_ntc_conformations(active);
+}
+
+
+extern "C" G_MODULE_EXPORT
+void
 on_model_toolbar_edit_chi_angles_togglebutton_toggled_gtkbuilder_callback
                                               (GtkToggleToolButton *toggletoolbutton,
                                                gpointer         user_data)

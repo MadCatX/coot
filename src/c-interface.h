@@ -5481,6 +5481,27 @@ PyObject *rotamer_graphs_py(int imol);
 /* \} */
 
 /*  ----------------------------------------------------------------------- */
+/*                  NtCs                                                    */
+/*  ----------------------------------------------------------------------- */
+/*! \name NtCs */
+/* \{ */
+void setup_ntc_conformations(short int active);
+void ntc_conformations_set_ntc_class(int clsIdx);
+void ntc_conformations_set_ntc(int ntcIdx);
+
+#ifdef __cplusplus
+  #ifdef USE_GUILE
+    // Nothing yet
+  #endif /* USE_GUILE */
+
+  #ifdef USE_PYTHON
+    // Nothing yet
+  #endif /* USE_PYTHON */
+#endif /* __cplusplus */
+
+/* \} */
+
+/*  ----------------------------------------------------------------------- */
 /*                  180 degree flip                                         */
 /*  ----------------------------------------------------------------------- */
 /*! \name 180 Flip Side chain */

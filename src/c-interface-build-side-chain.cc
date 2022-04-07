@@ -1333,3 +1333,20 @@ void assign_sequence_to_active_fragment() {
       std::cout << "No active atom" << std::endl;
    }
 }
+
+void setup_ntc_conformations(short int active) {
+   graphics_info_t g;
+   g.in_ntc_conformations_define = active;
+
+   if (active) {
+      g.pick_cursor_maybe();
+      g.pick_pending_flag = 1;
+      std::cout << "Click on an atom in a step for which you wish to set NtC conformation\n";
+   } else {
+      g.normal_cursor();
+   }
+
+   std::vector<coot::command_arg_t> args;
+   args.push_back(active);
+   add_to_history_typed("setup-ntc-conformations", args);
+}

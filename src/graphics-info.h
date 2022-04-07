@@ -831,6 +831,7 @@ class graphics_info_t {
    void check_if_in_delete_item_define(GdkEventButton *event,
 				       const GdkModifierType &state);
    void check_if_in_rotamer_define(GdkEventButton *event);
+   void check_if_in_ntc_conformations_define(GdkEventButton *event);
    void check_if_in_mutate_define(GdkEventButton *event);
    void check_if_in_mutate_auto_fit_define(GdkEventButton *event);
    void check_if_in_auto_fit_define(GdkEventButton *event);
@@ -2782,6 +2783,22 @@ public:
    void set_rotamer_fit_clash_flag(int i) { rotamer_fit_clash_flag = i; }
    // autofit rotamer:
    static short int in_auto_fit_define;
+
+   static short int in_ntc_conformations_define;
+   // BEWARE: This is so terrifying that it almost made me cry for momma.
+   // Yes, these are global variables that contain the "imol" and "atom_index"
+   // values that were acquired from the initial pick from the structure view.
+   // This is, apparently, how it's supposed to be done in Coot.
+   // Run. Run fast! RUN FAR AWAY!!!
+   static int ntc_conformations_imol;
+   static int ntc_conformations_atom_index;
+
+   bool do_ntc_conformations(int atom_index, int imol);
+   void ntc_conformations_clear_prescribed();
+   void ntc_conformations_setup_ntc_combobox(int clsIdx);
+   void ntc_conformations_show_actual(int atom_index, int imol);
+   void ntc_conformations_show_prescribed(int ntcIdx);
+   void ntc_conformations_generate_moving_atoms(int atom_index, int imol, int ntcIdx);
 
 
    // Mutation stuff
