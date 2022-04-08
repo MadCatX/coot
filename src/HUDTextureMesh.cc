@@ -162,6 +162,9 @@ HUDTextureMesh::update_instancing_buffer_data(const std::vector<glm::vec2> &new_
 
    n_instances = n_phi_psis;
 
+   if (n_instances == 0)
+	   return;
+
    if (vao == VAO_NOT_SET)
       std::cout << "GL ERROR:: HUDTextureMesh::update_instancing_buffer_data() You forgot to setup this Mesh "
                 << name << std::endl;
