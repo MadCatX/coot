@@ -74,8 +74,7 @@ namespace coot {
  	 } 
 	 bool operator()(const extra_bond_restraint_t &br) {
 	    std::pair<atom_spec_t, atom_spec_t> p(br.atom_1, br.atom_2);
-	    std::map<std::pair<atom_spec_t, atom_spec_t>, double>::const_iterator it =
-	       dist_map.find(p);
+	    auto it = dist_map.find(p);
 	    if (it != dist_map.end()) {
 	       bool v =  (fabs(br.bond_dist - it->second)/br.esd >= n_sigma_lim);
 	       std::cout << "comparing (" << br.bond_dist << " - " << it->second << ")/" << br.esd
