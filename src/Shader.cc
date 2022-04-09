@@ -12,6 +12,7 @@
 #include "Shader.hh"
 
 Shader::Shader() {
+   success_status = false;
    program_id = 0; // unset
    name = "---Unset---";
 }
