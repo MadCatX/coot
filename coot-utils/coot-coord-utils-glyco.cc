@@ -26,6 +26,10 @@
 #include "utils/coot-utils.hh"
 #include "coot-coord-extras.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 // Note: this is a simple-minded hack.  The right way of doing this
 // is to define a bonding tree that includes atoms from both
@@ -1553,3 +1557,7 @@ coot::glyco_tree_t::complex_tree() const {
 
    return t;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

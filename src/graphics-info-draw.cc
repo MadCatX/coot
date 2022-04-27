@@ -3,8 +3,6 @@
 #include <Python.h>
 #endif // USE_PYTHON
 
-#include "compat/coot-sysdep.h"
-
 #define GLM_ENABLE_EXPERIMENTAL // # for norm things
 #include <glm/ext.hpp>
 #include <glm/gtx/string_cast.hpp>  // to_string()
@@ -29,6 +27,14 @@
 #include "cylinder-with-rotation-translation.hh"
 
 #include "screendump-tga.hh"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("near")
+# undef near
+
+# pragma push_macro("far")
+# undef far
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 enum {VIEW_CENTRAL_CUBE, ORIGIN_CUBE};
 
@@ -5623,3 +5629,8 @@ graphics_info_t::unfullscreen() {
       gtk_widget_show(tool_bar_frame);
    }
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("near")
+# pragma pop_macro("far")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

@@ -10,6 +10,11 @@
 #include "coot-utils/helix-like.hh"
 #include "daca.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 coot::daca::box_index_t::box_index_t(const clipper::Coord_orth &pos) {
    box_width = 1.0;
    idx_x = floor(pos.x()/box_width);
@@ -1691,3 +1696,7 @@ coot::daca::cook() {
    // envelope();
    normalize_v2();
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

@@ -10,6 +10,11 @@
 
 #include "analysis/daca.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 // This molecule should have hydrogen atoms.
 void
 coot::buried_unsatisfied_polar_atoms(mmdb::Manager *mol) {
@@ -115,3 +120,7 @@ coot::buried_unsatisfied_polar_atoms(mmdb::Manager *mol) {
    }
    
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

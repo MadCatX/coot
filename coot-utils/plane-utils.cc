@@ -1,11 +1,18 @@
 
 
 #include <algorithm> // for std::find
+#include "compat/coot-sysdep.h"
 
 #include "plane-utils.hh"
 #include "coot-coord-utils.hh"
 
-#include <compat/coot-sysdep.h>
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 // the vector points towards the ring
 std::pair<bool, double>
@@ -94,3 +101,9 @@ coot::angle_betwen_plane_and_vector(mmdb::Residue *residue_p,
    r = angle_betwen_plane_and_vector(residue_p, ring_atom_names, alt_conf, dv);
    return r;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+

@@ -23,8 +23,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 // For stat, mkdir:
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -66,8 +64,10 @@
 
 #include "manipulation-modes.hh"
 
-// #include "coot-utils.hh"
-
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 // This should be in coot-coord-utils.
 //
@@ -451,3 +451,7 @@ graphics_info_t::cis_trans_conversion(mmdb::Atom *at, int imol, short int is_N_f
 	 graphics_draw();
    }
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

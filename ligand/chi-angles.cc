@@ -25,6 +25,10 @@
 #include "chi-angles.hh"
 #include "ccp4mg-utils/mgtree.h"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
  
 coot::simple_rotamer::simple_rotamer(int rot1_in,  
 				     int rot2_in,  
@@ -1009,4 +1013,8 @@ coot::chi_angles::get_chi_angles() const {
       }
    }
    return v;
-} 
+}
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

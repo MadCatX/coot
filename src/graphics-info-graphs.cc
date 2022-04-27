@@ -82,6 +82,11 @@
 #include "coot-utils/coot-map-utils.hh"
 #include "geometry-graphs.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 // Validation stuff	    //
 
 
@@ -1689,3 +1694,8 @@ graphics_info_t::ncs_diffs_from_mol(int imol) {
    }
    return drv;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+

@@ -56,6 +56,10 @@
 
 #include "cc-interface.hh" // for add_animated_ligand_interactions
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 int
 sprout_hydrogens(int imol,
@@ -1972,3 +1976,7 @@ coot::flev_attached_hydrogens_t::get_radius(const std::string &ele) const {
       radius = 1.8;
    return radius;
 } 
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

@@ -25,8 +25,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #ifndef HAVE_STRING
 #define HAVE_STRING
 #include <string>
@@ -43,16 +41,6 @@
 // #include <GL/glut.h>  // for some reason...  // Eh?
 
 #include <iostream>
-#include <dirent.h>   // for refmac dictionary files
-
-#include <string.h> // strncpy
-
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
-#if !defined _MSC_VER && !defined WINDOWS_MINGW
-#include <unistd.h>
-#endif
 
 #include <mmdb2/mmdb_manager.h>
 #include "coords/mmdb-extras.h"
@@ -87,6 +75,11 @@
 
 #include "manipulation-modes.hh"
 #include "guile-fixups.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 void do_accept_reject_dialog(std::string fit_type, const coot::refinement_results_t &rr) {
 
@@ -5041,3 +5034,7 @@ graphics_info_t::update_main_window_molecular_representation_widgets() {
    }
 
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

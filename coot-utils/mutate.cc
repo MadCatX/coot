@@ -1,8 +1,17 @@
-
-#include <string.h> // bleugh
 #include "compat/coot-sysdep.h"
+
 #include "geometry/main-chain.hh"
 #include "coot-coord-utils.hh"
+
+#include <cstring>
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 void
 coot::util::mutate_internal(mmdb::Residue *residue,
@@ -85,10 +94,10 @@ coot::util::mutate_internal(mmdb::Residue *residue,
          copy_at->Copy(std_residue_atoms[i]);
          residue->AddAtom(copy_at);
          if (use_old_seg_id) {
-            strcpy(copy_at->segID, old_seg_id_for_residue_atoms.c_str());
+            std::strcpy(copy_at->segID, old_seg_id_for_residue_atoms.c_str());
          }
          if (alt_conf != "")
-            strcpy(copy_at->altLoc, alt_conf.c_str());
+            std::strcpy(copy_at->altLoc, alt_conf.c_str());
       }
    }
 
@@ -567,7 +576,7 @@ coot::util::mutate_base(mmdb::Residue *residue, mmdb::Residue *std_base,
                            strncpy(at->altLoc, new_alt_conf.c_str(), 2);
                            residue->AddAtom(at);
                            if (use_old_seg_id)
-                              strcpy(at->segID, old_seg_id_for_residue_atoms.c_str());
+                              std::strcpy(at->segID, old_seg_id_for_residue_atoms.c_str());
                            found = 1;
                            break;
                         }
@@ -686,3 +695,9 @@ coot::util::get_standard_residue_instance(const std::string &res_name) {
    }
    return 0; // failed, then
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+

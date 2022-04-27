@@ -9,6 +9,11 @@
 #include "coot-utils/coot-coord-utils.hh"
 #include "cablam-markup.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 coot::cablam_markup_t::cablam_markup_t(mmdb::Atom *O_prev_at,
                                        mmdb::Atom *O_this_at,
                                        mmdb::Atom *O_next_at,
@@ -305,3 +310,7 @@ coot::get_cablam_like_geometry_stats(mmdb::Manager *mol) {
 
    return v;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

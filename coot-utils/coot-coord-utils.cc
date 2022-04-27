@@ -23,9 +23,9 @@
  * 02110-1301, USA
  */
 
-#include <algorithm>
-#include <stdexcept>
+#include "compat/coot-sysdep.h"
 
+#include <algorithm>
 #include <string.h> // for strcpy
 
 #ifdef HAVE_GSL
@@ -38,12 +38,19 @@
 #include <mmdb2/mmdb_tables.h>  // for mmdb::Get1LetterCode()
 #include <mmdb2/mmdb_math_graph.h> // for graph matching
 
-#include "compat/coot-sysdep.h"
-
 #include "clipper/mmdb/clipper_mmdb.h"
 #include "geometry/main-chain.hh"
 #include "geometry/mol-utils.hh"
 #include "geometry/residue-and-atom-specs.hh"
+
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 std::vector<std::string>
 coot::util::residue_types_in_molecule(mmdb::Manager *mol) { 
@@ -9398,3 +9405,8 @@ coot::get_position_hash(mmdb::Manager *mol) {
 
    return h;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

@@ -29,7 +29,6 @@
 #include <string>
 #include <string.h>
 
-#include "compat/coot-sysdep.h"
 
 #include "c-interface-mmdb.hh"
 
@@ -38,6 +37,14 @@
 #include "guile-fixups.h"
 
 #include "graphics-info.h"
+
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 
 #ifdef USE_GUILE
 
@@ -491,3 +498,7 @@ void mmdb_manager_delete_conect(mmdb::Manager *mol) {
      mol->Delete ( mmdb::MMDBFCM_SC );
   }
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

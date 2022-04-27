@@ -23,7 +23,11 @@
 
 // #define ANALYSE_REFINEMENT_TIMING
 
-#include <string.h> // for strcmp
+#include "compat/coot-sysdep.h"
+
+#ifdef ANALYSE_REFINEMENT_TIMING
+#include <sys/time.h>
+#endif // ANALYSE_REFINEMENT_TIMING
 
 // we don't want to compile anything if we don't have gsl
 
@@ -45,11 +49,15 @@
 //
 #include "coot-utils/coot-coord-extras.hh"  // is_nucleotide_by_dict
 
-// #include "mmdb.h" // for printing of mmdb::Atom pointers as info not raw
-                     // pointers.  Removed. Too much (linking issues in)
-                     // Makefile pain.
+#include <cstring>
 
-#include "compat/coot-sysdep.h"
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 // We need to fill restraints_vec (which is a vector of
 // simple_restraint) using the coordinates () and the dictionary of
@@ -2206,7 +2214,7 @@ coot::restraints_container_t::construct_non_bonded_contact_list_conventional() {
 
 		    // PDBv3 FIXME
 		    if (have_oxt_flag) 
-		       if (! strcmp(res_selection_local_inner[jat]->name, " OXT")) // matched
+		       if (! std::strcmp(res_selection_local_inner[jat]->name, " OXT")) // matched
 			  matched_oxt = true;
 
 		    if (! matched_oxt) { 
@@ -2600,3 +2608,8 @@ coot::restraints_container_t::filter_non_bonded_by_distance(const std::vector<st
       }
    }
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

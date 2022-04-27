@@ -43,8 +43,6 @@
 
 #include <epoxy/gl.h>
 
-#include "compat/sleep-fixups.h"
-
 #include <string.h> // strncmp
 
 #include <math.h>
@@ -89,6 +87,11 @@
 #include "rotamer-search-modes.hh"
 
 #include "draw.hh"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 std::vector<molecule_class_info_t> graphics_info_t::molecules;
 std::atomic<bool> molecule_class_info_t::draw_vector_sets_lock(false);
@@ -3099,3 +3102,7 @@ void set_skeleton_bond_colour_random(int i, const std::vector<std::vector<float>
 // 		 combine_colour(0.8, 2));
 //    }
 // }
+
+#ifndef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

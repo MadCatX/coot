@@ -21,8 +21,6 @@
 
 #include <algorithm>
 
-#include <string.h>
-
 #include "compat/coot-sysdep.h"
 
 // include files needed to include molecule-class-info.h correctly. Useful.
@@ -32,6 +30,14 @@
 #include "coords/mmdb-crystal.h"
 
 #include "molecule-class-info.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 std::vector<ProteinDB::Chain>
 molecule_class_info_t::protein_db_loops(const std::vector<coot::residue_spec_t> &residue_specs,
@@ -704,4 +710,7 @@ molecule_class_info_t::add_residue_with_atoms(const coot::residue_spec_t &residu
    return r_added;
 }
 
-
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

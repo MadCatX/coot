@@ -29,8 +29,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
@@ -38,18 +36,6 @@
 #include <algorithm>
 
 #define HAVE_CIF  // will become unnessary at some stage.
-
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-#include <string.h> // strncmp
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-#include <windows.h>
-#endif
-
 
 #include <mmdb2/mmdb_manager.h>
 #include "coords/mmdb-extras.h"
@@ -108,6 +94,15 @@
 
 #include "c-interface-refine.hh"
 
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("IGNORE")
+# undef IGNORE
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 /*  ------------------------------------------------------------------------ */
 /*                   model/fit/refine functions:                             */
@@ -5929,3 +5924,9 @@ void set_auto_h_bond_restraints(int state) {
 void set_refine_hydrogen_bonds(int state) {
    set_auto_h_bond_restraints(state);
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("IGNORE")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+

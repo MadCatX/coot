@@ -20,21 +20,27 @@
  * 02110-1301, USA
  */
 
+#include "compat/coot-sysdep.h"
 
 #include <stdexcept>
 #include <iomanip>
 #include <algorithm> // for std::find
 
-#include "string.h"
-
-#include "compat/coot-sysdep.h"
 #include "utils/coot-utils.hh"
 #include "geometry/mol-utils.hh"
 #include "coot-coord-utils.hh"
 #include "coot-coord-extras.hh"
 #include "atom-tree.hh"
 
+#include <cstring>
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 // Return 0 if any of the residues don't have a dictionary entry
 // geom_p gets updated to include the residue restraints if necessary
@@ -96,7 +102,7 @@ coot::GetResidue(const minimol::residue &res_in) {
       // reset new_alt_loc
       for (unsigned int ic=0; ic<new_length; ic++)
          new_alt_loc[ic] = 0;
-      strncpy(at->altLoc, mat.altLoc.c_str(), new_length);
+      std::strncpy(at->altLoc, mat.altLoc.c_str(), new_length);
       res->AddAtom(at);
    }
 
@@ -1063,3 +1069,8 @@ coot::util::multi_parse_prosmart_log_and_gen_CO_plot() {
       }
    }
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

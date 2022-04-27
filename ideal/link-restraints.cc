@@ -21,13 +21,20 @@
  * 02110-1301, USA
  */
 
-
 // we don't want to compile anything if we don't have gsl
 #ifdef HAVE_GSL
 
 #include "simple-restraint.hh"
 
 #include "coot-utils/coot-coord-extras.hh"  // is_nucleotide_by_dict
+
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 
 // if they were not passed in the constructor.
 void
@@ -1861,6 +1868,10 @@ int coot::restraints_container_t::add_link_plane(std::string link_type,
 
    return n_plane;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 #endif // HAVE_GSL
 

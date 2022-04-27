@@ -3,6 +3,11 @@
 #include "coot-coord-utils.hh"
 #include "bonded-atoms.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 // called for atoms in different residues - we already know
 // that at_2 will be in a different residue to at_1.
 //
@@ -184,3 +189,7 @@ coot::find_1_4_connections(const std::vector<std::vector<unsigned int> > &bonds_
    return v;
 
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

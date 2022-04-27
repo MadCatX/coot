@@ -4,6 +4,11 @@
 #include "atom-selection-container.hh"
 #include "contact-info.hh"
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 // return a diagnostic message (set if needed)
 std::string
 coot::util::jed_flip(int imol_no, mmdb::Residue *residue_p, mmdb::Atom *atom_p,
@@ -180,3 +185,6 @@ coot::util::jed_flip_internal(coot::atom_tree_t &tree,
    return problem_string;
 } 
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION

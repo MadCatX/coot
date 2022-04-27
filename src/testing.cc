@@ -23,8 +23,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #ifdef MAKE_ENHANCED_LIGAND_TOOLS
 #include "lidia-core/use-rdkit.hh"
 #endif
@@ -90,6 +88,14 @@ bool close_float_p(float f1, float f2) {
 }
 
 #include "testing-data.hh"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("AddAtom")
+# undef AddAtom
+
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 coot::protein_geometry testing_data::geom;
 
@@ -3080,5 +3086,9 @@ test_read_prosmart_distance_restraints() {
    return status;
 }
 
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("AddAtom")
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 #endif // BUILT_IN_TESTING

@@ -1,7 +1,15 @@
+#include "compat/coot-sysdep.h"
 
 #include "loop-path.hh"
-#include "compat/coot-sysdep.h"
 #include "coot-utils/coot-coord-utils.hh"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+
+# pragma push_macro("AddAtom")
+# undef AddAtom
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
 
 std::pair<bool, std::vector<coot::CartesianPair> >
 coot::loop_path(mmdb::Atom *start_back_2,
@@ -142,3 +150,9 @@ coot::is_sane_inter_residue_distance(double dist_between_residues, int res_no_de
 
    return status;
 }
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+# pragma pop_macro("AddAtom")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+

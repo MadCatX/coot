@@ -19,13 +19,20 @@
  * 02110-1301, USA
  */
 
-
 #include "simple-restraint.hh"
 #include "geometry/protein-geometry.hh"
 #include "coot-utils/coot-coord-utils.hh"
 #include "coot-compare-residues.hh"
 #include "compat/coot-sysdep.h"
 #include "torsion-bonds.hh"
+
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma push_macro("GetAtomName")
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 
 bool
 coot::compare_residue_torsions(int imol_1, mmdb::Manager *mol1, mmdb::Residue *res_1,
@@ -108,4 +115,7 @@ coot::compare_residue_torsion_atom_names(const std::vector<torsion_atom_quad> &t
    }
    return status;
 }
-   
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# pragma pop_macro("GetAtomName")
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
