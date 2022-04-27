@@ -4,6 +4,7 @@
 #include "simple-restraint.hh"
 #include "coot-utils/contacts-by-bricks.hh"
 #include "coot-utils/stack-and-pair.hh"
+#include "coot-utils/coot-coord-extras.hh"
 
 int
 coot::restraints_container_t::make_restraints_ng(int imol,
@@ -1647,8 +1648,6 @@ coot::restraints_container_t::try_make_peptide_link_ng(const coot::protein_geome
    return std::pair<bool, coot::restraints_container_t::link_restraints_counts>(status, lrc);
 
 }
-
-#include "coot-utils/coot-coord-extras.hh"
 
 std::pair<bool, coot::restraints_container_t::link_restraints_counts>
 coot::restraints_container_t::try_make_phosphodiester_link_ng(const coot::protein_geometry &geom,

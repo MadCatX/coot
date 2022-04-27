@@ -1,10 +1,16 @@
 
 #include <string>
 #include <iostream>
-#include <glob.h>
 #include <sys/stat.h>
 #include <gtk/gtk.h>
 #include "utils/coot-utils.hh"
+
+#include "compat/coot-sysdep.h"
+
+static
+std::vector<std::string> gather_icons(const std::string &base_path) {
+    return coot::gather_files_by_patterns(base_path, { "*.svg", "*.png" });
+}
 
 // this returns the effective screen height if possible otherwise an estimate
 int
@@ -143,43 +149,32 @@ void setup_application_icon(GtkWindow *window) {
    const char *stock_id;
    GdkPixbuf* pixbuf;
 
-   glob_t myglob;
-   int flags = 0;
    std::string glob_dir = splash_screen_pixmap_dir;
    std::string glob_file = glob_dir;
-   glob_file += "/*.svg";
-   glob(glob_file.c_str(), flags, 0, &myglob);
-   glob_file = glob_dir;
-   glob_file += "/*.png";
-   glob(glob_file.c_str(), GLOB_APPEND, 0, &myglob);
-   size_t count;
-   char **p;
-   for (p = myglob.gl_pathv, count = myglob.gl_pathc; count; p++, count--) {
-      char *filename(*p);
-      if (false) // remove the noise while I think about other things.
-         std::cout << "setup_application_icon() filename " << filename << std::endl;
-      pixbuf = gdk_pixbuf_new_from_file(filename, &error);
-      if (error) {
-	 g_print ("Error loading icon: %s\n", error->message);
-	 g_error_free (error);
-	 error = NULL;
-      } else {
-	 if (pixbuf) {
-            // std::cout << "Replace gtk_icon_set_new_from_pixbuf()\n";
-	    iconset = gtk_icon_set_new_from_pixbuf(pixbuf);
-	    g_object_unref(pixbuf);
-	    // may have to be adjusted for Windows!!
-	    stock_id = coot::util::file_name_non_directory(filename).c_str();
-	    std::string tmp = coot::util::file_name_non_directory(filename);
-            stock_id = tmp.c_str();
-            if (! tmp.empty()) {
-               // std::cout << "factory adding icon " << stock_id << std::endl;
-	       gtk_icon_factory_add(iconfactory, stock_id, iconset);
-	       gtk_icon_factory_add_default(iconfactory);
-	    }
-	 }
-      }
-   }
-   globfree(&myglob);
 
+   std::vector<std::string> icons = gather_icons(glob_file);
+
+    for (const auto &icon : icons) {
+        pixbuf = gdk_pixbuf_new_from_file(icon.c_str(), &error);
+        if (error) {
+	        g_print ("Error loading icon: %s\n", error->message);
+            g_error_free (error);
+	        error = NULL;
+        } else {
+            if (pixbuf) {
+                // std::cout << "Replace gtk_icon_set_new_from_pixbuf()\n";
+    	        iconset = gtk_icon_set_new_from_pixbuf(pixbuf);
+	            g_object_unref(pixbuf);
+	            // may have to be adjusted for Windows!!
+	            stock_id = coot::util::file_name_non_directory(icon).c_str();
+    	        std::string tmp = coot::util::file_name_non_directory(icon);
+                stock_id = tmp.c_str();
+                if (! tmp.empty()) {
+                    // std::cout << "factory adding icon " << stock_id << std::endl;
+                    gtk_icon_factory_add(iconfactory, stock_id, iconset);
+                    gtk_icon_factory_add_default(iconfactory);
+	            }
+	        }
+        }
+    }
 }
