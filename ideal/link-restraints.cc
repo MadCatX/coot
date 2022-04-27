@@ -28,6 +28,13 @@
 
 #include "coot-utils/coot-coord-extras.hh"  // is_nucleotide_by_dict
 
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
+
 // if they were not passed in the constructor.
 void
 coot::restraints_container_t::fill_links(mmdb::Manager *mol) {

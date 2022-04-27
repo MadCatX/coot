@@ -26,6 +26,13 @@
 #include "compat/coot-sysdep.h"
 #include "torsion-bonds.hh"
 
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
+
 bool
 coot::compare_residue_torsions(int imol_1, mmdb::Manager *mol1, mmdb::Residue *res_1,
 			       int imol_2, mmdb::Manager *mol2, mmdb::Residue *res_2,

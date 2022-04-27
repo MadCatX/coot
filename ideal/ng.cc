@@ -6,6 +6,12 @@
 #include "coot-utils/stack-and-pair.hh"
 #include "coot-utils/coot-coord-extras.hh"
 
+#include "compat/coot-sysdep.h"
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+# undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
 int
 coot::restraints_container_t::make_restraints_ng(int imol,
                                                  const coot::protein_geometry &geom,
