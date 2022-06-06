@@ -71,7 +71,6 @@ COOT_EXTRA_LIBS = \
 	$(top_builddir)/ligand/libcoot-res-tracer.la  		\
 	$(top_builddir)/ligand/libcoot-ligand.la      		\
 	$(top_builddir)/lidia-core/libcoot-lidia-core.la      	\
-	$(top_builddir)/goograph/libcoot-goograph.la      	\
 	$(top_builddir)/density-contour/libcoot-isosurface.la  	\
 	$(top_builddir)/build/libcoot-cabuild.la		\
 	$(top_builddir)/skeleton/libcoot-skeleton.la    	\
@@ -94,7 +93,9 @@ COOT_EXTRA_LIBS = \
 	$(top_builddir)/cootaneer/libcootaneer.la 		\
 	$(top_builddir)/compat/libcoot-compat.la
 
-
+if COOT_BUILD_GOOGRAPH
+COOT_EXTRA_LIBS += $(top_builddir)/goograph/libcoot-goograph.la
+endif
 
 # Remember to regenerate coot_wrap_python_pre.cc before making dist, eh?
 #

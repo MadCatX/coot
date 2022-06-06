@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA
 
+if COOT_BUILD_GOOGRAPH
 
 AM_CPPFLAGS = -I$(top_srcdir) \
      $(GOOCANVAS_CFLAGS) $(GTK_CFLAGS) $(COOT_WINDOWS_CFLAGS)
@@ -42,3 +43,5 @@ test_goograph_LDADD = libcoot-goograph.la \
 	$(top_builddir)/coot-utils/libcoot-coord-utils.la \
 	$(top_builddir)/utils/libcoot-utils.la \
         $(GTK_LIBS)
+
+endif

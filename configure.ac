@@ -231,8 +231,13 @@ else
    PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.18)
 fi
 
-# goocanvas for GTK4?
-# PKG_CHECK_MODULES([GOOCANVAS], [goocanvas-2.0]) # not for the moment - while trying to compile vs GTK4
+if test $with_gtk4 = no ; then
+    AM_CONDITIONAL([COOT_BUILD_GOOGRAPH], TRUE)
+    PKG_CHECK_MODULES([GOOCANVAS], [goocanvas-2.0]) # not for the moment - while trying to compile vs GTK4
+else
+    AM_CONDITIONAL([COOT_BUILD_GOOGRAPH], FALSE)
+fi
+
 
 
 # this needs a rethink
