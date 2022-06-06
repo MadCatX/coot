@@ -80,7 +80,7 @@ GtkBuilder *get_builder_for_preferences_dialog() {
    GtkBuilder *builder = gtk_builder_new();
 
    std::string dir = coot::package_data_dir();
-   std::string glade_file_name = "preferences-gtk3.glade";
+   std::string glade_file_name = "preferences-gtk4.glade";
    std::string dir_glade = coot::util::append_dir_dir(dir, "glade");
    std::string glade_file_full = coot::util::append_dir_file(dir_glade, glade_file_name);
    if (coot::file_exists(glade_file_name))
