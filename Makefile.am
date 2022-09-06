@@ -39,7 +39,18 @@ else
 	density-contour skeleton  high-res build MoleculesToTriangles greg-tests \
 	python-tests lbg cootilus goograph pli fonts pyrogen src data \
 	man rama-data doc rcrane glTF pixmaps textures
+
+if COND_ENABLE_NTC
+    SUBDIRS += ntc
 endif
+
+# src directory must be included last to avoid linking errors in libcootsumo
+
+    SUBDIRS += src \
+	data man rama-data doc rcrane glTF pixmaps textures
+
+endif
+
 
 # po, no po today.
 
@@ -78,6 +89,10 @@ EXTRA_DIST = 		\
 	intltool-merge.in        \
 	intltool-update.in 
 
+if COND_ENABLE_NTC
+    EXTRA_DIST += ntc/ntc_dialog.glade
+endif
+
 # install-data-local:
 # 	@$(NORMAL_INSTALL)
 # 	if test -d $(srcdir)/pixmaps; then \
@@ -113,6 +128,10 @@ subpkgdata_DATA = cootrc standard-residues.pdb colours.def \
 
 cootgladedir = $(pkgdatadir)/glade
 dist_cootglade_DATA = a6.glade preferences-gtk3.glade single-map-properties-dialog.glade
+if COND_ENABLE_NTC
+dist_cootglade_DATA += ntc/ui/ntc_dialog.glade
+endif
+
 
 appdatadir = ${datarootdir}/appdata
 dist_appdata_DATA = coot.appdata.xml

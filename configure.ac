@@ -29,7 +29,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([coot],[1.0.06-pre])
 AC_CONFIG_SRCDIR(src/main.cc)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 
 dnl Pick up the macros.
 AM_ACLOCAL_INCLUDE(macros)
@@ -342,6 +342,35 @@ AC_SUBST(MOLTRIANGLES_LIBS)
 AC_SUBST(COOT_BUILD_INFO_STRING)
 
 
+# Check if we want to enable NtC feature
+AC_ARG_WITH(
+   ntc,
+   [AS_HELP_STRING([--with-ntc], [enable NtC (default is no)])],
+   [],
+   [with_ntc=no])
+if test "$with_ntc" = yes; then
+  CXXFLAGS="$CXXFLAGS -DCOOT_ENABLE_NTC -DLLKA_COMPILER_GCC_LIKE"
+   CFLAGS="$CFLAGS -DCOOT_ENABLE_NTC -DLLKA_COMPILER_GCC_LIKE"
+   AC_MSG_NOTICE([Building with NtC feature enabled])
+fi
+AM_CONDITIONAL([COND_ENABLE_NTC], [test "$with_ntc" = yes])
+# Check if we should look for the DNATCO backend library in a non-standard path
+AC_ARG_WITH(
+  [llka-prefix],
+  [AS_HELP_STRING([--with-llka-prefix], [path to libLLKA installation (default uses system path)])],
+  [
+    LLKA_PREFIX="$withval"
+    AC_SUBST(LLKA_PREFIX)
+    AC_MSG_NOTICE([Building with LLKA prefix set to $LLKA_PREFIX])
+    AM_CONDITIONAL([COND_LLKA_CUSTOM_PREFIX], true)
+    CXXFLAGS="$CXXFLAGS -isystem $LLKA_PREFIX/include"
+    CFLAGS="$CFLAGS -isystem $LLKA_PREFIX/include"
+  ],
+  [
+    AM_CONDITIONAL([COND_LLKA_CUSTOM_PREFIX], false)
+  ])
+
+
 # #defines for SWIG:
 #
 # SWIG_FLAGS is something of a misnomer.  It actually defines
@@ -466,6 +495,7 @@ auxil/sec-str/Makefile
 auxil/strand-analysis/Makefile
 auxil/vectors/Makefile
 rcrane/Makefile
+ntc/Makefile
 ])
 AC_OUTPUT
 # removed setup/Makefile

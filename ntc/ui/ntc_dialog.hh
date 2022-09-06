@@ -1,0 +1,30 @@
+// vim: set sw=4 ts=4 sts=4 expandtab :
+
+#ifndef _NTC_UI_NTC_DIALOG_HH
+#define _NTC_UI_NTC_DIALOG_HH
+
+#include <LLKA/llka_ntc.h>
+
+#include <functional>
+
+struct LLKA_ClassifiedStep;
+struct LLKA_StepMetrics;
+
+struct NtCDialog;
+using OnDisplayedNtCChanged = std::function<void(NtCDialog *, LLKA_NtC)>;
+using OnNtCDialogAccepted = std::function<void(NtCDialog *, LLKA_NtC)>;
+using OnNtCDialogRejected = std::function<void(NtCDialog *, LLKA_NtC)>;
+
+void ntc_dialog_destroy(NtCDialog *dlg);
+void ntc_dialog_display_classification(NtCDialog *dlg, const LLKA_ClassifiedStep &classified);
+void ntc_dialog_display_differences(NtCDialog *dlg, const LLKA_StepMetrics &differences);
+void ntc_dialog_display_rmsd(NtCDialog *dlg, double rmsd);
+bool ntc_dialog_is_valid(NtCDialog *dlg);
+NtCDialog * ntc_dialog_make(
+    OnDisplayedNtCChanged onDisplayedNtCC = nullptr,
+    OnNtCDialogAccepted onAccepted = nullptr,
+    OnNtCDialogRejected onRejected = nullptr
+);
+void ntc_dialog_show(NtCDialog *dlg);
+
+#endif //_NTC_UI_NTC_DIALOG_HH

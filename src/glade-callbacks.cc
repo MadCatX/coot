@@ -3364,6 +3364,18 @@ on_model_refine_dialog_rotamer_togglebutton_toggled_gtkbuilder_callback
       setup_rotamers(0);
 }
 
+extern "C" G_MODULE_EXPORT
+void
+on_model_refine_dialog_modify_ntc_togglebutton_toggled_gtkbuilder_callback
+                                        (GtkButton       *button,
+                                        gpointer         user_data)
+{
+#ifdef COOT_ENABLE_NTC
+  gboolean active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+  modify_ntc_setup(static_cast<short int>(active));
+#endif // COOT_ENABLE_NTC
+}
+
 
 extern "C" G_MODULE_EXPORT
 void

@@ -853,7 +853,7 @@ int nudge_residue_sequence(int imol, char *chain_id, int res_no_range_start,
 	 graphics_draw();
    }
    return status;
-} 
+}
 
 /*  ----------------------------------------------------------------------- */
 /*                  Edit Chi Angles                                         */
@@ -1389,3 +1389,21 @@ void assign_sequence_to_active_fragment() {
       std::cout << "No active atom" << std::endl;
    }
 }
+
+#ifdef COOT_ENABLE_NTC
+void modify_ntc_setup(short int state) {
+   graphics_info_t g; // Really just a shorthand to all the static functions in graphics_info_t;
+
+   g.in_modify_ntc_define = state; // Tell the graphics that we modifying NtC
+   if (state) {
+      g.pick_cursor_maybe();
+      g.pick_pending_flag = 1;
+
+      std::cout << "Click an atom in a residue to select a step whose NtC conformation you wish to modify" << std::endl;
+   } else {
+      g.normal_cursor(); // Not modifying, restore default UI mode
+   }
+
+   add_to_history_typed("setup-modify-ntcs", { state });
+}
+#endif // COOT_ENABLE_NTC

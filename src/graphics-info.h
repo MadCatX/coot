@@ -174,6 +174,11 @@ enum { N_ATOMS_MEANS_BIG_MOLECULE = 400 };
 
 #include "extra-distance-restraint-markup.hh"
 
+#ifdef COOT_ENABLE_NTC
+struct NtCDialog;
+struct NtCStructure;
+#endif // COOT_ENABLE_NTC
+
 namespace coot {
    enum {NEW_COORDS_UNSET = 0,       // moving_atoms_asc_type values
 	 NEW_COORDS_ADD = 1,                 // not used?
@@ -828,6 +833,9 @@ class graphics_info_t {
    void check_if_in_delete_item_define(GdkEventButton *event,
 				       const GdkModifierType &state);
    void check_if_in_rotamer_define(GdkEventButton *event);
+#ifdef COOT_ENABLE_NTC
+   void check_if_in_modify_ntc_define(GdkEventButton *event);
+#endif // COOT_ENABLE_NTC
    void check_if_in_mutate_define(GdkEventButton *event);
    void check_if_in_mutate_auto_fit_define(GdkEventButton *event);
    void check_if_in_auto_fit_define(GdkEventButton *event);
@@ -2779,6 +2787,15 @@ public:
    // autofit rotamer:
    static short int in_auto_fit_define;
 
+#ifdef COOT_ENABLE_NTC
+   static short int in_modify_ntc_define;
+   static int modify_ntc_imol;
+   static NtCStructure *modify_ntc_selected_structure;
+   void modify_ntc(int atom_index, int imol);
+   void modify_ntc_accepted();
+   void modify_ntc_display_reference(NtCDialog *dlg, int ntc);
+   void modify_ntc_rejected();
+#endif // COOT_ENABLE_NTC
 
    // Mutation stuff
    static short int in_mutate_define;

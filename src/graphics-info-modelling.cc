@@ -108,6 +108,10 @@
 
 #include "widget-from-builder.hh"
 
+#ifdef COOT_ENABLE_NTC
+#include "ntc/ntc.hh"
+#include "ntc/ui/ntc_dialog.hh"
+#endif // COOT_ENABLE_NTC
 
 void
 graphics_info_t::get_restraints_lock(const std::string &calling_function_name) {
@@ -4591,6 +4595,105 @@ graphics_info_t::do_rotamers(int atom_index, int imol) {
    }
 }
 
+// --------------------------
+//         NtC stuff
+// --------------------------
+
+#ifdef COOT_ENABLE_NTC
+void
+graphics_info_t::modify_ntc_accepted() {
+  accept_moving_atoms();
+  clear_moving_atoms_object();
+
+  delete modify_ntc_selected_structure;
+  modify_ntc_selected_structure = nullptr;
+}
+
+void
+graphics_info_t::modify_ntc_display_reference(NtCDialog *dlg, int ntc) {
+  LLKA_NtC _ntc = LLKA_NtC(ntc);
+
+  LLKA_StepMetrics differences;
+  auto tRet = LLKA_calculateStepMetricsDifferenceAgainstReference(&modify_ntc_selected_structure->llkaStru, _ntc, &differences);
+  if (tRet != LLKA_OK) {
+    return;
+  }
+
+  NtCSuperposition superpos = ntc_superpose_reference(*modify_ntc_selected_structure, _ntc);
+
+  ntc_dialog_display_differences(dlg, differences);
+  ntc_dialog_display_rmsd(dlg, superpos.rmsd);
+
+  set_moving_atoms(make_asc(superpos.mmdbStru), modify_ntc_imol, coot::NEW_COORDS_REPLACE_CHANGE_ALTCONF);
+  graphics_draw();
+}
+
+void
+graphics_info_t::modify_ntc_rejected() {
+  clear_up_moving_atoms();
+  clear_moving_atoms_object();
+
+  delete modify_ntc_selected_structure;
+  modify_ntc_selected_structure = nullptr;
+}
+
+void
+graphics_info_t::modify_ntc(int atom_index, int imol) {
+  if (!is_valid_model_molecule(imol)) {
+    return;
+  }
+
+  std::string initError;
+  if (!ntc_initialize_classification_context_if_needed("", initError)) {
+    GtkWidget *errDlg = gtk_message_dialog_new(
+      nullptr,
+      GTK_DIALOG_MODAL,
+      GTK_MESSAGE_ERROR,
+      GTK_BUTTONS_CLOSE,
+      "%s",
+      initError.c_str()
+    );
+    gtk_window_set_title(GTK_WINDOW(errDlg), "Failed to initialize classification context");
+    gtk_dialog_run(GTK_DIALOG(errDlg));
+
+    gtk_widget_destroy(errDlg);
+    return;
+  }
+
+  if (!modify_ntc_selected_structure) {
+    modify_ntc_selected_structure = new NtCStructure{};
+  }
+
+  *modify_ntc_selected_structure = ntc_dinucleotide_from_atom(atom_index, imol, molecules);
+  if (!modify_ntc_selected_structure->isValid) {
+    std::cout << "Selected structure is not a step\n";
+    delete modify_ntc_selected_structure;
+    modify_ntc_selected_structure = nullptr;
+    return;
+  }
+
+  auto evaluatedDinu = ntc_classify(*modify_ntc_selected_structure);
+  if (!evaluatedDinu.succeeded) {
+    // TODO: Better alert
+    std::cout << "Cannot classify step: " << LLKA_errorToString(evaluatedDinu.failure) << "\n";
+    return;
+  }
+
+  static NtCDialog *dlg = nullptr;
+  if (!dlg || !ntc_dialog_is_valid(dlg)) {
+    ntc_dialog_destroy(dlg);
+    dlg = ntc_dialog_make(
+      [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_display_reference(dlg, ntc); },
+      [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_accepted(); },
+      [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_rejected(); }
+    );
+  }
+
+  modify_ntc_display_reference(dlg, evaluatedDinu.success.closestNtC);
+  ntc_dialog_display_classification(dlg, evaluatedDinu.success);
+  ntc_dialog_show(dlg);
+}
+#endif // COOT_ENABLE_NTC
 
 // static
 void graphics_info_t::new_alt_conf_occ_adjustment_changed(GtkAdjustment *adj,

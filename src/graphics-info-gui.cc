@@ -2715,6 +2715,10 @@ graphics_info_t::model_fit_refine_unactive_togglebutton(const std::string &butto
       toolbar_button_name = "model_toolbar_simple_mutate_togglebutton";
    if (button_name == "model_refine_dialog_fit_terminal_residue_togglebutton")
       toolbar_button_name = "model_toolbar_add_terminal_residue_togglebutton";
+#ifdef COOT_ENABLE_NTC
+   if (button_name == "model_refine_dialog_modify_ntc_togglebutton")
+      toolbar_button_name = "model_toolbar_modify_ntc_toggletoolbutton";
+#endif // COOT_ENABLE_NTC
 
    std::cout << "-------------------- debug in model_fit_refine_unactive_togglebutton() toolbar_button_name "
              << toolbar_button_name << std::endl;

@@ -96,6 +96,9 @@ COOT_EXTRA_LIBS = \
 	$(top_builddir)/MoleculesToTriangles/CXXSurface/libMoleculesToTrianglesCXXSurface.la     		\
 	$(top_builddir)/compat/libcoot-compat.la
 
+if COND_ENABLE_NTC
+COOT_EXTRA_LIBS += $(top_builddir)/ntc/libcoot-ntc.la
+endif
 
 
 # Remember to regenerate coot_wrap_python_pre.cc before making dist, eh?

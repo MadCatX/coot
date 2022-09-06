@@ -5460,6 +5460,10 @@ PyObject *get_rotamer_name_py(int imol, const char *chain_id, int resno, const c
 #endif /* USE_GUILE */
 #endif /* c++ */
 
+/* ----------------------------- */
+/*          NtC                  */
+/* ----------------------------- */
+void modify_ntc_setup(short int state);
 
 /*! \brief fill all the residues of molecule number imol that have
    missing atoms.
