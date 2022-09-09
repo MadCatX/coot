@@ -5,6 +5,9 @@
 
 #ifdef COOT_ENABLE_NTC
 
+#include "types.hh"
+
+#include <LLKA/llka_connectivity_similarity.h>
 #include <LLKA/llka_classification.h>
 #include <LLKA/llka_structure.h>
 
@@ -70,8 +73,11 @@ public:
     double rmsd;
 };
 
+using NtCSimilarityResult = NtCResult<std::vector<NtCSimilarity>, LLKA_RetCode>;
+
 NtCResult<LLKA_ClassifiedStep, LLKA_RetCode> ntc_classify(const NtCStructure &stru);
-NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, std::vector<molecule_class_info_t> &molecules);
+NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, const std::vector<molecule_class_info_t> &molecules);
+NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru);
 NtCStructure ntc_get_reference_structure(LLKA_NtC ntc);
 bool ntc_initialize_classification_context(const std::string &path, std::string &error);
 bool ntc_initialize_classification_context_if_needed(std::string path, std::string &error);

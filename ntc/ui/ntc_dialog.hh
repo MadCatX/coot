@@ -3,9 +3,14 @@
 #ifndef _NTC_UI_NTC_DIALOG_HH
 #define _NTC_UI_NTC_DIALOG_HH
 
+#include "../types.hh"
+
+#include <LLKA/llka_connectivity_similarity.h>
 #include <LLKA/llka_ntc.h>
 
 #include <functional>
+#include <string>
+#include <vector>
 
 struct LLKA_ClassifiedStep;
 struct LLKA_StepMetrics;
@@ -26,5 +31,6 @@ NtCDialog * ntc_dialog_make(
     OnNtCDialogRejected onRejected = nullptr
 );
 void ntc_dialog_show(NtCDialog *dlg);
+void ntc_dialog_update_similarities(NtCDialog *dlg, std::vector<NtCSimilarity> similarities);
 
 #endif //_NTC_UI_NTC_DIALOG_HH

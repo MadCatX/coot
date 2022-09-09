@@ -110,6 +110,7 @@
 
 #ifdef COOT_ENABLE_NTC
 #include "ntc/ntc.hh"
+#include "ntc/ui/notifications.hh"
 #include "ntc/ui/ntc_dialog.hh"
 #endif // COOT_ENABLE_NTC
 
@@ -4620,12 +4621,23 @@ graphics_info_t::modify_ntc_display_reference(NtCDialog *dlg, int ntc) {
   }
 
   NtCSuperposition superpos = ntc_superpose_reference(*modify_ntc_selected_structure, _ntc);
-
   ntc_dialog_display_differences(dlg, differences);
   ntc_dialog_display_rmsd(dlg, superpos.rmsd);
 
   set_moving_atoms(make_asc(superpos.mmdbStru), modify_ntc_imol, coot::NEW_COORDS_REPLACE_CHANGE_ALTCONF);
   graphics_draw();
+}
+
+void
+graphics_info_t::modify_ntc_update_connectivity(NtCDialog *dlg) {
+  NtCSimilarityResult similarities = ntc_calculate_similarities(*modify_ntc_selected_structure);
+  if (similarities.succeeded) {
+    ntc_dialog_update_similarities(dlg, similarities.success);
+  } else {
+    std::string errMsg = std::string{"Unable to calculate similarities: "} + LLKA_errorToString(similarities.failure);
+    ntc_notify_warning(errMsg);
+    ntc_dialog_update_similarities(dlg, {});
+  }
 }
 
 void
@@ -4645,18 +4657,7 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
 
   std::string initError;
   if (!ntc_initialize_classification_context_if_needed("", initError)) {
-    GtkWidget *errDlg = gtk_message_dialog_new(
-      nullptr,
-      GTK_DIALOG_MODAL,
-      GTK_MESSAGE_ERROR,
-      GTK_BUTTONS_CLOSE,
-      "%s",
-      initError.c_str()
-    );
-    gtk_window_set_title(GTK_WINDOW(errDlg), "Failed to initialize classification context");
-    gtk_dialog_run(GTK_DIALOG(errDlg));
-
-    gtk_widget_destroy(errDlg);
+    ntc_notify_error("Failed to initialize NtC classification context: " + initError);
     return;
   }
 
@@ -4666,7 +4667,8 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
 
   *modify_ntc_selected_structure = ntc_dinucleotide_from_atom(atom_index, imol, molecules);
   if (!modify_ntc_selected_structure->isValid) {
-    std::cout << "Selected structure is not a step\n";
+    ntc_notify_info("Selected structure is not a step");
+
     delete modify_ntc_selected_structure;
     modify_ntc_selected_structure = nullptr;
     return;
@@ -4674,8 +4676,10 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
 
   auto evaluatedDinu = ntc_classify(*modify_ntc_selected_structure);
   if (!evaluatedDinu.succeeded) {
-    // TODO: Better alert
-    std::cout << "Cannot classify step: " << LLKA_errorToString(evaluatedDinu.failure) << "\n";
+    std::string	errMsg = std::string{"Selected structure looks like a step but we could not classify it: "} + LLKA_errorToString(evaluatedDinu.failure);
+
+    delete modify_ntc_selected_structure;
+    modify_ntc_selected_structure = nullptr;
     return;
   }
 
@@ -4690,6 +4694,7 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
   }
 
   modify_ntc_display_reference(dlg, evaluatedDinu.success.closestNtC);
+  modify_ntc_update_connectivity(dlg);
   ntc_dialog_display_classification(dlg, evaluatedDinu.success);
   ntc_dialog_show(dlg);
 }

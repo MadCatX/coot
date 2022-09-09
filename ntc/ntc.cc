@@ -186,7 +186,7 @@ bool ntc_initialize_classification_context_if_needed(std::string path, std::stri
     return ntc_initialize_classification_context(path, error);
 }
 
-NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, std::vector<molecule_class_info_t> &molecules) {
+NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, const std::vector<molecule_class_info_t> &molecules) {
     auto &molecule = molecules[imol];
 
     mmdb::Atom *atom = molecule.atom_sel.atom_selection[atom_index];
@@ -224,6 +224,38 @@ NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, std::vector<mo
         return {};
 
     return { mmdbStru, llkaStru };
+}
+
+NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
+    static std::vector<LLKA_NtC> AllNtCs = []() {
+        auto r = make_ntc_range(LLKA_AA00, LLKA_LAST_NTC);
+        r.push_back(LLKA_INVALID_NTC);
+        return r;
+    }();
+
+    /*LLKA_Structure bkbn{};
+    LLKA_RetCode tRet = LLKA_extractExtendedBackbone(&stru.llkaStru, &bkbn);
+    if (tRet != LLKA_OK) {
+        NtCSimilarityResult::fail(tRet);
+    }*/
+
+    LLKA_Similarities cSimils{};
+    cSimils.similars = new LLKA_Similarity[AllNtCs.size() - 1];
+    cSimils.nSimilars = AllNtCs.size() - 1;
+
+    LLKA_RetCode tRet = LLKA_measureStepSimilarityNtCMultiple(&stru.llkaStru, AllNtCs.data(), &cSimils);
+    if (tRet != LLKA_OK) {
+        return NtCSimilarityResult::fail(tRet);
+    }
+
+    std::vector<NtCSimilarity> simils{};
+    for (size_t idx = 0; idx < cSimils.nSimilars; idx++) {
+        simils.emplace_back(cSimils.similars[idx], LLKA_NtCToName(AllNtCs[idx]));
+    }
+
+    // WTF? Is there no deleter for cSimils???
+
+    return NtCSimilarityResult::succeed(std::move(simils));
 }
 
 NtCSuperposition ntc_superpose_reference(const NtCStructure &stru, LLKA_NtC ntc) {

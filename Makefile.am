@@ -129,7 +129,7 @@ subpkgdata_DATA = cootrc standard-residues.pdb colours.def \
 cootgladedir = $(pkgdatadir)/glade
 dist_cootglade_DATA = a6.glade preferences-gtk3.glade single-map-properties-dialog.glade
 if COND_ENABLE_NTC
-dist_cootglade_DATA += ntc/ui/ntc_dialog.glade
+dist_cootglade_DATA += ntc/ui/ntc_dialog.glade ntc/ui/conn_simil_plots_dialog.glade
 endif
 
 

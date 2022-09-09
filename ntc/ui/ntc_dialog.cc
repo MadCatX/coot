@@ -1,7 +1,9 @@
 // vim: set sw=4 ts=4 sts=4 expandtab :
 
 #include "ntc_dialog.hh"
+
 #include "common.hh"
+#include "conn_simil_plots_dialog.hh"
 
 #include <LLKA/llka_classification.h>
 #include <LLKA/llka_util.h>
@@ -45,12 +47,21 @@ struct NtCDialog {
     GtkComboBox *list_of_ntcs;
     LLKA_NtC closest_ntc_id;
 
+    GtkButton *toggle_conn_simil_plots;
+    NtCConnSimilPlotsDialog *conn_simil_plots_dialog;
+    int conn_simil_width;
+    int conn_simil_height;
+    std::vector<NtCSimilarity> similarities;
+
     OnDisplayedNtCChanged on_displayed_ntc_changed;
     OnNtCDialogAccepted on_accepted;
     OnNtCDialogRejected on_rejected;
 
     bool destroyed;
 };
+
+static
+void destroy_ui(NtCDialog *dlg);
 
 static
 LLKA_NtC get_selected_ntc(NtCDialog *dlg);
@@ -61,18 +72,23 @@ void switch_list_to_ntc(GtkComboBox *list_of_ntcs, LLKA_NtC targetNtC);
 static
 void on_ntc_dialog_closed(GtkWidget *self, gpointer data) {
     NtCDialog *dlg = static_cast<NtCDialog*>(data);
+
+    // Do not call destroy_ui() because our root widget is already gone
+    ntc_csp_dialog_destroy(dlg->conn_simil_plots_dialog);
     dlg->destroyed = true;
+
+    if (dlg->on_rejected)
+        dlg->on_rejected(dlg, dlg->closest_ntc_id);
 }
 
 static
 void on_cancel_button_clicked(GtkButton *self, gpointer data) {
     NtCDialog *dlg = static_cast<NtCDialog*>(data);
-    dlg->destroyed = true;
+
+    destroy_ui(dlg);
 
     if (dlg->on_rejected)
         dlg->on_rejected(dlg, dlg->closest_ntc_id);
-
-    gtk_widget_destroy(dlg->root);
 }
 
 static
@@ -83,12 +99,11 @@ void on_displayed_ntc_changed(GtkComboBox *self, gpointer data) {
 static
 void on_ok_button_clicked(GtkButton *self, gpointer data) {
     NtCDialog *dlg = static_cast<NtCDialog*>(data);
-    dlg->destroyed = true;
+
+    destroy_ui(dlg);
 
     if (dlg->on_accepted)
         dlg->on_accepted(dlg, get_selected_ntc(dlg));
-
-    gtk_widget_destroy(dlg->root);
 }
 
 static
@@ -113,8 +128,47 @@ void on_reset_ntc_clicked(GtkButton *self, gpointer data) {
 }
 
 static
+void on_similarity_selected(NtCDialog *dlg, NtCSimilarity similarity) {
+    LLKA_NtC ntc = LLKA_nameToNtC(similarity.NtC.c_str());
+    if (ntc != LLKA_INVALID_NTC) {
+        switch_list_to_ntc(dlg->list_of_ntcs, ntc);
+    }
+}
+
+static
+void on_toggle_conn_simil_plots_clicked(GtkButton *self, gpointer data) {
+    NtCDialog *dlg = static_cast<NtCDialog *>(data);
+    NtCConnSimilPlotsDialog *cspDlg = dlg->conn_simil_plots_dialog;
+
+    if (cspDlg && ntc_csp_dialog_is_valid(cspDlg)) {
+        ntc_csp_dialog_destroy(cspDlg);
+        dlg->conn_simil_plots_dialog = nullptr;
+    } else {
+        ntc_csp_dialog_destroy(cspDlg);
+
+        dlg->conn_simil_plots_dialog = ntc_csp_dialog_make(
+            [dlg](NtCSimilarity similarity) { on_similarity_selected(dlg, similarity); },
+            [dlg](int width, int height) { dlg->conn_simil_width = width, dlg->conn_simil_height; }
+        );
+        assert(dlg->conn_simil_plots_dialog);
+
+        ntc_csp_dialog_update_similarities(dlg->conn_simil_plots_dialog, dlg->similarities);
+        ntc_csp_dialog_show(dlg->conn_simil_plots_dialog, dlg->conn_simil_width, dlg->conn_simil_height);
+    }
+}
+
+static
 double convert_angle(double ang) {
     return LLKA_fullAngleFromDeg(LLKA_rad2deg(ang));
+}
+
+static
+void destroy_ui(NtCDialog *dlg) {
+    ntc_csp_dialog_destroy(dlg->conn_simil_plots_dialog);
+    dlg->conn_simil_plots_dialog = nullptr;
+    gtk_widget_destroy(dlg->root);
+
+    dlg->destroyed = true;
 }
 
 static
@@ -196,8 +250,7 @@ void ntc_dialog_destroy(NtCDialog *dlg) {
         return;
 
     if (!dlg->destroyed) {
-        gtk_widget_destroy(dlg->root);
-        g_object_unref(dlg->root);
+        destroy_ui(dlg);
     }
 
     delete dlg;
@@ -337,6 +390,14 @@ NtCDialog * ntc_dialog_make(
     assert(dialog->list_of_ntcs);
     prepare_list_of_ntcs(dialog->list_of_ntcs);
 
+    dialog->toggle_conn_simil_plots = GTK_BUTTON(get_widget(b, "toggle_conn_simil_plots"));
+    assert(dialog->toggle_conn_simil_plots);
+    dialog->conn_simil_plots_dialog = nullptr;
+    g_signal_connect(dialog->toggle_conn_simil_plots, "clicked", G_CALLBACK(on_toggle_conn_simil_plots_clicked), dialog);
+
+    dialog->conn_simil_width = 400;
+    dialog->conn_simil_height = 600;
+
     g_signal_connect(dialog->list_of_ntcs, "changed", G_CALLBACK(on_list_of_ntcs_changed), dialog);
 
     dialog->closest_ntc_id = LLKA_INVALID_NTC;
@@ -368,4 +429,14 @@ void ntc_dialog_show(NtCDialog *dlg) {
     assert(!dlg->destroyed);
 
     gtk_widget_show(dlg->root);
+}
+
+void ntc_dialog_update_similarities(NtCDialog *dlg, std::vector<NtCSimilarity> similarities) {
+    assert(!dlg->destroyed);
+
+    dlg->similarities = std::move(similarities);
+
+    if (dlg->conn_simil_plots_dialog) {
+        ntc_csp_dialog_update_similarities(dlg->conn_simil_plots_dialog, dlg->similarities);
+    }
 }

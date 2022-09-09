@@ -145,6 +145,21 @@ mmdb::Manager * LLKA_structure_to_mmdb_structure(const LLKA_Structure &llkaStru)
     return mmdbStru;
 }
 
+std::vector<LLKA_NtC> make_ntc_range(LLKA_NtC first, LLKA_NtC last) {
+    using UT = std::underlying_type<LLKA_NtC>::type;
+
+    std::vector<LLKA_NtC> list{};
+    UT _first = first;
+    UT _last = last;
+    assert(first <= last);
+
+    for (UT ntc = _first; ntc <= _last; ntc++) {
+        list.push_back(LLKA_NtC(ntc));
+    }
+
+    return list;
+}
+
 LLKA_Structure mmdb_structure_to_LLKA_structure(mmdb::Manager *mmdbStru) {
     LLKA_Structure llkaStru{};
 
