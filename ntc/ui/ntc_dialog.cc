@@ -100,10 +100,10 @@ static
 void on_ok_button_clicked(GtkButton *self, gpointer data) {
     NtCDialog *dlg = static_cast<NtCDialog*>(data);
 
-    destroy_ui(dlg);
-
     if (dlg->on_accepted)
         dlg->on_accepted(dlg, get_selected_ntc(dlg));
+
+    destroy_ui(dlg);
 }
 
 static

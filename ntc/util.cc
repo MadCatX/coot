@@ -3,12 +3,16 @@
 #include "util.hh"
 
 #include "coot-utils/coot-coord-utils.hh"
+#include "src/molecule-class-info.h"
 
 #include <mmdb2/mmdb_manager.h>
 
 #include <cassert>
 #include <cctype>
 #include <cstring>
+
+static
+std::string trim(const char *str);
 
 template <size_t N>
 static
@@ -23,26 +27,23 @@ void CopyCharArray(CharArray dst, const CharArray src) {
 }
 
 static
-std::string trim(const char *str) {
-    size_t len = strlen(str);
-    const char *first = &str[0];
-    const char *last = &str[len - 1];
+void fix_up_atom_names(mmdb::Residue *relabelee, mmdb::Residue *relabeler) {
+    // Change atom names back to the padded form
 
-    size_t idx = 0;
-    while (idx < len) {
-        first = &str[idx++];
-        if (!std::isspace(first[0]))
-            break;
+    // Do not assume that the atoms are in the same order
+    for (int aixR = 0; aixR < relabeler->GetNumberOfAtoms(); aixR++) {
+        mmdb::Atom *atomR = relabeler->GetAtom(aixR);
+        std::string nameR = trim(atomR->GetAtomName());
+
+        for (int aixE = 0; aixE < relabelee->GetNumberOfAtoms(); aixE++) {
+            mmdb::Atom *atomE = relabelee->GetAtom(aixE);
+            std::string nameE = trim(atomE->GetAtomName());
+
+            if (nameR == nameE) {
+                atomE->SetAtomName(atomR->GetAtomName());
+            }
+        }
     }
-
-    idx = len - 1;
-    while (last > first) {
-        last = &str[idx--];
-        if (!std::isspace(last[0]))
-            break;
-    }
-
-    return std::string(first, last - first + 1);
 }
 
 static
@@ -73,6 +74,46 @@ LLKA_Atom mmdb_atom_to_LLKA_atom(mmdb::Atom *mmdbAtom, mmdb::Residue *mmdbResidu
         0,
         &coords
     );
+}
+
+static
+std::string refmac_residue_name(std::string residueName) {
+    residueName = trim(residueName.c_str());
+
+    if (residueName == "A")  return "Ar";
+    if (residueName == "G")  return "Gr";
+    if (residueName == "T")  return "Tr";
+    if (residueName == "U")  return "Ur";
+    if (residueName == "C")  return "Cr";
+    if (residueName == "DA") return "Ad";
+    if (residueName == "DG") return "Gd";
+    if (residueName == "DT") return "Td";
+    if (residueName == "DC") return "Cd";
+
+    return residueName;
+}
+
+static
+std::string trim(const char *str) {
+    size_t len = strlen(str);
+    const char *first = &str[0];
+    const char *last = &str[len - 1];
+
+    size_t idx = 0;
+    while (idx < len) {
+        first = &str[idx++];
+        if (!std::isspace(first[0]))
+            break;
+    }
+
+    idx = len - 1;
+    while (last > first) {
+        last = &str[idx--];
+        if (!std::isspace(last[0]))
+            break;
+    }
+
+    return std::string(first, last - first + 1);
 }
 
 mmdb::Residue * clone_mmdb_residue(mmdb::Residue *original, const std::string &onlyAltConf) {
@@ -197,8 +238,9 @@ LLKA_Structure mmdb_structure_to_LLKA_structure(mmdb::Manager *mmdbStru) {
     return llkaStru;
 }
 
-void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler) {
+void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool relabelAtomNames) {
     // This function assumes that both arguments constitute a valid NtC step
+    static molecule_class_info_t minfo{};
 
     // Relabel chain
     mmdb::Chain *chainR = relabeler->GetChain(1, 0);
@@ -208,10 +250,58 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler) {
     // Relabel first residue
     mmdb::Residue *residueE = chainE->GetResidue(0);
     mmdb::Residue *residueR = chainR->GetResidue(0);
-    residueE->SetResID(residueR->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode());
+    residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here
+    if (relabelAtomNames) {
+        std::string nameR = refmac_residue_name(residueE->GetResName());
+        mmdb::Residue *reference = minfo.get_standard_residue_instance(nameR);
+        if (reference) {
+            fix_up_atom_names(residueE, reference);
+        }
+    }
 
     // Relabel second residue
     residueE = chainE->GetResidue(1);
     residueR = chainR->GetResidue(1);
-    residueE->SetResID(residueR->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode());
+    residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here
+    if (relabelAtomNames) {
+        std::string nameR = refmac_residue_name(residueE->GetResName());
+        mmdb::Residue *reference = minfo.get_standard_residue_instance(nameR);
+        if (reference) {
+            fix_up_atom_names(residueE, reference);
+        }
+    }
+}
+
+void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer) {
+    static molecule_class_info_t minfo{};
+
+    for (int modelNo = 1; modelNo <= replacer->GetNumberOfModels(); modelNo++) {
+        mmdb::Model *modelE = replacee->GetModel(modelNo);
+        mmdb::Model *modelR = replacer->GetModel(modelNo);
+
+        assert(modelE); assert(modelR);
+
+        for (int chainIdx = 0; chainIdx < modelR->GetNumberOfChains(); chainIdx++) {
+            mmdb::Chain *chainE = modelE->GetChain(chainIdx);
+            mmdb::Chain *chainR = modelR->GetChain(chainIdx);
+
+            assert(chainE); assert(chainR);
+
+            for (int residueIdx = 0; residueIdx < chainR->GetNumberOfResidues(); residueIdx++) {
+                mmdb::Residue *residueE = chainE->GetResidue(residueIdx);
+                mmdb::Residue *residueR = chainR->GetResidue(residueIdx);
+
+                assert(residueE); assert(residueR);
+
+                std::string nameR = refmac_residue_name(residueR->GetResName());
+                mmdb::Residue *standardBase = minfo.get_standard_residue_instance(nameR);
+                if (!standardBase) {
+                    continue;
+                }
+
+                coot::util::mutate_base(residueE, standardBase, false);
+            }
+        }
+    }
+    replacee->FinishStructEdit();
 }

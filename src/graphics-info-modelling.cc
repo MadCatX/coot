@@ -112,6 +112,7 @@
 #include "ntc/ntc.hh"
 #include "ntc/ui/notifications.hh"
 #include "ntc/ui/ntc_dialog.hh"
+#include "molecule-class-info.h"
 #endif // COOT_ENABLE_NTC
 
 void

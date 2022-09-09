@@ -233,12 +233,6 @@ NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
         return r;
     }();
 
-    /*LLKA_Structure bkbn{};
-    LLKA_RetCode tRet = LLKA_extractExtendedBackbone(&stru.llkaStru, &bkbn);
-    if (tRet != LLKA_OK) {
-        NtCSimilarityResult::fail(tRet);
-    }*/
-
     LLKA_Similarities cSimils{};
     cSimils.similars = new LLKA_Similarity[AllNtCs.size() - 1];
     cSimils.nSimilars = AllNtCs.size() - 1;
@@ -265,12 +259,12 @@ NtCSuperposition ntc_superpose_reference(const NtCStructure &stru, LLKA_NtC ntc)
     // Extract backbones
     LLKA_Structure bkbn{};
     LLKA_Structure refBkbn{};
-    auto tRet = LLKA_extractExtendedBackbone(&stru.llkaStru, &bkbn);
+    auto tRet = LLKA_extractBackbone(&stru.llkaStru, &bkbn);
     if (tRet != LLKA_OK) {
         return {};
     }
 
-    tRet = LLKA_extractExtendedBackbone(&llkaRefStru, &refBkbn);
+    tRet = LLKA_extractBackbone(&llkaRefStru, &refBkbn);
     if (tRet != LLKA_OK) {
         LLKA_destroyStructure(&bkbn);
 
@@ -284,39 +278,6 @@ NtCSuperposition ntc_superpose_reference(const NtCStructure &stru, LLKA_NtC ntc)
         return {};
     }
 
-#if 0
-    // Another option how to maybe to this. Instead of trying to replace the bases
-    // we could just put the original structure to the proper position and change the torsions and distances.
-    // The question is whether coot can adjust structure geometry in this way without breaking it
-    mmdb::Manager *mmdbRefStru = clone_mmdb_structure(stru.mmdbStru);
-    mmdb::Atom **mmdbAtomTable;
-    int mmdbNAtoms;
-    mmdbRefStru->GetAtomTable(mmdbAtomTable, mmdbNAtoms);
-    LLKA_Points llkaPoints = LLKA_zeroPoints(mmdbNAtoms);
-
-    for (int idx = 0; idx < mmdbNAtoms; idx++) {
-        mmdb::Atom *mmdbAtom = mmdbAtomTable[idx];
-        LLKA_Point *pt = &llkaPoints.points[idx];
-        pt->x = mmdbAtom->x;
-        pt->y = mmdbAtom->y;
-        pt->z = mmdbAtom->z;
-    }
-
-    tRet = LLKA_applyTransformationPoints(&llkaPoints, &transformation);
-    assert(tRet == LLKA_OK);
-
-    for (int idx = 0; idx < mmdbNAtoms; idx++) {
-        mmdb::Atom *mmdbAtom = mmdbAtomTable[idx];
-        LLKA_Point *pt = &llkaPoints.points[idx];
-
-        mmdbAtom->x = pt->x;
-        mmdbAtom->y = pt->y;
-        mmdbAtom->z = pt->z;
-    }
-
-    mmdbRefStru->FinishStructEdit();
-    LLKA_destroyPoints(&llkaPoints);
-#else
     tRet = LLKA_applyTransformationStructure(&llkaRefStru, &transformation);
     assert(tRet == LLKA_OK);
 
@@ -324,8 +285,9 @@ NtCSuperposition ntc_superpose_reference(const NtCStructure &stru, LLKA_NtC ntc)
 
     // We need to relabel the chains and residue numbers to allow coot to replace the current structure
     // instead of just creating a new one
-    relabel_mmdb_step(mmdbRefStru, stru.mmdbStru);
-#endif
+    relabel_mmdb_step(mmdbRefStru, stru.mmdbStru, true);
+    // Reference NtC may have different base than the step in the structure. Replace the bases on the reference
+    replace_bases(mmdbRefStru, stru.mmdbStru);
 
     // Superpose the reference backbone onto the actual backbone to allow us to calculate RMSD
     double rmsd;
