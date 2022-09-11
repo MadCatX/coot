@@ -21,5 +21,21 @@ std::vector<LLKA_NtC> make_ntc_range(LLKA_NtC first, LLKA_NtC last);
 LLKA_Structure mmdb_structure_to_LLKA_structure(mmdb::Manager *mmdbStru);
 void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool relabelAtomNames = false);
 void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer);
+std::wstring string_to_wstring(const std::string &str);
+
+template <typename CharType>
+struct LLKAPathConverter {};
+
+template <>
+struct LLKAPathConverter<char> {
+    static std::string convert(const std::string &path) { return path; }
+};
+
+template <>
+struct LLKAPathConverter<wchar_t> {
+    static std::wstring convert(const std::string &path) {
+        return string_to_wstring(path);
+    }
+};
 
 #endif // _NTC_UTIL_HH

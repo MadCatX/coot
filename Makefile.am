@@ -44,13 +44,7 @@ if COND_ENABLE_NTC
     SUBDIRS += ntc
 endif
 
-# src directory must be included last to avoid linking errors in libcootsumo
-
-    SUBDIRS += src \
-	data man rama-data doc rcrane glTF pixmaps textures
-
 endif
-
 
 # po, no po today.
 

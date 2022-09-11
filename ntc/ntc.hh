@@ -17,6 +17,7 @@
 
 namespace mmdb {
     class Manager;
+    class Residue;
 }
 
 class molecule_class_info_t;
@@ -76,7 +77,7 @@ public:
 using NtCSimilarityResult = NtCResult<std::vector<NtCSimilarity>, LLKA_RetCode>;
 
 NtCResult<LLKA_ClassifiedStep, LLKA_RetCode> ntc_classify(const NtCStructure &stru);
-NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, const std::vector<molecule_class_info_t> &molecules);
+NtCStructure ntc_dinucleotide(mmdb::Residue *residue, mmdb::Residue *residue2, const std::string &altconf);
 NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru);
 NtCStructure ntc_get_reference_structure(LLKA_NtC ntc);
 bool ntc_initialize_classification_context(const std::string &path, std::string &error);

@@ -39,14 +39,14 @@ void on_close_button_clicked(GtkButton *self, gpointer data) {
 }
 
 static
-void on_configure_event(GtkWidget *self, GdkEvent *event, gpointer data) {
+gboolean on_configure_event(GtkWidget *self, GdkEvent *event, gpointer data) {
     NtCConnSimilPlotsDialog *dlg = static_cast<NtCConnSimilPlotsDialog *>(data);
 
     if (dlg->on_widget_resized) {
         dlg->on_widget_resized(event->configure.width, event->configure.height);
     }
 
-    gtk_widget_queue_draw(self);
+    return FALSE;
 }
 
 static

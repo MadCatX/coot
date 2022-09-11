@@ -56,7 +56,7 @@ void zoom_reset(PlotWidget *pw) {
 
 // Event handlers
 static
-void on_plot_click_event(GtkDrawingArea *area, GdkEventButton *event, gpointer data) {
+gboolean on_plot_click_event(GtkDrawingArea *area, GdkEventButton *event, gpointer data) {
     PlotWidget *pw = static_cast<PlotWidget *>(data);
 
     if (event->type == GDK_BUTTON_PRESS && event->button == 1) {
@@ -69,17 +69,21 @@ void on_plot_click_event(GtkDrawingArea *area, GdkEventButton *event, gpointer d
         zoom_reset(pw);
         gtk_widget_queue_draw(GTK_WIDGET(pw->area));
     }
+
+    return TRUE;
 }
 
 static
-void on_plot_draw(GtkDrawingArea *area, cairo_t *cr, gpointer data) {
+gboolean on_plot_draw(GtkDrawingArea *area, cairo_t *cr, gpointer data) {
     PlotWidget *pw = static_cast<PlotWidget *>(data);
 
     dot_plot_draw(area, cr, pw->x_axis, pw->y_axis, pw->options, pw->data_points);
+
+    return TRUE;
 }
 
 static
-void on_plot_scroll_event(GtkDrawingArea *area, GdkEventScroll *event, gpointer data) {
+gboolean on_plot_scroll_event(GtkDrawingArea *area, GdkEventScroll *event, gpointer data) {
     PlotWidget *pw = static_cast<PlotWidget *>(data);
 
     if (event->direction == GDK_SCROLL_UP) {
@@ -87,10 +91,12 @@ void on_plot_scroll_event(GtkDrawingArea *area, GdkEventScroll *event, gpointer 
     } else if (event->direction == GDK_SCROLL_DOWN) {
         plot_zoom_out(pw);
     }
+
+    return TRUE;
 }
 
 static
-void on_plot_pointer_motion_event(GtkDrawingArea *area, GdkEventMotion *motion, gpointer data) {
+gboolean on_plot_pointer_motion_event(GtkDrawingArea *area, GdkEventMotion *motion, gpointer data) {
     PlotWidget *pw = static_cast<PlotWidget *>(data);
 
     if (motion->state & GDK_CONTROL_MASK) {
@@ -123,6 +129,8 @@ void on_plot_pointer_motion_event(GtkDrawingArea *area, GdkEventMotion *motion, 
 
     pw->pointer_x = motion->x;
     pw->pointer_y = motion->y;
+
+    return TRUE;
 }
 
 static

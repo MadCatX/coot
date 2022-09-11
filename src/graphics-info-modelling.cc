@@ -4666,7 +4666,14 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
     modify_ntc_selected_structure = new NtCStructure{};
   }
 
-  *modify_ntc_selected_structure = ntc_dinucleotide_from_atom(atom_index, imol, molecules);
+  const molecule_class_info_t &molecule = molecules[imol];
+
+  mmdb::Atom *atom = molecule.atom_sel.atom_selection[atom_index];
+  mmdb::Residue *residue = atom->residue;
+  const std::string &altconf = atom->altLoc;
+  mmdb::Residue *residue2 = molecule.get_following_residue(coot::residue_spec_t(residue));
+
+  *modify_ntc_selected_structure = ntc_dinucleotide(residue, residue2, altconf);
   if (!modify_ntc_selected_structure->isValid) {
     ntc_notify_info("Selected structure is not a step");
 

@@ -4,7 +4,9 @@
 #include "util.hh"
 #include "ui/util.hh"
 
-#include "src/molecule-class-info.h"
+#include "coot-utils/coot-coord-utils.hh"
+
+#include <mmdb2/mmdb_manager.h>
 
 #include <LLKA/llka_nucleotide.h>
 #include <LLKA/llka_resource_loaders.h>
@@ -122,22 +124,22 @@ bool ntc_initialize_classification_context(const std::string &path, std::string 
     nuAngles.type = LLKA_RES_AVERAGE_NU_ANGLES;
 
     /* Load the data necessary to initialize the classification context */
-    LLKA_RetCode tRet = LLKA_loadResource((path + "/" + GOLDEN_STEPS_FILE).c_str(), LLKA_RES_AS_FILE, &goldenSteps);
+    LLKA_RetCode tRet = LLKA_loadResourceFile(LLKAPathConverter<LLKA_PathChar>::convert(path + "/" + GOLDEN_STEPS_FILE).c_str(), &goldenSteps);
     if (tRet != LLKA_OK) {
         error = std::string{"Failed to load golden steps data: "} + LLKA_errorToString(tRet);
         goto out;
     }
-    tRet = LLKA_loadResource((path + "/" + CLUSTERS_FILE).c_str(), LLKA_RES_AS_FILE, &clusters);
+    tRet = LLKA_loadResourceFile(LLKAPathConverter<LLKA_PathChar>::convert(path + "/" + CLUSTERS_FILE).c_str(), &clusters);
     if (tRet != LLKA_OK) {
         error = std::string{"Failed to load clusters data: "} + LLKA_errorToString(tRet);
         goto out_golden_steps;
     }
-    tRet = LLKA_loadResource((path + "/" + CONFALS_FILE).c_str(), LLKA_RES_AS_FILE, &confals);
+    tRet = LLKA_loadResourceFile(LLKAPathConverter<LLKA_PathChar>::convert(path + "/" + CONFALS_FILE).c_str(), &confals);
     if (tRet != LLKA_OK) {
         error = std::string{"Failed to load confals data: "} + LLKA_errorToString(tRet);
         goto out_clusters;
     }
-    tRet = LLKA_loadResource((path + "/" + NU_ANGLES_FILE).c_str(), LLKA_RES_AS_FILE, &nuAngles);
+    tRet = LLKA_loadResourceFile(LLKAPathConverter<LLKA_PathChar>::convert(path + "/" + NU_ANGLES_FILE).c_str(), &nuAngles);
     if (tRet != LLKA_OK) {
         error = std::string{"Failed to load Nu angles data: "} + LLKA_errorToString(tRet);
         goto out_confals;
@@ -186,14 +188,8 @@ bool ntc_initialize_classification_context_if_needed(std::string path, std::stri
     return ntc_initialize_classification_context(path, error);
 }
 
-NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, const std::vector<molecule_class_info_t> &molecules) {
-    auto &molecule = molecules[imol];
-
-    mmdb::Atom *atom = molecule.atom_sel.atom_selection[atom_index];
-    mmdb::Residue *residue = atom->residue;
-    const std::string &altconf = atom->altLoc;
-    mmdb::Residue *residue2 = molecule.get_following_residue(coot::residue_spec_t(residue));
-    if (!residue2)
+NtCStructure ntc_dinucleotide(mmdb::Residue *residue, mmdb::Residue *residue2, const std::string &altconf) {
+    if (!residue || ! residue2)
         return {};
 
     if (!is_nucleotide(residue->GetLabelCompID()) || !is_nucleotide(residue2->GetLabelCompID()))
@@ -201,8 +197,6 @@ NtCStructure ntc_dinucleotide_from_atom(int atom_index, int imol, const std::vec
 
     mmdb::Residue *filteredResidue = clone_mmdb_residue(residue, altconf);
     mmdb::Residue *filteredResidue2 = clone_mmdb_residue(residue2, altconf);
-
-    std::cout << filteredResidue->GetLabelCompID() << ", " << filteredResidue2->GetLabelCompID() << "\n";
 
     mmdb::Manager *mmdbStru = new mmdb::Manager;
     mmdb::Model *model = new mmdb::Model;

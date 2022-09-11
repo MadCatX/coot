@@ -3,13 +3,22 @@
 #include "util.hh"
 
 #include "coot-utils/coot-coord-utils.hh"
-#include "src/molecule-class-info.h"
+#include "compat/coot-sysdep.h"
+#include "coords/mmdb-crystal.h"
 
 #include <mmdb2/mmdb_manager.h>
 
 #include <cassert>
 #include <cctype>
 #include <cstring>
+
+#ifdef COOT_ENABLE_WINAPI_SUSPENSION
+#undef GetAtomName
+#endif // COOT_ENABLE_WINAPI_SUSPENSION
+
+#ifdef COOT_BUILD_WINDOWS
+#include <Windows.h>
+#endif // COOT_BUILD_WINDOWS
 
 static
 std::string trim(const char *str);
@@ -25,6 +34,35 @@ static
 void CopyCharArray(CharArray dst, const CharArray src) {
     _CopyCharArray<sizeof(CharArray)>(dst, src);
 }
+
+// @nocheckin Shit code
+static
+mmdb::Residue *
+get_standard_residue_instance(const std::string &residue_name, mmdb::Manager *standard_residues) {
+   mmdb::Residue *std_residue = 0;
+   int selHnd = standard_residues->NewSelection();
+   standard_residues->Select (selHnd, mmdb::STYPE_RESIDUE, 1, // .. TYPE, iModel
+			      "*",
+			      mmdb::ANY_RES, "*",  // starting res
+			      mmdb::ANY_RES, "*",  // ending res
+			      residue_name.c_str(),  // residue name
+			      "*",  // Residue must contain this atom name?
+			      "*",  // Residue must contain this Element?
+			      "*",  // altLocs
+			      mmdb::SKEY_NEW // selection key
+			      );
+   mmdb::PPResidue SelResidue;
+   int nSelResidues;
+   standard_residues->GetSelIndex(selHnd, SelResidue, nSelResidues);
+
+   assert(nSelResidues == 1);
+
+    std_residue = coot::util::deep_copy_this_residue(SelResidue[0]);
+   
+    standard_residues->DeleteSelection(selHnd);
+   return std_residue;
+}
+
 
 static
 void fix_up_atom_names(mmdb::Residue *relabelee, mmdb::Residue *relabeler) {
@@ -240,7 +278,7 @@ LLKA_Structure mmdb_structure_to_LLKA_structure(mmdb::Manager *mmdbStru) {
 
 void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool relabelAtomNames) {
     // This function assumes that both arguments constitute a valid NtC step
-    static molecule_class_info_t minfo{};
+    static atom_selection_container_t standard_residues = read_standard_residues();
 
     // Relabel chain
     mmdb::Chain *chainR = relabeler->GetChain(1, 0);
@@ -253,7 +291,7 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
     residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here
     if (relabelAtomNames) {
         std::string nameR = refmac_residue_name(residueE->GetResName());
-        mmdb::Residue *reference = minfo.get_standard_residue_instance(nameR);
+        mmdb::Residue *reference = get_standard_residue_instance(nameR, standard_residues.mol);
         if (reference) {
             fix_up_atom_names(residueE, reference);
         }
@@ -265,7 +303,7 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
     residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here
     if (relabelAtomNames) {
         std::string nameR = refmac_residue_name(residueE->GetResName());
-        mmdb::Residue *reference = minfo.get_standard_residue_instance(nameR);
+        mmdb::Residue *reference = get_standard_residue_instance(nameR, standard_residues.mol);
         if (reference) {
             fix_up_atom_names(residueE, reference);
         }
@@ -273,7 +311,7 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
 }
 
 void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer) {
-    static molecule_class_info_t minfo{};
+    static atom_selection_container_t standard_residues = read_standard_residues();
 
     for (int modelNo = 1; modelNo <= replacer->GetNumberOfModels(); modelNo++) {
         mmdb::Model *modelE = replacee->GetModel(modelNo);
@@ -294,7 +332,7 @@ void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer) {
                 assert(residueE); assert(residueR);
 
                 std::string nameR = refmac_residue_name(residueR->GetResName());
-                mmdb::Residue *standardBase = minfo.get_standard_residue_instance(nameR);
+                mmdb::Residue *standardBase = get_standard_residue_instance(nameR, standard_residues.mol);
                 if (!standardBase) {
                     continue;
                 }
@@ -305,3 +343,30 @@ void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer) {
     }
     replacee->FinishStructEdit();
 }
+
+#ifdef COOT_BUILD_WINDOWS
+std::wstring string_to_wstring(const std::string &path) {
+    int len;
+
+    len = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, path.c_str(), -1, nullptr, 0);
+    if (len < 1) {
+        return L"";
+    }
+
+    wchar_t *buf = new wchar_t[len + 1];
+    len = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, path.c_str(), -1, buf, len);
+    if (len < 1) {
+        return L"";
+    }
+
+    std::wstring wstr{buf};
+    delete [] buf;
+
+    return wstr;
+}
+#else
+std::wstring string_to_wstring(const std::string &path) {
+    // We do not need this right now on UNIXes
+    return L"";
+}
+#endif // COOT_BUILD_WINDOWS
