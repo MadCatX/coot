@@ -19,7 +19,9 @@ libcoot_ntc_la_LIBADD = -lmmdb2 -lclipper-core \
 			 $(GTK_LIBS)
 
 if COND_LLKA_CUSTOM_PREFIX
-libcoot_ntc_la_LIBADD += -L$(LLKA_PREFIX)/bin/ -lLLKA
+libcoot_ntc_la_LIBADD += -L$(LLKA_PREFIX)/lib/ -lLLKA
+else
+libcoot_ntc_la_LIBADD += -lLLKA
 endif
 
 pkginclude_HEADERS = ntc.hh ui/ntc_dialog.hh ui/conn_simil_plots_dialog.hh ui/notifications.hh

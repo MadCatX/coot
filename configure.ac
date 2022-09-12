@@ -350,8 +350,8 @@ AC_ARG_WITH(
    [with_ntc=no])
 if test "$with_ntc" = yes; then
   CXXFLAGS="$CXXFLAGS -DCOOT_ENABLE_NTC -DLLKA_COMPILER_GCC_LIKE"
-   CFLAGS="$CFLAGS -DCOOT_ENABLE_NTC -DLLKA_COMPILER_GCC_LIKE"
-   AC_MSG_NOTICE([Building with NtC feature enabled])
+  CFLAGS="$CFLAGS -DCOOT_ENABLE_NTC -DLLKA_COMPILER_GCC_LIKE"
+  AC_MSG_NOTICE([Building with NtC feature enabled])
 fi
 AM_CONDITIONAL([COND_ENABLE_NTC], [test "$with_ntc" = yes])
 # Check if we should look for the DNATCO backend library in a non-standard path
