@@ -4692,13 +4692,18 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
   }
 
   static NtCDialog *dlg = nullptr;
+  static NtCDialogOptions opts{};
   if (!dlg || !ntc_dialog_is_valid(dlg)) {
+    if (dlg) {
+      opts = ntc_dialog_get_options(dlg);
+    } else {
+      opts.onDisplayedNtCChanged = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_display_reference(dlg, ntc); };
+      opts.onAccepted = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_accepted(); };
+      opts.onRejected = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_rejected(); };
+    }
+
     ntc_dialog_destroy(dlg);
-    dlg = ntc_dialog_make(
-      [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_display_reference(dlg, ntc); },
-      [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_accepted(); },
-      [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_rejected(); }
-    );
+    dlg = ntc_dialog_make(opts);
   }
 
   modify_ntc_display_reference(dlg, evaluatedDinu.success.closestNtC);

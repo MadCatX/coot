@@ -20,16 +20,24 @@ using OnDisplayedNtCChanged = std::function<void(NtCDialog *, LLKA_NtC)>;
 using OnNtCDialogAccepted = std::function<void(NtCDialog *, LLKA_NtC)>;
 using OnNtCDialogRejected = std::function<void(NtCDialog *, LLKA_NtC)>;
 
+struct NtCDialogOptions {
+    NtCDialogOptions();
+
+    OnDisplayedNtCChanged onDisplayedNtCChanged;
+    OnNtCDialogAccepted onAccepted;
+    OnNtCDialogRejected onRejected;
+
+    int connSimilDlgWidth;
+    int connSimilDlgHeight;
+};
+
 void ntc_dialog_destroy(NtCDialog *dlg);
 void ntc_dialog_display_classification(NtCDialog *dlg, const LLKA_ClassifiedStep &classified);
 void ntc_dialog_display_differences(NtCDialog *dlg, const LLKA_StepMetrics &differences);
 void ntc_dialog_display_rmsd(NtCDialog *dlg, double rmsd);
+NtCDialogOptions ntc_dialog_get_options(NtCDialog *dlg);
 bool ntc_dialog_is_valid(NtCDialog *dlg);
-NtCDialog * ntc_dialog_make(
-    OnDisplayedNtCChanged onDisplayedNtCC = nullptr,
-    OnNtCDialogAccepted onAccepted = nullptr,
-    OnNtCDialogRejected onRejected = nullptr
-);
+NtCDialog * ntc_dialog_make(const NtCDialogOptions &options);
 void ntc_dialog_show(NtCDialog *dlg);
 void ntc_dialog_update_similarities(NtCDialog *dlg, std::vector<NtCSimilarity> similarities);
 

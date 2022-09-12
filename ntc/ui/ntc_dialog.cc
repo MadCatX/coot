@@ -12,6 +12,9 @@
 #include <mutex>
 #include <string>
 
+#define CONN_SIMIL_DEFAULT_WIDTH 400
+#define CONN_SIMIL_DEFAULT_HEIGHT 600
+
 struct NtCDialog {
     GtkWidget *root;
 
@@ -49,16 +52,22 @@ struct NtCDialog {
 
     GtkButton *toggle_conn_simil_plots;
     NtCConnSimilPlotsDialog *conn_simil_plots_dialog;
-    int conn_simil_width;
-    int conn_simil_height;
     std::vector<NtCSimilarity> similarities;
 
-    OnDisplayedNtCChanged on_displayed_ntc_changed;
-    OnNtCDialogAccepted on_accepted;
-    OnNtCDialogRejected on_rejected;
+    NtCDialogOptions options;
 
     bool destroyed;
 };
+
+
+NtCDialogOptions::NtCDialogOptions() :
+    onDisplayedNtCChanged{nullptr},
+    onAccepted{nullptr},
+    onRejected{nullptr},
+    connSimilDlgWidth{CONN_SIMIL_DEFAULT_WIDTH},
+    connSimilDlgHeight{CONN_SIMIL_DEFAULT_HEIGHT}
+{
+}
 
 static
 void destroy_ui(NtCDialog *dlg);
@@ -77,8 +86,8 @@ void on_ntc_dialog_closed(GtkWidget *self, gpointer data) {
     ntc_csp_dialog_destroy(dlg->conn_simil_plots_dialog);
     dlg->destroyed = true;
 
-    if (dlg->on_rejected)
-        dlg->on_rejected(dlg, dlg->closest_ntc_id);
+    if (dlg->options.onRejected)
+        dlg->options.onRejected(dlg, dlg->closest_ntc_id);
 }
 
 static
@@ -87,8 +96,8 @@ void on_cancel_button_clicked(GtkButton *self, gpointer data) {
 
     destroy_ui(dlg);
 
-    if (dlg->on_rejected)
-        dlg->on_rejected(dlg, dlg->closest_ntc_id);
+    if (dlg->options.onRejected)
+        dlg->options.onRejected(dlg, dlg->closest_ntc_id);
 }
 
 static
@@ -100,8 +109,8 @@ static
 void on_ok_button_clicked(GtkButton *self, gpointer data) {
     NtCDialog *dlg = static_cast<NtCDialog*>(data);
 
-    if (dlg->on_accepted)
-        dlg->on_accepted(dlg, get_selected_ntc(dlg));
+    if (dlg->options.onAccepted)
+        dlg->options.onAccepted(dlg, get_selected_ntc(dlg));
 
     destroy_ui(dlg);
 }
@@ -117,8 +126,8 @@ void on_list_of_ntcs_changed(GtkComboBox *self, gpointer data) {
     gtk_combo_box_get_active_iter(self, &iter);
     gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 0, &ntc, -1);
 
-    if (dlg->on_displayed_ntc_changed)
-        dlg->on_displayed_ntc_changed(dlg, ntc);
+    if (dlg->options.onDisplayedNtCChanged)
+        dlg->options.onDisplayedNtCChanged(dlg, ntc);
 }
 
 static
@@ -148,12 +157,12 @@ void on_toggle_conn_simil_plots_clicked(GtkButton *self, gpointer data) {
 
         dlg->conn_simil_plots_dialog = ntc_csp_dialog_make(
             [dlg](NtCSimilarity similarity) { on_similarity_selected(dlg, similarity); },
-            [dlg](int width, int height) { dlg->conn_simil_width = width, dlg->conn_simil_height; }
+            [dlg](int width, int height) { dlg->options.connSimilDlgWidth = width; dlg->options.connSimilDlgHeight = height; }
         );
         assert(dlg->conn_simil_plots_dialog);
 
         ntc_csp_dialog_update_similarities(dlg->conn_simil_plots_dialog, dlg->similarities);
-        ntc_csp_dialog_show(dlg->conn_simil_plots_dialog, dlg->conn_simil_width, dlg->conn_simil_height);
+        ntc_csp_dialog_show(dlg->conn_simil_plots_dialog, dlg->options.connSimilDlgWidth, dlg->options.connSimilDlgHeight);
     }
 }
 
@@ -314,15 +323,17 @@ void ntc_dialog_display_rmsd(NtCDialog *dlg, double rmsd) {
     gtk_label_set_text(dlg->rmsd, format_decimal_number(rmsd, 5, 2).c_str());
 }
 
+NtCDialogOptions ntc_dialog_get_options(NtCDialog *dlg) {
+    assert(dlg);
+
+    return dlg->options;
+}
+
 bool ntc_dialog_is_valid(NtCDialog *dlg) {
     return !dlg->destroyed;
 }
 
-NtCDialog * ntc_dialog_make(
-    OnDisplayedNtCChanged onDisplayedNtCChanged,
-    OnNtCDialogAccepted onAccepted,
-    OnNtCDialogRejected onRejected
-) {
+NtCDialog * ntc_dialog_make(const NtCDialogOptions &options) {
     GtkBuilder *b = gtk_builder_new_from_file(get_glade_file("ntc_dialog.glade").c_str());
     assert(b);
 
@@ -394,16 +405,11 @@ NtCDialog * ntc_dialog_make(
     assert(dialog->toggle_conn_simil_plots);
     dialog->conn_simil_plots_dialog = nullptr;
     g_signal_connect(dialog->toggle_conn_simil_plots, "clicked", G_CALLBACK(on_toggle_conn_simil_plots_clicked), dialog);
-
-    dialog->conn_simil_width = 400;
-    dialog->conn_simil_height = 600;
-
     g_signal_connect(dialog->list_of_ntcs, "changed", G_CALLBACK(on_list_of_ntcs_changed), dialog);
-
     dialog->closest_ntc_id = LLKA_INVALID_NTC;
-    dialog->on_displayed_ntc_changed = onDisplayedNtCChanged;
-    dialog->on_accepted = onAccepted;
-    dialog->on_rejected = onRejected;
+
+    dialog->options = options;
+
     dialog->destroyed = false;
 
     GtkButton *resetNtC = GTK_BUTTON(get_widget(b, "reset_displayed_ntc"));
