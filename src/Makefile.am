@@ -337,6 +337,7 @@ coot_bin_LDADD =  \
         libcootsumo.la \
 	$(top_builddir)/utils/libcoot-utils.la \
         $(top_builddir)/lidia-core/libcoot-lidia-core.la  \
+        $(top_builddir)/compat/libcoot-compat.la  \
 	$(CLIPPER_LIBS) $(CURL_LIBS) $(GTK_LIBS)
 
 

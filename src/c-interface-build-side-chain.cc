@@ -1390,8 +1390,8 @@ void assign_sequence_to_active_fragment() {
    }
 }
 
-#ifdef COOT_ENABLE_NTC
 void modify_ntc_setup(short int state) {
+#ifdef COOT_ENABLE_NTC
    graphics_info_t g; // Really just a shorthand to all the static functions in graphics_info_t;
 
    g.in_modify_ntc_define = state; // Tell the graphics that we modifying NtC
@@ -1405,5 +1405,5 @@ void modify_ntc_setup(short int state) {
    }
 
    add_to_history_typed("setup-modify-ntcs", { state });
-}
 #endif // COOT_ENABLE_NTC
+}
