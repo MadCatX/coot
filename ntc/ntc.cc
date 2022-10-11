@@ -112,7 +112,7 @@ bool ntc_initialize_classification_context(const std::string &path, std::string 
     // TODO: This should be made configurable
     limits.averageNeighborsTorsionCutoff = LLKA_deg2rad(28.0);
     limits.nearestNeighborTorsionsCutoff = LLKA_deg2rad(28.0);
-    limits.manhattanDistanceCutoff = LLKA_deg2rad(60.0);
+    limits.totalDistanceCutoff = LLKA_deg2rad(60.0);
     limits.pseudorotationCutoff = LLKA_deg2rad(72.0);
     limits.minimumClusterVotes = 0.001111;
     limits.minimumNearestNeighbors = 7;
@@ -150,7 +150,7 @@ bool ntc_initialize_classification_context(const std::string &path, std::string 
         clusters.data.clusters, clusters.count,
         goldenSteps.data.goldenSteps, goldenSteps.count,
         confals.data.confals, confals.count,
-        nuAngles.data.averageNuAngles, nuAngles.count,
+        nuAngles.data.clusterNuAngles, nuAngles.count,
         &limits,
         &classificationContext
     );
