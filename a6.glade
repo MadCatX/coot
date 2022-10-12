@@ -16424,20 +16424,6 @@ into Molecule:
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="model_refine_dialog_modify_ntc_togglebutton">
-                    <property name="label" translatable="yes">NtC</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <signal name="toggled" handler="on_model_refine_dialog_modify_ntc_button_toggled_gtkbuilder_callback" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">14</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkHSeparator" id="hseparator6">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>

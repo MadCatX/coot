@@ -327,8 +327,7 @@ extern "C" G_MODULE_EXPORT
 void
 on_model_toolbar_modify_ntc_togglebutton_toggled_gtkbuilder_callback
                                         (GtkToggleToolButton *toggletoolbutton,
-                                        gpointer             user_data)
-{
+                                        gpointer             user_data) {
 #ifdef COOT_ENABLE_NTC
   gboolean active = gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(toggletoolbutton));
   modify_ntc_setup(static_cast<short int>(active));

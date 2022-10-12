@@ -10,16 +10,15 @@ AM_CXXFLAGS = \
 	-I$(top_srcdir) \
 	-D_USE_MATH_DEFINES
 
-libcoot_ntc_la_LDFLAGS = $(SHARED_LDFLAGS)
-
-libcoot_ntc_la_LIBADD = -lmmdb2 -lclipper-core \
-                         $(top_builddir)/coords/libcoot-coords.la  \
+libcoot_ntc_la_LIBADD =  $(top_builddir)/coords/libcoot-coords.la  \
                          $(top_builddir)/coot-utils/libcoot-coord-utils.la  \
                          $(top_builddir)/utils/libcoot-utils.la \
+		         $(CLIPPER_LIBS) $(MMDB_LIBS) \
 			 $(GTK_LIBS)
 
 if COND_LLKA_CUSTOM_PREFIX
 libcoot_ntc_la_LIBADD += -L$(LLKA_PREFIX)/lib/ -lLLKA
+libcoot_ntc_la_LDFLAGS = -Wl,-rpath=$(LLKA_PREFIX)/lib $(SHARED_LDFLAGS)
 else
 libcoot_ntc_la_LIBADD += -lLLKA
 endif
