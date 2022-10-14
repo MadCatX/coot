@@ -35,16 +35,6 @@
 #include <math.h>  // for fabs
 
 #include "compat/coot-sysdep.h"
-#if defined _MSC_VER
-#include <direct.h>
-#include <windows.h>
-#include <lm.h>
-#else
-#if !defined(WINDOWS_MINGW)
-#include <unistd.h>
-#include <pwd.h>
-#endif // MINGW
-#endif
 
 #include <ctype.h>  // for toupper
 
@@ -84,43 +74,13 @@ coot::util::append_dir_file(const std::string &s1, const std::string &file) {
 // as a label in the database.  Not important to get right.
 //
 std::pair<std::string, std::string> coot::get_userid_name_pair() {
+   std::string username = coot::user_account_name();
+   std::string full_name = coot::user_full_name();
 
-   std::pair<std::string, std::string> p("unknown","unknown");
-// BL says:: in windows we dont have USER and no getpwnam, so do somethign else
-// and we avoid the ugly code below!!!
-#if defined WINDOWS_MINGW
-   const char *u = getenv("USERNAME");
-   if (u) {
-      p.first  = u;
-      p.second = u;
-   }
-#else
-   const char *u = getenv("USER");
-#ifdef _MSC_VER
-   // Man this is ugly windows code...
-   LPUSER_INFO_10 pBuf = NULL;
-   NET_API_STATUS nStatus;
-
-   // Call the NetUserGetInfo function with level 10
-   nStatus = NetUserGetInfo(NULL, (LPCWSTR) u, 10, (LPBYTE *)&pBuf);
-   if (nStatus == NERR_Success) {
-      if (pBuf) {
-	 p.first  = (char *) pBuf->usri10_name;
-	 p.second = (char *) pBuf->usri10_full_name;
-      }
-   }
-
-#else
-   if (u) {
-      struct passwd *pwbits = getpwnam(u);
-      std::string uid;
-      std::string nam;
-      p.first  = pwbits->pw_name;
-      p.second = pwbits->pw_gecos;
-   }
-#endif // MSC
-#endif // MINGW
-   return p;
+   return {
+      username.empty() ? "unknown" : std::move(username),
+      full_name.empty() ? "unknown" : std::move(full_name)
+   };
 }
 
 

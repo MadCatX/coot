@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <pwd.h>
 
 #include <array>
 #include <cstring>
@@ -14,6 +15,10 @@
 #define COOT_PATH_MAX 4096UL
 
 namespace coot {
+
+int cpu_count() {
+    return sysconf(_SC_NPROCESSORS_CONF);
+}
 
 std::string current_working_dir() {
     std::array<char, COOT_PATH_MAX> bytes{};
@@ -102,6 +107,23 @@ void sleep(unsigned int secs) {
 
 void usleep(useconds_t usecs) {
     ::usleep(usecs);
+}
+
+std::string user_account_name() {
+    const char *u = getenv("USER");
+    return u ? u : "";
+}
+
+std::string user_full_name() {
+    std::string username = user_account_name();
+    if (username.empty()) {
+        return "";
+    }
+
+    passwd *pw = getpwnam(username.c_str());
+    std::string full_name(pw->pw_gecos);
+
+    return full_name.empty() ? username : full_name;
 }
 
 } // namespace coot

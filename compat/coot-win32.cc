@@ -3,6 +3,7 @@
 #include "coot-sysdep.h"
 
 #include <windows.h>
+#include <secext.h>
 
 #include <algorithm>
 #include <cwctype>
@@ -120,7 +121,37 @@ bool paths_equal(const std::wstring &first, const std::wstring &second) {
     return true;
 }
 
+static
+std::string user_account_info_internal(EXTENDED_NAME_FORMAT fmt) {
+    ULONG length = 0;
+    BOOLEAN ret;
+
+    ret = GetUserNameExW(fmt, NULL, &length);
+    if (ret || GetLastError() != ERROR_MORE_DATA) {
+        return ""; // The function must fail for the first time.
+    }
+
+    // Behavior of GetUserNameExW is inconsistent with regard to
+    // whether the "length" accounts for zero-terminator.
+    // Let us add 1 to be on the safe side.
+    auto buf = std::unique_ptr<wchar_t[]>(new wchar_t[length + 1]);
+
+    ret = GetUserNameExW(NameUserPrincipal, NULL, &length);
+    if (!ret) {
+        return "";
+    }
+
+    return wide_string_to_local(std::wstring{buf.get(), nullptr);
+}
+
 namespace coot {
+
+int cpu_count() {
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+
+  return sysinfo.dwNumberOfProcessors;
+}
 
 std::string current_working_dir() {
     // ret DOES include the null-terminator
@@ -324,6 +355,14 @@ void sleep(unsigned int secs) {
 
 void usleep(unsigned int usecs) {
     Sleep(usecs / 1000);
+}
+
+std::string user_account_name() {
+    return user_account_info_internal(NameUserPrincipal);
+}
+
+std::string user_full_name() {
+    return user_account_info_internal(NameDisplay);
 }
 
 } // namespace coot

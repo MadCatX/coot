@@ -4,25 +4,11 @@
 #include <algorithm>
 #include "coot-utils.hh"
 
-#ifdef  _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
+#include "compat/coot-sysdep.h"
 
 // can return -1 if name is invalid
 //
-long coot::get_number_of_threads_by_system_call()  {
 
-#ifdef _WIN32
-SYSTEM_INFO sysinfo;
-  GetSystemInfo(&sysinfo);
-  return sysinfo.dwNumberOfProcessors;
-#else
-  return sysconf(_SC_NPROCESSORS_CONF);
-#endif
-
-}
 
 // unsigned int coot::coot_n_threads = 0;
 
@@ -50,7 +36,7 @@ unsigned int coot::get_max_number_of_threads() {
       } else {
 	 // no environment variable, use system call.
 	 coot_n_threads = n_threads_default;
-	 long n = get_number_of_threads_by_system_call();
+	 int n = coot::cpu_count();
 	 if (n > 0)
 	    coot_n_threads = n;
       }
