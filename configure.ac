@@ -103,15 +103,6 @@ dnl So, let's check GLIB here, should be harmless.
 dnl
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
 
-
-dnl test for WINDOWS_MINGW
-AM_MINGW_WINDOWS
-dnl test for LIBPNG (Windows only - maybe shouif here rather than in macro?)
-if test "$have_windows_mingw" = yes; then
-  AM_PATH_GLOB
-  AC_CONFIG_FILES(pyrogen/pyrogen.bat)
-fi
-
 # This seems not to be returning the correct value
 # AM_PATH_LIBPNG
 # so try this:
@@ -144,27 +135,27 @@ if test x$with_libdw == xtrue ; then
 fi
 AM_CONDITIONAL(BACKWARD_HAS_DW, [test x$with_libdw = xtrue])    # tested in utils/Makefile.am
 
-dnl Set platform-specific compilation flags - derived from clipper's configure
+coot_build_platform=unknown
 test "${target:+set}" = set || target="$host_os"
 case "$target" in
-   *linux* ) ;;
-   *irix* )
-	if test "`basename $CXX`" = CC; then
-	   case "$CXXFLAGS" in
-	      *LANG::std* ) ;;
-              * )
-		  CXXFLAGS="$CXXFLAGS -LANG:std -ptused"
-           esac
-           # This patches libtool... This change exists in libtool 1.4d and
-           # is required such that -LANG: is not filtered out...
-           AC_MSG_NOTICE([Patching libtool for irix CC])
-           sed "s:no/\*-\*-irix\*):no/*-*-irix* | /*-*-irix*):" libtool > libtool.tp
-           mv libtool.tp libtool
-           chmod +x libtool
-	fi
+   *mingw* )
+        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_WINDOWS -DWIN32_LEAN_AND_MEAN -DNOMINMAX=1"
+        CFLAGS="$CFLAGS -DCOOT_BUILD_WINDOWS -DWIN32_LEAN_AND_MEAN -DNOMINMAX=1"
+        coot_build_platform=windows
     ;;
+   *linux* )
+        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_POSIX"
+        CFLAGS="$CFLAGS -DCOOT_BUILD_POSIX"
+        coot_build_platform=posix
+   ;;
 esac
+AM_CONDITIONAL([COOT_BUILD_POSIX], [test "$coot_build_platform" = posix])
+AM_CONDITIONAL([COOT_BUILD_WINDOWS], [test "$coot_build_platform" = windows])
 
+dnl test for LIBPNG (Windows only - maybe shouif here rather than in macro?)
+if test "$coot_build_platform" = "windows"; then
+  AC_CONFIG_FILES(pyrogen/pyrogen.bat)
+fi
 
 dnl Check for MMDB.
 AM_PATH_MMDB2(, [echo Error locating necessary mmdb; exit 1],,)

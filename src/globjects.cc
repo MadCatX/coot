@@ -43,8 +43,6 @@
 
 #include <epoxy/gl.h>
 
-#include "compat/sleep-fixups.h"
-
 #include <string.h> // strncmp
 
 #include <math.h>

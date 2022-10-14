@@ -1,3 +1,5 @@
+// vim: sw=4 ts=4 sts= 4 expandtab
+
 /* compat/coot-sysdep.h
  * 
  * Copyright 2008, The University of York
@@ -19,43 +21,42 @@
  * 02110-1301, USA
  */
 
-// window magic jiggery pokery
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
+#ifndef _COMPAT_COOT_SYSDEP_H
+#define _COMPAT_COOT_SYSDEP_H
 
-// for timeval; needs to be moved before windows.h nowadays...
-#include <winsock2.h>
+#include <string>
+#include <vector>
+#include <type_traits>
 
-#define HKL HKL_RENAMED
-#include <windows.h>
-#undef HKL
+namespace coot {
+	enum GatherOptions {
+		GATHER_FILES       = 1 << 0,
+		GATHER_DIRECTORIES = 1 << 1,
+		GATHER_LINKS       = 1 << 2
+	};
+    inline GatherOptions operator|(GatherOptions lhs, GatherOptions rhs) {
+		using UT = std::underlying_type<GatherOptions>::type;
+		return static_cast<GatherOptions>(static_cast<UT>(lhs) | static_cast<UT>(rhs));
+	}
 
-#define AddAtomA AddAtom
-#define GetAtomNameA GetAtomName
-#undef V_UNKNOWN
-#define V_UNKNOWNA V_UNKNOWN
-#undef small
-#undef near
-#undef far
-#ifdef PLANE
-#undef PLANE
-#endif
-// for nomenclature errors
-#ifdef IGNORE
-#undef IGNORE
-#endif
-#endif //Windows
+    std::string current_working_dir();
+    std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options = (GATHER_FILES | GATHER_LINKS));
+    std::string get_fixed_font();
+    bool is_dir(const std::string &file_path);
+    bool is_link(const std::string &file_path);
+    bool is_regular_file(const std::string &file_path);
+    bool rename(const char *old_file_path, const char *new_file_path, std::string &error_message);
+    void set_os_error_mode();
+    void sleep(unsigned int secs);
+    void usleep(unsigned int usecs);
+} // namespace coot
 
-// some redefinitions for Visual C++
-#if defined _MSC_VER
-#define PKGDATADIR "C:/coot/share"
-#define snprintf _snprintf
-#define S_ISDIR(m)  (((m) & S_IFMT) == S_IFDIR)
-#define S_ISREG(m)  (((m) & S_IFMT) == S_IFREG)
-#define S_IWUSR S_IWRITE
-#define S_IXUSR S_IEXEC
-#define S_IRUSR S_IREAD
-#endif
+#if defined(COOT_BUILD_WINDOWS)
+# include "coot-win32.h"
+#elif defined(COOT_BUILD_POSIX)
+# include "coot-posix.h"
+#else
+# error "Misdetected or unsupported platform"
+#endif // COOT_
 
+#endif // _COMPAT_COOT_SYSDEP_H

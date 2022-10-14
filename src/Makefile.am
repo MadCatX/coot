@@ -309,11 +309,12 @@ _coot_la_LDFLAGS = -module $(SHARED_LDFLAGS) --no-undefined  \
 	   $(top_builddir)/geometry/libcoot-geometry.la      \
 	   $(top_builddir)/pli/libcoot-pli.la                \
 	   $(top_builddir)/lidia-core/libcoot-lidia-core.la  \
-	   $(top_builddir)/utils/libcoot-utils.la            \
-	   $(PYTHON_LIBS) $(CLIPPER_LIBS)
+           $(top_builddir)/utils/libcoot-utils.la            \
+	   $(top_builddir)/compat/libcoot-compat.la          \
+           $(PYTHON_LIBS) $(CLIPPER_LIBS)
 
 
-if OS_WIN32
+if COOT_BUILD_WINDOWS
 # no more libexec for windows
 bin_PROGRAMS     = coot-bin coot-density-score-by-residue-bin dynarama-bin
 else
@@ -729,7 +730,7 @@ libcootsumo_la_SOURCES = \
 EXTRA_DIST += coot_wrap_python_pre.cc
 dist_python_PYTHON = coot.py coot.pth
 
-if OS_WIN32
+if COOT_BUILD_WINDOWS
 # Python .pyd modules are simply DLLs, but they have to be called .pyd for
 # python to find them, and libtool only creates .dll.
 install-exec-hook:

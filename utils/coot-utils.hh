@@ -141,9 +141,6 @@ namespace coot {
       // as above but only nucleotide names allowed.
       bool is_standard_nucleotide_name(const std::string &residue_name);
 
-      // return a set of string that match the glob, with the directory name pre-appended
-      std::vector<std::string> glob_files(const std::string &dir, const std::string &glob_pattern);
-
       std::string downcase(const std::string &s);
       std::string upcase(const std::string &s);
       std::string capitalise(const std::string &s); // capitalise first, downcase rest

@@ -45,7 +45,6 @@
 #include <iostream>
 
 #include <sys/stat.h>
-#include <glob.h>
 
 
 
@@ -372,20 +371,15 @@ void try_load_dot_coot_py_and_python_scripts(const std::string &home_directory) 
       // (if it is not a file already)
       //
       std::string startup_scripts_dir = graphics_info_t::add_dir_file(home_directory, ".coot");
-      struct stat buff;
-      int preferences_dir_status = stat(startup_scripts_dir.c_str(), &buff);
+      bool have_startup_scripts_dir = coot::is_dir(startup_scripts_dir);
 
-      if (preferences_dir_status != 0) {
+      if (!have_startup_scripts_dir) {
          std::cout << "INFO:: preferences directory " << startup_scripts_dir
                    << " does not exist. Won't read preferences." << std::endl;;
       } else {
 	 // load all .py files
-	 glob_t myglob;
-	 int flags = 0;
-	 //std::string glob_patt = "/*.py";
-	 std::string glob_file = startup_scripts_dir;
-	 glob_file += "/*.py";
-	 glob(glob_file.c_str(), flags, 0, &myglob);
+	 std::vector<std::string> py_files = coot::gather_files_by_patterns(startup_scripts_dir, { "*.py" });
+
 	 // dont load the coot_toolbuttons.py if no graphics
 	 // same for key_bindings (and potentially others)
 	 std::set<std::string> exclude_py_files;
@@ -401,8 +395,7 @@ void try_load_dot_coot_py_and_python_scripts(const std::string &home_directory) 
          std::vector<std::string> curlew_scripts;
          std::string coot_preferences_py_script;
 
-         for (char **p = myglob.gl_pathv, count = myglob.gl_pathc; count; p++, count--) {
-            std::string preferences_script(*p);
+         for (const auto &preferences_script : py_files) {
             std::string psf = coot::util::file_name_non_directory(preferences_script);
             if (exclude_py_files.find(psf) == exclude_py_files.end()) {
                bool done = false;
@@ -424,7 +417,6 @@ void try_load_dot_coot_py_and_python_scripts(const std::string &home_directory) 
                   coot_preferences_py_script = preferences_script;
             }
          }
-         globfree(&myglob);
 
          for(const auto &script_fn : basic_scripts)
             run_python_script(script_fn.c_str()); // bleugh

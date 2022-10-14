@@ -51,7 +51,6 @@
 #include "coot-init-glue.hh"
 #include "pre-load.hh"
 
-#include <glob.h>
 #include "graphics-info.h"
 
 #include "command-line-extern.hh"

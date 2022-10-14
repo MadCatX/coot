@@ -56,10 +56,6 @@
 #include <direct.h>
 #endif // _MSC_VER
 
-#if !defined(_MSC_VER)
-#include <glob.h> // for globbing.
-#endif
-
 #include "guile-fixups.h"
 
 #include "c-interface-scm.hh"
