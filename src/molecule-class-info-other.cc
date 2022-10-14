@@ -28,18 +28,6 @@
 
 #include <stdlib.h>
 
-#if !defined WINDOWS_MINGW && !defined _MSC_VER
-#  include <glob.h>
-#  include <unistd.h>
-#else
-#   ifdef _MSC_VER
-#     include <windows.h>
-#   else
-#     include <unistd.h>
-#     include <glob.h>
-#   endif
-#endif
-
 #include <string.h>  // strncpy
 #include <sys/types.h>  // for stating
 #include <sys/stat.h>
@@ -53,11 +41,6 @@
 #include "clipper/core/xmap.h"
 #include "clipper/cns/cns_hkl_io.h"
 #include "clipper/minimol/minimol_io.h"
-
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-#undef V_UNKNOWN
-#define V_UNKNOWNA V_UNKNOWN
-#endif
 
 #include <mmdb2/mmdb_manager.h>
 #include "coords/mmdb-extras.h"
@@ -3802,68 +3785,38 @@ molecule_class_info_t::recent_backup_file_info() const {
 
    coot::backup_file_info info;
 
-#if !defined(_MSC_VER)
    if (has_model()) {
       std::string t_name_glob = name_;
       // convert "/" to "_"
       // and in Windows the ":" to "_" as well
       int slen = t_name_glob.length();
       for (int i=0; i<slen; i++)
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
          if (t_name_glob[i] == '/' || t_name_glob[i] == ':')
             t_name_glob[i] = '_';
 #else
          if (t_name_glob[i] == '/')
             t_name_glob[i] = '_';
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
 
       // Let's make a string that we can glob:
       // "coot-backup/thing.pdb*.pdb.gz"
 
       // c.f. make_backup():
+
+      std::string backup_dir = "coot-backup/";
+
       char *es = getenv("COOT_BACKUP_DIR");
-      std::string backup_name_glob = "coot-backup/";
-      // very first check if COOT_BACKUP_DIR is defined
-      if (es) {
-        // first we shall check if es, i.e. COOT_BACKUP_DIR actually exists
-        struct stat buf;
-        int err = stat(es, &buf);
-        if (!err) {
-          if (! S_ISDIR(buf.st_mode)) {
-            es = NULL;
-          }
-        } else {
-          es = NULL;
-        }
+      if (es && coot::is_dir(es)) {
+         backup_dir = es;
+	 if (backup_dir.back() != '/') {
+            backup_dir += "/";
+	 }
       }
-      if (es) {
-         backup_name_glob = es;
-         // on windows we somehow need to add an /
-#ifdef WINDOWS_MINGW
-         backup_name_glob += "/";
-#endif // MINGW
-      }
-      backup_name_glob += t_name_glob;
 
-      // First only the ones withwout gz
-      backup_name_glob += "*.pdb";
+      backup_dir += t_name_glob;
 
-      glob_t myglob;
-      int flags = 0;
-      glob(backup_name_glob.c_str(), flags, 0, &myglob);
-      // And finally the ones with gz
-      backup_name_glob += ".gz";
-      flags = GLOB_APPEND;
-      glob(backup_name_glob.c_str(), flags, 0, &myglob);
-      size_t count;
-
-      char **p;
-      std::vector<std::string> v;
-      for (p = myglob.gl_pathv, count = myglob.gl_pathc; count; p++, count--) {
-         std::string f(*p);
-         v.push_back(f);
-      }
-      globfree(&myglob);
+      std::vector<std::string> v = coot::gather_files_by_patterns(backup_dir, { "*.pdb", ".pdb.gz" });
 
       if (v.size() > 0) {
 
@@ -3905,7 +3858,6 @@ molecule_class_info_t::recent_backup_file_info() const {
          }
       }
    }
-#endif
    return info;
 }
 

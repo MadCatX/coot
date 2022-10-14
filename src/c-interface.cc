@@ -41,10 +41,6 @@
 #include <fstream>
 #include <algorithm>
 
-#if !defined(_MSC_VER)
-#include <glob.h> // for globbing.  Needed here?
-#endif
-
 #ifdef USE_GUILE
 #include <libguile.h>
 #include "c-interface-scm.hh"
@@ -60,7 +56,6 @@
 #undef DATADIR
 #endif // DATADIR
 #endif /* MINGW */
-#include "compat/sleep-fixups.h"
 
 // Here we used to define GTK_ENABLE_BROKEN if defined(WINDOWS_MINGW)
 // Now we don't want to enable broken stuff.  That is not the way.
@@ -1331,10 +1326,6 @@ std::vector<std::string> filtered_by_glob(const std::string &pre_directory,
    std::vector<std::string> v; // returned object
    std::vector<std::string> globs;
 
-#if !defined(_MSC_VER)
-
-   // std::map<std::string, int, std::less<std::string> >  files;
-
    if (data_type == COOT_COORDS_FILE_SELECTION)
       globs = *graphics_info_t::coordinates_glob_extensions;
    if (data_type == COOT_DATASET_FILE_SELECTION)
@@ -1348,31 +1339,20 @@ std::vector<std::string> filtered_by_glob(const std::string &pre_directory,
    if (data_type == COOT_PHS_COORDS_FILE_SELECTION)
       globs = *graphics_info_t::coordinates_glob_extensions;
 
-   for (unsigned int i=0; i<globs.size(); i++) {
+   std::transform(globs.begin(), globs.end(), globs.begin(), [](const std::string &s) { return "*" + s; });
 
-      std::string file_name_glob = pre_directory;
-      file_name_glob += "/";
+   if (globs.size() > 0) {
+      std::vector<std::string> gathered = coot::gather_files_by_patterns(pre_directory, globs);
 
-      file_name_glob += "*";
-      file_name_glob += globs[i];
-      glob_t myglob;
-      int flags = 0;
-      glob(file_name_glob.c_str(), flags, 0, &myglob);
-      size_t count;
-
-      char **p;
-      for (p = myglob.gl_pathv, count = myglob.gl_pathc; count; p++, count--) {
-	 std::string f(*p);
-	 if (! string_member(f, v))
-	    v.push_back(f);
+      for (const auto &f : gathered) {
+         if (!string_member(f, v)) {
+            v.push_back(f);
+         }
       }
-      globfree(&myglob);
+
+      // now we need to sort v;
+      std::sort(v.begin(), v.end(), compare_strings);
    }
-
-   // now we need to sort v;
-   std::sort(v.begin(), v.end(), compare_strings);
-
-#endif // MSC
 
    return v;
 }
@@ -9234,7 +9214,7 @@ void set_socket_string_waiting(const char *s) {
       std::cout << "Waiting for lock! "
 		<< graphics_info_t::socket_string_waiting_mutex_lock
 		<< std::endl;
-      usleep(1000000);
+      coot::usleep(1000000);
    }
 
    std::cout << " =============== setting mutex lock (scheme version) =========" << std::endl;

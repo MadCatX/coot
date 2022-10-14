@@ -56,8 +56,6 @@
 #include "c-inner-main.h"
 #include "c-interface-preferences.h"
 
-#include <glob.h>
-
 
 #if defined (USE_GUILE) || defined (USE_PYTHON)
 extern void SWIG_init();

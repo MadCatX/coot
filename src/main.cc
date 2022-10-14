@@ -102,7 +102,6 @@
 #undef DATADIR
 #endif // DATADIR
 #endif
-#include "compat/sleep-fixups.h"
 
 #include "c-interface.h"
 #include "c-interface-gtk-widgets.h"
@@ -112,8 +111,6 @@
 // #include "coot-surface/rgbreps.h"
 
 #include "coot-database.hh"
-
-#include <glob.h>
 
 #ifdef USE_GUILE
 #include <libguile.h>
@@ -212,7 +209,7 @@ GtkWidget *do_splash_screen(const command_line_data &cld) {
 
          while(gtk_main_iteration() == FALSE);
          while (gtk_events_pending()) {
-            usleep(3000);
+            coot::usleep(3000);
             gtk_main_iteration();
          }
       }

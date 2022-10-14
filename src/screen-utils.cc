@@ -1,10 +1,10 @@
 
 #include <string>
 #include <iostream>
-#include <glob.h>
 #include <sys/stat.h>
 #include <gtk/gtk.h>
 #include "utils/coot-utils.hh"
+#include "compat/coot-sysdep.h"
 
 // this returns the effective screen height if possible otherwise an estimate
 int
@@ -114,10 +114,8 @@ void setup_application_icon(GtkWindow *window) {
 
    // now add the application icon
    std::string app_icon_path = coot::util::append_dir_file(splash_screen_pixmap_dir, "coot-icon.png");
-
-   struct stat buf;
-   int status = stat(app_icon_path.c_str(), &buf);
-   if (status == 0) { // icon file was found
+   bool have_splash_screen = coot::is_regular_file(app_icon_path);
+   if (have_splash_screen) { // icon file was found
 
       GdkPixbuf *icon_pixbuf =
 	 gdk_pixbuf_new_from_file (app_icon_path.c_str(), NULL);
@@ -143,22 +141,11 @@ void setup_application_icon(GtkWindow *window) {
    const char *stock_id;
    GdkPixbuf* pixbuf;
 
-   glob_t myglob;
-   int flags = 0;
-   std::string glob_dir = splash_screen_pixmap_dir;
-   std::string glob_file = glob_dir;
-   glob_file += "/*.svg";
-   glob(glob_file.c_str(), flags, 0, &myglob);
-   glob_file = glob_dir;
-   glob_file += "/*.png";
-   glob(glob_file.c_str(), GLOB_APPEND, 0, &myglob);
-   size_t count;
-   char **p;
-   for (p = myglob.gl_pathv, count = myglob.gl_pathc; count; p++, count--) {
-      char *filename(*p);
-      if (false) // remove the noise while I think about other things.
-         std::cout << "setup_application_icon() filename " << filename << std::endl;
-      pixbuf = gdk_pixbuf_new_from_file(filename, &error);
+   std::string icons_dir = splash_screen_pixmap_dir;
+   std::vector<std::string> icon_files = coot::gather_files_by_patterns(icons_dir, { ".svg", "*.png" });
+
+   for (const auto &filename : icon_files) {
+      pixbuf = gdk_pixbuf_new_from_file(filename.c_str(), &error);
       if (error) {
 	 g_print ("Error loading icon: %s\n", error->message);
 	 g_error_free (error);
@@ -180,6 +167,5 @@ void setup_application_icon(GtkWindow *window) {
 	 }
       }
    }
-   globfree(&myglob);
 
 }
