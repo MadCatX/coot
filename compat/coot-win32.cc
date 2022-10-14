@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cwctype>
 #include <array>
+#include <memory>
 #include <string>
 
 #define W_PATH_BUF_SIZE 32768UL
@@ -123,18 +124,24 @@ bool paths_equal(const std::wstring &first, const std::wstring &second) {
 
 static
 std::string user_account_info_internal(EXTENDED_NAME_FORMAT fmt) {
-    ULONG length = 0;
+    ULONG length = 32;
     BOOLEAN ret;
 
+    // MSDN docn does not specify if we can pass NULL to GetUserNameExW()
+    // Let us allocate a "large enough" buffer and try.
+    auto buf = std::unique_ptr<wchar_t[]>(new wchar_t[length + 1]);
+
     ret = GetUserNameExW(fmt, NULL, &length);
-    if (ret || GetLastError() != ERROR_MORE_DATA) {
-        return ""; // The function must fail for the first time.
+    if (!ret && GetLastError() != ERROR_MORE_DATA) {
+        // We failed but not because the buffer is too small
+        return "";
     }
 
-    // Behavior of GetUserNameExW is inconsistent with regard to
+    // Try again with larger buffer. "length" now contains the required size of the buffer.
+    // None that ehavior of GetUserNameExW is inconsistent with regard to
     // whether the "length" accounts for zero-terminator.
     // Let us add 1 to be on the safe side.
-    auto buf = std::unique_ptr<wchar_t[]>(new wchar_t[length + 1]);
+    buf = std::unique_ptr<wchar_t[]>(new wchar_t[length + 1]);
 
     ret = GetUserNameExW(NameUserPrincipal, NULL, &length);
     if (!ret) {
