@@ -1,4 +1,4 @@
-// vim: sw=4 ts=4 sts= 4 expandtab
+// vim: sw=4 ts=4 sts=4 expandtab
 
 /* compat/coot-sysdep.h
  * 
@@ -39,6 +39,7 @@ namespace coot {
 		return static_cast<GatherOptions>(static_cast<UT>(lhs) | static_cast<UT>(rhs));
 	}
 
+	int cpu_count();
     std::string current_working_dir();
     std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options = (GATHER_FILES | GATHER_LINKS));
     std::string get_fixed_font();
@@ -49,6 +50,8 @@ namespace coot {
     void set_os_error_mode();
     void sleep(unsigned int secs);
     void usleep(unsigned int usecs);
+    std::string user_account_name();
+    std::string user_full_name();
 } // namespace coot
 
 #if defined(COOT_BUILD_WINDOWS)
