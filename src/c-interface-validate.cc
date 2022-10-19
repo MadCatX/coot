@@ -28,12 +28,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
-#if defined _MSC_VER
-#include <windows.h>
-#endif
-
 #include <stdlib.h>
 #include <iostream>
 

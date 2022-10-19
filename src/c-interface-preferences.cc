@@ -27,8 +27,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
 
 #ifndef HAVE_VECTOR
 #define HAVE_VECTOR
@@ -45,16 +43,6 @@
 #include <string.h> // strlen, strcpy
 #include <sys/types.h> // for stating
 #include <sys/stat.h>
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define S_IRUSR S_IREAD
-#define S_IWUSR S_IWRITE
-#define S_IXUSR S_IEXEC
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-#include <windows.h>
-#include <direct.h>
-#endif // _MSC_VER
 
 #include <dirent.h>   // for extra scheme dir
 

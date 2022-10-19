@@ -33,9 +33,6 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "compat/coot-sysdep.h"
-
-
 #include "guile-fixups.h"
 
 #include "graphics-info.h"

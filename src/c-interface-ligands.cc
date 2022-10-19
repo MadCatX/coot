@@ -24,17 +24,10 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
 #include <stdlib.h>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
-
-#if defined _MSC_VER
-#include <windows.h>
-#endif
 
 #include "globjects.h" //includes gtk/gtk.h
 

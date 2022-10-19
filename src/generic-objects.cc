@@ -30,8 +30,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 
-#include "compat/coot-sysdep.h"
-
 #include <iostream>
 #include <algorithm>
 #include <vector>

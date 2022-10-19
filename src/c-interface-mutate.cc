@@ -27,9 +27,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
 #include <stdlib.h>
 #include <iostream>
 

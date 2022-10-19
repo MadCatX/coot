@@ -37,11 +37,10 @@
 
 #include "compat/coot-sysdep.h"
 
-#include <ctype.h>  // for toupper
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#include <sys/types.h>  // for getpwnam
-#include <sys/stat.h>   // for mkdir
-#include <unistd.h> // Also needed for mkdir on Fedora?
+#include <ctype.h>  // for toupper
 
 #include "coot-utils.hh"
 
@@ -578,13 +577,7 @@ std::string coot::util::file_name_directory(const std::string &file_name) {
 
 std::string
 coot::util::current_working_dir() {
-   std::string s = "";
-   unsigned long l = 2480;
-   char b[l];
-   char *x = getcwd(b,l);
-   if (x)
-      s = std::string(b);
-   return s;
+   return coot::current_working_dir();
 }
 
 // If cwd is a substring of f (starting at 0), then return the

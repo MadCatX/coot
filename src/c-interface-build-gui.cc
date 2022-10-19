@@ -28,8 +28,6 @@
 #include <Python.h>  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #include <stdlib.h>
 #include <iostream>
 
@@ -37,11 +35,6 @@
 
 #include <sys/types.h> // for stating
 #include <sys/stat.h>
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#include <windows.h>
-#endif
 
 #include "globjects.h" //includes gtk/gtk.h
 

@@ -23,9 +23,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
 #include <string>
 #include <iostream> // fixes undefined strchr, strchrr problems
 #include <mmdb2/mmdb_manager.h>

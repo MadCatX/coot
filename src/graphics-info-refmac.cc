@@ -34,9 +34,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
 #ifndef HAVE_STRING
 #define HAVE_STRING
 #include <string>
@@ -49,18 +46,6 @@
 
 #include <gtk/gtk.h>  // must come after mmdb_manager on MacOS X Darwin
 // #include <GL/glut.h>  // for some reason...  // Eh?
-
-#include <iostream>
-#include <dirent.h>   // for refmac dictionary files
-
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
-#if !defined _MSC_VER && !defined WINDOWS_MINGW
-#include <unistd.h>
-#else
-//#include "coot-sysdep.h"
-#endif
 
 #include <mmdb2/mmdb_manager.h>
 #include "coords/mmdb-extras.h"

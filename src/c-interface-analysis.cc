@@ -22,7 +22,6 @@
 #endif
 
 #include <iomanip>
-#include "compat/coot-sysdep.h"
 
 // We don't use gtkgraph these days
 // #include "libgtkgraph/gtkgraph.h"
