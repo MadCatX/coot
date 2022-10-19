@@ -36,13 +36,11 @@
 #include <vector>
 #include <queue>
 
-#include "compat/coot-sysdep.h"
-
+#include <mmdb2/mmdb_manager.h>
 #include "clipper/core/xmap.h"
 #include "clipper/cns/cns_hkl_io.h"
 #include "clipper/minimol/minimol_io.h"
 
-#include <mmdb2/mmdb_manager.h>
 #include "coords/mmdb-extras.h"
 #include "coords/mmdb.h"
 #include "coords/mmdb-crystal.h"

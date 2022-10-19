@@ -26,13 +26,6 @@
 //           do we need python here at all?!
 #endif
 
-
-#ifdef _MSC_VER
-#include <windows.h>
-#else
-#include <unistd.h> // for getopt(3)
-#endif
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif

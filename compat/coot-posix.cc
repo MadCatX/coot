@@ -11,6 +11,7 @@
 
 #include <array>
 #include <cstring>
+#include <iostream>
 
 #define COOT_PATH_MAX 4096UL
 
@@ -25,6 +26,41 @@ std::string current_working_dir() {
     if (getcwd(bytes.data(), bytes.size()))
         return std::string{bytes.data()};
     return {};
+}
+
+int create_directory(const std::string &path) {
+    int istat = -1;
+    struct stat s;
+
+    int fstat = stat(path.c_str(), &s);
+
+    // 20060411 Totally bizarre pathology!  (FC4) If I comment out the
+    // following line, we fail to create the directory, presumably
+    // because the S_ISDIR returns true (so we don't make the
+    // directory).
+
+    if (fstat == -1) { // file not exist
+        // not exist
+        std::cout << "INFO:: Creating directory " << path << std::endl;
+
+        mode_t mode = S_IRUSR|S_IWUSR|S_IXUSR; // over-ridden
+        mode = 511; // octal 777
+        mode_t mode_o = umask(0);
+        mode_t mkdir_mode = mode - mode_o;
+
+        istat = mkdir(path.c_str(), mkdir_mode);
+        umask(mode_o); // oh yes we do, crazy.
+    } else {
+        if (!S_ISDIR(s.st_mode)) {
+            // exists but is not a directory
+            istat = -1;
+        } else {
+            // was a directory already
+            istat = 0; // return as if we made it
+        }
+    }
+
+    return istat;
 }
 
 std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &patterns, GatherOptions options) {

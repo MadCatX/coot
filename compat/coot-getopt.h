@@ -122,17 +122,17 @@ struct option
    `getopt'.  */
 
 
-int coot_getopt_long (int __argc, char *const *__argv, const char *__shortopts,
-                      const struct option *__longopts, int *__longind);
+int coot_getopt_long (int argc, char *const *argv, const char *shortopts,
+                      const struct option *longopts, int *longind);
 
-int coot_getopt_long_only (int __argc, char *const *__argv,
-                           const char *__shortopts,
-                           const struct option *__longopts, int *__longind);
+int coot_getopt_long_only (int argc, char *const *argv,
+                           const char *shortopts,
+                           const struct option *longopts, int *longind);
 
 /* Internal only.  Users should not call this directly.  */
-int _coot_getopt_internal (int __argc, char *const *__argv,
-                           const char *__shortopts,
-                           const struct option *__longopts, int *__longind,
-                           int __long_only);
+int _coot_getopt_internal (int argc, char *const *argv,
+                           const char *shortopts,
+                           const struct option *longopts, int *longind,
+                           int long_only);
 
 #endif /* COOT_GETOPT_H */

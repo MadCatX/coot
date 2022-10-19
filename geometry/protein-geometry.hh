@@ -40,7 +40,6 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <mmdb2/mmdb_utils.h>
 #include <mmdb2/mmdb_math_graph.h>
 
 #ifdef HAVE_CCP4SRS
@@ -56,6 +55,7 @@
 #include "energy-lib.hh"
 
 #include "clipper/core/coords.h"
+#include "compat/coot-inhibit-win32-api.h"
 
 #include "hb-types.hh"
 #include "mini-mol/atom-quads.hh"

@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <random>
 
 #include <stdexcept> // for string_to_int.
 #include <sstream>   // ditto.
@@ -89,51 +90,7 @@ std::pair<std::string, std::string> coot::get_userid_name_pair() {
 //
 int
 coot::util::create_directory(const std::string &dir_name) {
-
-   int istat = -1;
-   struct stat s;
-   // on Windows stat works only properly if we remove the last / (if it exists)
-   // everything else following seems to be fine with the /
-#ifdef WINDOWS_MINGW
-   std::string tmp_name = dir_name;
-   if (dir_name.find_last_of("/") == dir_name.size() - 1) {
-     tmp_name = dir_name.substr(0, dir_name.size() - 1);
-   }
-   int fstat = stat(tmp_name.c_str(), &s);
-#else
-   int fstat = stat(dir_name.c_str(), &s);
-#endif // MINGW
-
-   // 20060411 Totally bizarre pathology!  (FC4) If I comment out the
-   // following line, we fail to create the directory, presumably
-   // because the S_ISDIR returns true (so we don't make the
-   // directory).
-
-   if ( fstat == -1 ) { // file not exist
-      // not exist
-      std::cout << "INFO:: Creating directory " << dir_name << std::endl;
-
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-      istat = mkdir(dir_name.c_str());
-#else
-      mode_t mode = S_IRUSR|S_IWUSR|S_IXUSR; // over-ridden
-      mode = 511; // octal 777
-      mode_t mode_o = umask(0);
-      mode_t mkdir_mode = mode - mode_o;
-      istat = mkdir(dir_name.c_str(), mkdir_mode);
-      umask(mode_o); // oh yes we do, crazy.
-#endif
-
-   } else {
-      if ( ! S_ISDIR(s.st_mode) ) {
-	 // exists but is not a directory
-	 istat = -1;
-      } else {
-	 // was a directory already
-	 istat = 0; // return as if we made it
-      }
-   }
-   return istat;
+   return coot::create_directory(dir_name);
 }
 
 
@@ -1120,14 +1077,9 @@ coot::util::capitalise(const std::string &s) {
 
 long int
 coot::util::random() {
+    static std::mt19937 generator{};
 
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-          long int r = rand();
-          return r;
-#else
-          long int r = ::random();
-          return r;
-#endif
+    return generator();
 }
 
 
@@ -1219,7 +1171,9 @@ bool coot::is_directory_p(const std::string &filename) {
    return st;
 }
 
-
+bool coot::is_dir_or_link(const std::string &filename) {
+   return coot::is_dir(filename) || coot::is_link(filename);
+}
 
 
 // is ALA, GLY, TRP, MET, MSE (RNA DNA too)...?

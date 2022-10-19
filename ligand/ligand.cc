@@ -62,7 +62,6 @@
 
 #include <mmdb2/mmdb_coormngr.h> // for GetMassCenter()
 
-#include "utils/win-compat.hh"
 #include "utils/coot-utils.hh"
 
 #include "coords/mmdb-extras.h"   // 220403
@@ -71,6 +70,7 @@
 #include "coot-utils/coot-coord-utils.hh"
 #include "coot-utils/coot-map-utils.hh"
 
+#include "compat/coot-sysdep.h"
 
 std::pair<coot::minimol::molecule, coot::minimol::molecule>
 coot::make_mols_from_atom_selection_string(mmdb::Manager *mol,

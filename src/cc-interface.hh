@@ -37,6 +37,8 @@
 
 #include "utils/coot-utils.hh"
 #include "coot-utils/coot-coord-utils.hh"
+#include "compat/coot-inhibit-win32-api.h"
+
 #include "coot-utils/coot-density-stats.hh"
 
 #include "ligand/dipole.hh"
