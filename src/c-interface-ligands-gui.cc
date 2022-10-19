@@ -28,16 +28,10 @@
 #include <sqlite3.h>
 #endif // USE_SQLITE
 
-#include "compat/coot-sysdep.h"
-
 
 #include <stdlib.h>
 #include <iostream>
 #include <stdexcept>
-
-#if defined _MSC_VER
-#include <windows.h>
-#endif
 
 #include "lbg/lbg.hh" // it matters where this is - rdkit issues...
 

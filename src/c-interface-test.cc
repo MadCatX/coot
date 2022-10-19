@@ -33,8 +33,6 @@
 #endif
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
@@ -63,18 +61,6 @@
 
 #include <sys/types.h> // for stating
 #include <sys/stat.h>
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define S_IRUSR S_IREAD
-#define S_IWUSR S_IWRITE
-#define S_IXUSR S_IEXEC
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-#define snprintf _snprintf
-#include <windows.h>
-#include <direct.h>
-#endif // _MSC_VER
 
 #include <clipper/ccp4/ccp4_map_io.h>
 

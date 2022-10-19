@@ -32,9 +32,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
 #include <stdlib.h>
 #include <string.h> // strncmp
 #include <iostream>
@@ -46,13 +43,6 @@
 
 #include <sys/types.h> // for stating
 #include <sys/stat.h>
-
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#include <windows.h>
-#define snprintf _snprintf
-#endif
 
 #include "globjects.h" //includes gtk/gtk.h
 

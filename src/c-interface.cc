@@ -33,8 +33,6 @@
 #endif
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #include <stdlib.h>
 #include <string.h> // strncpy, strncmp
 #include <iostream>
@@ -51,31 +49,10 @@
 #include "c-interface-python.hh"
 #endif // USE_PYTHON
 
-#if defined (WINDOWS_MINGW)
-#ifdef DATADIR
-#undef DATADIR
-#endif // DATADIR
-#endif /* MINGW */
-
 // Here we used to define GTK_ENABLE_BROKEN if defined(WINDOWS_MINGW)
 // Now we don't want to enable broken stuff.  That is not the way.
 
 #define HAVE_CIF  // will become unnessary at some stage.
-
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define S_IRUSR S_IREAD
-#define S_IWUSR S_IWRITE
-#define S_IXUSR S_IEXEC
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-#define snprintf _snprintf
-#include <windows.h>
-#include <direct.h>
-#endif // _MSC_VER
 
 // #include <GL/glut.h> // needed for glutGet(GLUT_ELAPSED_TIME);
 

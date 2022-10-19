@@ -12,8 +12,6 @@
 
 #include "globjects.h"
 
-#include "compat/coot-sysdep.h"
-
 #ifdef WII_INTERFACE_WIIUSE
 
 #include "wiiuse.h"
