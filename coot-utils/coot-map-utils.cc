@@ -30,11 +30,16 @@
 
 #include "clipper/core/map_interp.h"
 #include "clipper/core/hkl_compute.h"
+
+// We need to put this here before anything from mmdb2 gets included
+#include "compat/coot-inhibit-win32-api.h"
+
 #include "clipper/mmdb/clipper_mmdb.h"
 #include "clipper/ccp4/ccp4_mtz_io.h"
 #include "clipper/ccp4/ccp4_map_io.h"
 #include "clipper/contrib/skeleton.h"
 #include <clipper/contrib/edcalc.h>
+
 
 #include "utils/coot-utils.hh"
 #include "coot-map-utils.hh"

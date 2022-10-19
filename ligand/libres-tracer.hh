@@ -3,8 +3,10 @@
 
 #include <atomic>
 
-#include <mmdb2/mmdb_manager.h>
 #include <clipper/core/xmap.h>
+#include "compat/coot-inhibit-win32-api.h"
+
+#include <mmdb2/mmdb_manager.h>
 #include "utils/coot-fasta.hh"
 
 class watch_res_tracer_data_t {

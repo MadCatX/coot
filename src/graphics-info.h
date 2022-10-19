@@ -28,7 +28,6 @@
 #ifndef GRAPHICS_INFO_H
 #define GRAPHICS_INFO_H
 
-#include "compat/coot-sysdep.h"
 // need gtk things
 #include <gtk/gtk.h>
 
@@ -64,6 +63,7 @@
 #include "ft-character.hh"
 
 #include "clipper/core/xmap.h"
+#include "compat/coot-inhibit-win32-api.h"
 
 #include "coords/Cartesian.h"
 #include "ccp4mg-utils/mgtree.h"

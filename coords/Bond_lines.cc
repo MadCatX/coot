@@ -31,6 +31,7 @@
 #include <iterator>
 
 #include "Cartesian.h"
+#include "compat/coot-inhibit-win32-api.h"
 #include <mmdb2/mmdb_manager.h>
 #include "mmdb-extras.h"
 #include "mmdb.h"

@@ -3,6 +3,8 @@
 #include <clipper/core/coords.h>
 #include <clipper/core/xmap.h>
 
+#include "compat/coot-inhibit-win32-api.h"
+
 #include "geometry/residue-and-atom-specs.hh"
 
 namespace coot {

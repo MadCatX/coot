@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "clipper/core/coords.h"
+#include "compat/coot-inhibit-win32-api.h"
 
 // #include "cos-sin.h"
 

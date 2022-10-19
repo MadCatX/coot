@@ -25,15 +25,13 @@ public:
    }
    void update_from_stat_info(const struct stat &s) {
 
-#ifdef WINDOWS_MINGW
+#if defined(COOT_BUILD_WINDOWS)
       ctime.tv_sec = s.st_ctime;
       ctime.tv_nsec = 0.; // not available!? Lets hope not necessary
-#else
-#ifndef _POSIX_SOURCE
-      ctime = s.st_ctimespec; // Mac OS X?
-#else
+#elif defined(COOT_BUILD_POSIX)
       ctime = s.st_ctim;
-#endif
+#else
+      ctime = s.st_ctimespec; // Mac OS X?
 #endif
    }
 };

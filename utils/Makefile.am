@@ -38,6 +38,7 @@ libcoot_utils_la_SOURCES = coot-utils.cc coot-fasta.cc atomic-numbers.cc \
 	pir-alignment.cc split-indices.cc radix.cc logging.cc insertion-sort.cc
 
 libcoot_utils_la_LIBADD = \
+	$(top_builddir)/compat/libcoot-compat.la \
 	$(GLOB_LIBS)
 
 

@@ -41,6 +41,7 @@ namespace coot {
 
 	int cpu_count();
     std::string current_working_dir();
+    int create_directory(const std::string &path);
     std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options = (GATHER_FILES | GATHER_LINKS));
     std::string get_fixed_font();
     bool is_dir(const std::string &file_path);

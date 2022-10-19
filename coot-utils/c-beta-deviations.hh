@@ -1,7 +1,10 @@
 
 #include <map>
-#include <mmdb2/mmdb_manager.h>
 #include <clipper/core/coords.h>
+
+// We need to put this here before anything from mmdb2 gets included
+#include "compat/coot-inhibit-win32-api.h"
+#include <mmdb2/mmdb_manager.h>
 #include "mini-mol/atom-quads.hh"
 
 namespace coot {

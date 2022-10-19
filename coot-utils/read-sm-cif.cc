@@ -26,7 +26,6 @@
 #include <algorithm> // for remove_if
 #include <string.h> // for strncpy
 
-#include <mmdb2/mmdb_manager.h>
 #include <clipper/core/clipper_util.h>
 #include <clipper/core/spacegroup.h>
 #include "clipper/core/clipper_instance.h" // tidy up space group cache
@@ -34,6 +33,9 @@
 #include "clipper/contrib/sfcalc_obs.h"
 #include "clipper/contrib/sfscale.h"
 #include "clipper/contrib/sfweight.h"
+
+// We need to put this here before anything from mmdb2 gets included
+#include "compat/coot-inhibit-win32-api.h"
 
 #include "clipper/mmdb/clipper_mmdb.h"
 #include "clipper/clipper-cif.h"

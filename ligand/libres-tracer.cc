@@ -5,7 +5,7 @@
 #include <deque>
 #include <thread>
 
-#include "compat/coot-sysdep.h"
+#include "libres-tracer.hh"
 #include "utils/split-indices.hh"
 #include "utils/coot-fasta.hh"
 #include "cootaneer/buccaneer-prot.h"  // for clipper's globuarise()
@@ -21,7 +21,6 @@
 #include "ideal/simple-restraint.hh"
 #include "ideal/regularize-minimol.hh"
 #include "rama-rsr-extend-fragments.hh"
-#include "libres-tracer.hh"
 
 typedef std::deque<std::pair<unsigned int, coot::scored_node_t> > tree_t;
 

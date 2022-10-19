@@ -39,8 +39,9 @@
 
 #include <map>
 
-#include <mmdb2/mmdb_manager.h>
 #include <clipper/core/coords.h>
+#include "compat/coot-inhibit-win32-api.h"
+#include <mmdb2/mmdb_manager.h>
 
 #include "mini-mol/atom-quads.hh"
 #include "coot-lsq-types.h"

@@ -135,23 +135,6 @@ if test x$with_libdw == xtrue ; then
 fi
 AM_CONDITIONAL(BACKWARD_HAS_DW, [test x$with_libdw = xtrue])    # tested in utils/Makefile.am
 
-coot_build_platform=unknown
-test "${target:+set}" = set || target="$host_os"
-case "$target" in
-   *mingw* )
-        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_WINDOWS -DWIN32_LEAN_AND_MEAN -DNOMINMAX=1"
-        CFLAGS="$CFLAGS -DCOOT_BUILD_WINDOWS -DWIN32_LEAN_AND_MEAN -DNOMINMAX=1"
-        coot_build_platform=windows
-    ;;
-   *linux* )
-        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_POSIX"
-        CFLAGS="$CFLAGS -DCOOT_BUILD_POSIX"
-        coot_build_platform=posix
-   ;;
-esac
-AM_CONDITIONAL([COOT_BUILD_POSIX], [test "$coot_build_platform" = posix])
-AM_CONDITIONAL([COOT_BUILD_WINDOWS], [test "$coot_build_platform" = windows])
-
 dnl test for LIBPNG (Windows only - maybe shouif here rather than in macro?)
 if test "$coot_build_platform" = "windows"; then
   AC_CONFIG_FILES(pyrogen/pyrogen.bat)
@@ -279,6 +262,26 @@ if test -n "$RDKIT_LIBS" ; then
           ;;
    esac
 fi
+
+coot_build_platform=unknown
+test "${target:+set}" = set || target="$host_os"
+case "$target" in
+   *mingw* )
+        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_WINDOWS -DWIN32_LEAN_AND_MEAN -DNOMINMAX=1 -DSECURITY_WIN32 -D_USE_MATH_DEFINES"
+        CFLAGS="$CFLAGS -DCOOT_BUILD_WINDOWS -DWIN32_LEAN_AND_MEAN -DNOMINMAX=1 -DSECURITY_WIN32 -D_USE_MATH_DEFINES"
+        coot_build_platform=windows
+
+	SHARED_LDFLAGS="$LDFLAGS -no-undefined -Wl,--export-all-symbols"
+	AC_SUBST(SHARED_LDFLAGS)
+    ;;
+   *linux* )
+        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_POSIX"
+        CFLAGS="$CFLAGS -DCOOT_BUILD_POSIX"
+        coot_build_platform=posix
+   ;;
+esac
+AM_CONDITIONAL([COOT_BUILD_POSIX], [test "$coot_build_platform" = posix])
+AM_CONDITIONAL([COOT_BUILD_WINDOWS], [test "$coot_build_platform" = windows])
 
 
 AC_ARG_WITH(enhanced-ligand-tools, [  --with-enhanced-ligand-tools with optional ligand-related dependencies ],

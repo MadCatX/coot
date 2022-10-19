@@ -4384,16 +4384,14 @@ molecule_class_info_t::update_map_from_mtz_if_changed(const updating_map_params_
 	    continue_watching_mtz = false;
 	 } else {
 	    // happy path
-#ifndef _POSIX_SOURCE
-#ifdef WINDOWS_MINGW
+#if defined(COOT_BUILD_WINDOWS)
             ump.ctime.tv_sec = s.st_ctime;
             ump.ctime.tv_nsec = 0.; // not available!? Lets hope not necessary
+#elif defined(COOT_BUILD_POSIX)
+	    ump.ctime = s.st_ctim;
 #else
 	    ump.ctime = s.st_ctimespec; // mac?
-#endif //MINGW
-#else
-	    ump.ctime = s.st_ctim;
-#endif
+#endif // COOT_BUILD_
 	 }
       }
 
