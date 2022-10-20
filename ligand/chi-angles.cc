@@ -19,7 +19,6 @@
  * 02110-1301, USA
  */
 
-#include "compat/coot-sysdep.h"
 #include "coot-utils/coot-coord-extras.hh"
 
 #include "chi-angles.hh"

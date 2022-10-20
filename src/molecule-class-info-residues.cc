@@ -28,9 +28,6 @@
 #include "Python.h"
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
 #include <string>
 #include <algorithm>
 #include <stdexcept>

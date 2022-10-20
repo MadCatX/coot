@@ -26,6 +26,7 @@
 
 #include <cstring>
 
+#include "compat/coot-sysdep.h"
 #include <gtk/gtk.h>
 #include "coot-setup-python.hh"
 #include "python-classes.hh"

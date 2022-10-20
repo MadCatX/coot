@@ -23,8 +23,6 @@
 
 #include <string.h>
 
-#include "compat/coot-sysdep.h"
-
 // include files needed to include molecule-class-info.h correctly. Useful.
 #include <mmdb2/mmdb_manager.h> 
 #include "coords/Cartesian.h"

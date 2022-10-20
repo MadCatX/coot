@@ -75,6 +75,7 @@
 
 #include "rotamer-search-modes.hh"
 
+#include "compat/coot-sysdep.h"
 
 std::vector<std::pair<mmdb::Atom *, float> >
 coot::dots_representation_info_t::solvent_exposure(int SelHnd_in, mmdb::Manager *mol) const {

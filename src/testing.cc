@@ -23,8 +23,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #ifdef MAKE_ENHANCED_LIGAND_TOOLS
 #include "lidia-core/use-rdkit.hh"
 #endif

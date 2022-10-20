@@ -49,8 +49,6 @@
                      // pointers.  Removed. Too much (linking issues in)
                      // Makefile pain.
 
-#include "compat/coot-sysdep.h"
-
 // We need to fill restraints_vec (which is a vector of
 // simple_restraint) using the coordinates () and the dictionary of
 // restraints, protein_geometry geom.

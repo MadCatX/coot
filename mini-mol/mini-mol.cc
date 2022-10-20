@@ -27,8 +27,6 @@
 // #include "coot-coord-utils.hh"   no! mini-mol should be a low level library, not depend on
                                  // higher level libs.
 
-#include "compat/coot-sysdep.h"
-
 // udd_atom_index_to_user_data is optional arg default false
 coot::minimol::molecule::molecule(mmdb::Manager *mol, bool udd_atom_index_to_user_data_flag) {
    setup(mol, udd_atom_index_to_user_data_flag);

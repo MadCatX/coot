@@ -28,7 +28,6 @@
 #include <string>
 #include <vector>
 
-#include "compat/coot-sysdep.h"
 #include <GraphMol/GraphMol.h>
 #include <GraphMol/MolOps.h>
 #include <GraphMol/Bond.h>

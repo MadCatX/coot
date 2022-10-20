@@ -32,9 +32,6 @@
 #include "mmdb-extras.h" 
 #include "mmdb.h"
 
-#include "compat/coot-sysdep.h"
-
-
 float max_bond_length(const std::string &element) { 
 
    if (element == " S") { 

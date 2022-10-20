@@ -24,7 +24,6 @@
 #include "geometry/protein-geometry.hh"
 #include "coot-utils/coot-coord-utils.hh"
 #include "coot-compare-residues.hh"
-#include "compat/coot-sysdep.h"
 #include "torsion-bonds.hh"
 
 bool

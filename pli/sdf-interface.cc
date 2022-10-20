@@ -33,8 +33,6 @@
 #include <libintl.h>
 #endif // MAKE_ENHANCED_LIGAND_TOOLS
 
-#include "compat/coot-sysdep.h"
-
 #include <cstring>
 #include <iostream> // for istream?
 #include <istream>  // for istream?

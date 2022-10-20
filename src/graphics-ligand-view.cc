@@ -29,8 +29,6 @@
 #include <mmdb2/mmdb_manager.h>
 #include "graphics-ligand-view.hh"
 
-#include "compat/coot-sysdep.h"
-
 #ifdef MAKE_ENHANCED_LIGAND_TOOLS
 #include "lidia-core/rdkit-interface.hh"
 #endif

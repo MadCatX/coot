@@ -22,7 +22,6 @@
 
 #include "Python.h"
 
-#include "compat/coot-sysdep.h"
 #include <GraphMol/GraphMol.h>
 
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>

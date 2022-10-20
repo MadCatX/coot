@@ -28,8 +28,6 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "compat/coot-sysdep.h"
-
 #include <cairo.h>
 #if CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>

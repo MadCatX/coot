@@ -22,7 +22,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
 #define ENABLE_NLS // 20220126-PE Charles says this is needed to fix dcgettext() problems
                    // when including libintl.h - move it up above graphics-info.h
 #include "graphics-info.h"
