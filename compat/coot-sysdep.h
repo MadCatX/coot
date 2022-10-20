@@ -21,14 +21,15 @@
  * 02110-1301, USA
  */
 
-#ifndef _COMPAT_COOT_SYSDEP_H
-#define _COMPAT_COOT_SYSDEP_H
+#ifndef COMPAT_COOT_SYSDEP_H
+#define COMPAT_COOT_SYSDEP_H
 
 #include <string>
 #include <vector>
 #include <type_traits>
 
 namespace coot {
+namespace sysdep {
 	enum GatherOptions {
 		GATHER_FILES       = 1 << 0,
 		GATHER_DIRECTORIES = 1 << 1,
@@ -53,6 +54,7 @@ namespace coot {
     void usleep(unsigned int usecs);
     std::string user_account_name();
     std::string user_full_name();
+} // namespace sysdep
 } // namespace coot
 
 #if defined(COOT_BUILD_WINDOWS)
@@ -61,6 +63,6 @@ namespace coot {
 # include "coot-posix.h"
 #else
 # error "Misdetected or unsupported platform"
-#endif // COOT_
+#endif // COOT_BUILD_
 
-#endif // _COMPAT_COOT_SYSDEP_H
+#endif // COMPAT_COOT_SYSDEP_H

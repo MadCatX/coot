@@ -1073,10 +1073,10 @@ coot::util::parse_prosmart_log_and_gen_CO_plot(const std::string &prosmart_log_f
 void
 coot::util::multi_parse_prosmart_log_and_gen_CO_plot() {
    std::string dir = "pdb";
-   std::vector<std::string> sub_dirs = coot::gather_files_by_patterns(dir, { "*" }, GATHER_DIRECTORIES | GATHER_LINKS);
+   std::vector<std::string> sub_dirs = coot::sysdep::gather_files_by_patterns(dir, { "*" }, coot::sysdep::GATHER_DIRECTORIES | coot::sysdep::GATHER_LINKS);
    for (unsigned int i=0; i<sub_dirs.size(); i++) {
       const std::string &sub_dir = sub_dirs[i];
-      std::vector<std::string> sub_dir_files = coot::gather_files_by_patterns(sub_dir, { "*.pdb" });
+      std::vector<std::string> sub_dir_files = coot::sysdep::gather_files_by_patterns(sub_dir, { "*.pdb" });
       for (unsigned int j=0; j<sub_dir_files.size(); j++) {
          const std::string &pdb_file = sub_dir_files[j];
          // std::cout << "pdb_file: " << pdb_file << std::endl;
@@ -1087,7 +1087,7 @@ coot::util::multi_parse_prosmart_log_and_gen_CO_plot() {
          // std::cout << "pdb file name: " << pdb_file << " code: " << code << "\n";
 
          std::string prosmart_1 = "../src/ProSMART_Output/Output_Files/Residue_Alignment_Scores";
-         std::vector<std::string> chain_files = coot::gather_files_by_patterns(prosmart_1, { code_star });
+         std::vector<std::string> chain_files = coot::sysdep::gather_files_by_patterns(prosmart_1, { code_star });
 
          for (unsigned int k=0; k<chain_files.size(); k++) {
             std::string chain_file = chain_files[k];

@@ -6,7 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 
-void coot_c_free_found(Coot_C_Found *found) {
+void coot_c_free_found(Coot_Sysdep_C_Found *found) {
     if (!found)
         return;
 
@@ -16,12 +16,12 @@ void coot_c_free_found(Coot_C_Found *found) {
     std::free(found);
 }
 
-Coot_C_Found coot_c_gather_files_by_patterns(const char *dir_path, const char **patterns, size_t n_patterns) {
+Coot_Sysdep_C_Found coot_c_gather_files_by_patterns(const char *dir_path, const char **patterns, size_t n_patterns) {
     std::vector<std::string> cxx_patterns;
     for (size_t idx = 0; idx < n_patterns; idx++)
         cxx_patterns.push_back(patterns[idx]);
 
-    const auto cxx_found = coot::gather_files_by_patterns(dir_path, cxx_patterns);
+    const auto cxx_found = coot::sysdep::gather_files_by_patterns(dir_path, cxx_patterns);
     char **found = static_cast<char **>(std::calloc(cxx_found.size(), sizeof(char *)));
     for (size_t idx = 0; idx < cxx_found.size(); idx++) {
         auto str = cxx_found[idx].c_str();
@@ -30,6 +30,6 @@ Coot_C_Found coot_c_gather_files_by_patterns(const char *dir_path, const char **
         std::strcpy(found[idx], str);
     }
 
-    Coot_C_Found ret { found, cxx_found.size() };
+    Coot_Sysdep_C_Found ret { found, cxx_found.size() };
     return ret;
 }

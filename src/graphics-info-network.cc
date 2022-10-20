@@ -18,7 +18,7 @@ bool
 graphics_info_t::add_curl_handle_and_file_name(std::pair<CURL *, std::string> p) {
 
    while (curl_handlers_lock == 1) {
-      coot::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
+      coot::sysdep::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
    }
    bool done = add_curl_handle_and_file_name_inner(p);
    if (! done)
@@ -51,7 +51,7 @@ bool
 graphics_info_t::remove_curl_handle_with_file_name(std::string file_name) {
 
    while (curl_handlers_lock == 1) {
-      coot::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
+      coot::sysdep::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
    }
    bool done = remove_curl_handle_with_file_name_inner(file_name);
    if (! done)
@@ -93,7 +93,7 @@ CURL *
 graphics_info_t::get_curl_handle_for_file_name(const std::string &filename) const {
 
    while (curl_handlers_lock == 1) {
-      coot::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
+      coot::sysdep::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
    }
    return get_curl_handle_for_file_name_inner(filename);
 }
@@ -124,7 +124,7 @@ bool
 graphics_info_t::curl_handler_stop_it_flag_set(CURL *c) {
 
    while (curl_handlers_lock == 1) {
-      coot::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
+      coot::sysdep::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
    }
    return curl_handler_stop_it_flag_set_inner(c);
 } 
@@ -158,7 +158,7 @@ void
 graphics_info_t::set_stop_curl_download_flag(const std::string &file_name) {
 
    while (curl_handlers_lock == 1) {
-      coot::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
+      coot::sysdep::usleep(int(100*float(coot::util::random())/float(RAND_MAX)));
    }
    set_stop_curl_download_flag_inner(file_name);
 }

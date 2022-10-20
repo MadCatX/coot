@@ -16,6 +16,7 @@
 #define COOT_PATH_MAX 4096UL
 
 namespace coot {
+namespace sysdep {
 
 int cpu_count() {
     return sysconf(_SC_NPROCESSORS_CONF);
@@ -141,8 +142,8 @@ void sleep(unsigned int secs) {
     ::sleep(secs);
 }
 
-void usleep(useconds_t usecs) {
-    ::usleep(usecs);
+void usleep(unsigned int usecs) {
+    ::usleep(useconds_t{usecs});
 }
 
 std::string user_account_name() {
@@ -162,4 +163,5 @@ std::string user_full_name() {
     return full_name.empty() ? username : full_name;
 }
 
+} // namespace sysdep
 } // namespace coot

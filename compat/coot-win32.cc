@@ -33,6 +33,7 @@ static std::wstring windowsize_path(const std::string &path, bool *ok);
 typedef BOOLEAN SEC_ENTRY (*FuncGetUserNameExW)(EXTENDED_NAME_FORMAT NameFormat, LPWSTR lpNameBuffer, PULONG nSize);
 
 namespace coot {
+namespace sysdep {
 
 int cpu_count() {
   SYSTEM_INFO sysinfo;
@@ -288,6 +289,7 @@ std::string user_full_name() {
     return user_account_info_internal(NameDisplay);
 }
 
+} // namespace sysdep
 } // namespace coot
 
 // Internal utility functions
@@ -437,7 +439,7 @@ std::string user_account_info_internal(EXTENDED_NAME_FORMAT fmt) {
     ret = _GetUserNameExW(NameUserPrincipal, NULL, &length);
     FreeLibrary(hSecur32);
 
-    return ret ? coot::wide_string_to_local(std::wstring{buf.get()}, nullptr) : std::string{};
+    return ret ? coot::sysdep::wide_string_to_local(std::wstring{buf.get()}, nullptr) : std::string{};
 }
 
 static
@@ -458,7 +460,7 @@ std::wstring windowsize_path(const std::wstring &path) {
 
 static
 std::wstring windowsize_path(const std::string &path, bool *ok) {
-    std::wstring w_path = coot::local_to_wide_string(path, ok);
+    std::wstring w_path = coot::sysdep::local_to_wide_string(path, ok);
     if (!ok) {
         return L"";
     }

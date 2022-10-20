@@ -1323,7 +1323,7 @@ coot::geometry_graphs::setup_internal() {
    colour_list.push_back("red");
 
    // fixed_font_str = "fixed";
-   fixed_font_str = coot::get_fixed_font();
+   fixed_font_str = coot::sysdep::get_fixed_font();
 
    tooltip_item = NULL;
    tooltip_item_text = NULL;

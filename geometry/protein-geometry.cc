@@ -638,7 +638,7 @@ coot::protein_geometry::try_dynamic_add(const std::string &resname, int read_num
 	 struct stat buf;
 	 int istat = stat(filename.c_str(), &buf);
 	 if (istat == 0) {
-	    if (coot::is_regular_file(filename)) {
+	    if (coot::sysdep::is_regular_file(filename)) {
 
 	       coot::read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(filename, read_number);
 	       success = rmit.success;
