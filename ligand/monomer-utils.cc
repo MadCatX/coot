@@ -21,8 +21,6 @@
 
 #include <string.h>  // for strcpy
 
-#include "compat/coot-sysdep.h"
-
 #include "monomer-utils.hh"
 
 

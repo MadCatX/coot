@@ -52,8 +52,6 @@
                      // pointers.  Removed. Too much (linking issues in)
                      // Makefile pain.
 
-#include "compat/coot-sysdep.h"
-
 zo::rama_table_set coot::restraints_container_t::zo_rama;
 std::atomic<bool> coot::restraints_container_t::print_lock(false);
 

@@ -27,21 +27,7 @@
 #include "protein-geometry.hh"
 #include "utils/coot-utils.hh"
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define DATADIR "C:/coot/share"
-#define PKGDATADIR DATADIR
-#define S_ISDIR(m)  (((m) & S_IFMT) == S_IFDIR)
-#define S_ISREG(m)  (((m) & S_IFMT) == S_IFREG)
-#endif
-
 #include "clipper/core/clipper_util.h"
-
-#include "compat/coot-sysdep.h"
 
 #include "lbg-graph.hh"
 

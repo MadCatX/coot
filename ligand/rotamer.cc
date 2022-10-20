@@ -25,8 +25,6 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "compat/coot-sysdep.h"
-
 #include "rotamer.hh"
 #include "ccp4mg-utils/mgtree.h"
 

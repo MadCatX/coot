@@ -23,17 +23,9 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 // For stat, mkdir:
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define PKGDATADIR "C:/coot/share"
-#endif
 
 #ifndef HAVE_STRING
 #define HAVE_STRING

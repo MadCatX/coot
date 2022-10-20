@@ -31,8 +31,6 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "compat/coot-sysdep.h"
-
 #ifdef MAKE_ENHANCED_LIGAND_TOOLS
 #include <RDGeneral/versions.h>
 #include <RDGeneral/FileParseException.h>

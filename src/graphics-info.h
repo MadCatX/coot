@@ -69,7 +69,6 @@
 #include "ccp4mg-utils/mgtree.h"
 #include "pick.hh"
 
-#include "compat/coot-sysdep.h"
 #include "command-arg.hh"
 
 #include "ligand/rotamer.hh"

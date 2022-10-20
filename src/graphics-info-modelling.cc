@@ -26,8 +26,6 @@
 #include "python-3-interface.hh"
 #endif
 
-#include "compat/coot-sysdep.h"
-
 #ifndef HAVE_STRING
 #define HAVE_STRING
 #include <string>
@@ -49,13 +47,6 @@
 // #include <GL/glut.h>  // for some reason...  // Eh?
 
 #include <gdk/gdkkeysyms.h> // for keyboarding (in this case nudge_active_residue) added 20091101
-
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
-#if !defined _MSC_VER
-#include <unistd.h>
-#endif
 
 #include "guile-fixups.h"
 

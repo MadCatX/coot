@@ -26,14 +26,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
-
-#if defined _MSC_VER
-#define snprintf _snprintf
-#include <windows.h>
-#endif
-
 #include <string>
 #include "sequence-view.hh"
 #include <mmdb2/mmdb_tables.h>

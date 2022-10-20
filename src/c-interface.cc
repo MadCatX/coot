@@ -104,6 +104,7 @@
 #include "cmtz-interface.hh"
 // #include "mtz-bits.h" stuff from here moved to cmtz-interface
 
+#include "compat/coot-sysdep.h"
 
 // This is (already) in git-revision-count.cc
 //

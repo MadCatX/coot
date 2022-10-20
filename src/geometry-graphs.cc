@@ -23,6 +23,7 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
+#include "compat/coot-sysdep.h"
 #include "utils/win-compat.hh"
 #include "coot-utils/coot-coord-utils.hh" // compilation error on MacOSX if this
                                // doesn't come before the next 3 lines

@@ -21,7 +21,6 @@
 #ifndef RDKIT_INTERFACE_HH
 #define RDKIT_INTERFACE_HH
 
-#include "compat/coot-sysdep.h"
 #include "use-rdkit.hh"
 
 #include <mmdb2/mmdb_manager.h>

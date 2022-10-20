@@ -30,8 +30,6 @@
 #include <algorithm> // for sort
 #include <stdexcept>
 
-#include "compat/coot-sysdep.h"
-
 //
 #include "coot-utils/coot-coord-extras.hh"  // is_nucleotide_by_dict
 

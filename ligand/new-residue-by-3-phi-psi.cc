@@ -1,5 +1,4 @@
 
-#include "compat/coot-sysdep.h"
 #include "coot-utils/coot-coord-utils.hh"
 #include "coot-utils/coot-map-utils.hh"
 #include "utils/split-indices.hh"

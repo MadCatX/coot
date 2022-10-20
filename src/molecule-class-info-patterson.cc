@@ -28,14 +28,8 @@
 #endif
 
 
-#include "compat/coot-sysdep.h"
-
 // Having to set up the include files like this so that
 // molecule-class-info.h can be parsed, is silly.
-
-// For stat, mkdir:
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include <string>
 #include <mmdb2/mmdb_manager.h>

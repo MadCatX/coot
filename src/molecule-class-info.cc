@@ -27,16 +27,7 @@
 
 #include <epoxy/gl.h>
 
-#include "compat/coot-sysdep.h"
-
 #include <stdlib.h>
-
-#ifndef _MSC_VER
-#include <unistd.h>
-#else
-#include <windows.h>
-#include <direct.h>
-#endif
 
 #include <iostream>
 #include <iomanip>
