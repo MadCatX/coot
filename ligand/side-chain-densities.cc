@@ -1764,13 +1764,13 @@ coot::side_chain_densities::compare_block_vs_all_rotamers(density_box_t block,
    std::map<std::string, double> probability_map;
 
    std::string glob_pattern = "*";
-   std::vector<std::string> dirs = coot::gather_files_by_patterns(data_dir, { "*" }, GATHER_DIRECTORIES);
+   std::vector<std::string> dirs = coot::sysdep::gather_files_by_patterns(data_dir, { "*" }, coot::sysdep::GATHER_DIRECTORIES);
    // std::cout << "found " << dirs.size() << " files in " << data_dir << std::endl;
 
    for (std::size_t idir=0; idir<dirs.size(); idir++) {
       const std::string &res_dir = dirs[idir];
 
-      std::vector<std::string> rot_dirs = coot::gather_files_by_patterns(res_dir, { "*" }, GATHER_DIRECTORIES);
+      std::vector<std::string> rot_dirs = coot::sysdep::gather_files_by_patterns(res_dir, { "*" }, coot::sysdep::GATHER_DIRECTORIES);
       for (std::size_t jdir=0; jdir<rot_dirs.size(); jdir++) {
          const std::string &rot_dir = rot_dirs[jdir];
 
@@ -2042,7 +2042,7 @@ coot::side_chain_densities::compare_block_vs_rotamer(density_box_t block,
 
    auto fill_rotamer_dir_grid_stats_map_cache = [rotamer_dir] (std::map<std::string, std::map<unsigned int, std::tuple<double, double, double> > > &rotamer_dir_grid_stats_map_cache) {
                                                    std::string glob_pattern = "stats.table";
-                                                   std::vector<std::string> tables = coot::gather_files_by_patterns(rotamer_dir, { glob_pattern });
+                                                   std::vector<std::string> tables = coot::sysdep::gather_files_by_patterns(rotamer_dir, { glob_pattern });
                                                    if (tables.size() == 1) {
                                                       std::map<unsigned int, std::tuple<double, double, double> > stats_map;
                                                       std::string stats_table_file_name = tables[0];
@@ -2209,7 +2209,7 @@ coot::side_chain_densities::combine_directory(const std::string &rot_dir, int n_
    unsigned int n_target = n_per_side * n_per_side * n_per_side;
 
    std::string glob_pattern = "*.tab";
-   std::vector<std::string> files = coot::gather_files_by_patterns(rot_dir, { "*.tab" });
+   std::vector<std::string> files = coot::sysdep::gather_files_by_patterns(rot_dir, { "*.tab" });
 
    // first check that every file has the same number of numbers
    std::map<std::string, unsigned int> number_count_map;

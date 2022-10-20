@@ -222,7 +222,7 @@ coot::ligand::map_fill_from_mtz(std::string mtz_file_name,
    clipper::MTZcrystal myxtl;
 
   std::cout << "reading mtz file " << mtz_file_name << std::endl;
-  if (! coot::is_regular_file(mtz_file_name))
+  if (! coot::sysdep::is_regular_file(mtz_file_name))
      return 0;
 
   clipper::CCP4MTZfile mtzin;

@@ -35,7 +35,7 @@ unsigned int coot::get_max_number_of_threads() {
       } else {
 	 // no environment variable, use system call.
 	 coot_n_threads = n_threads_default;
-	 int n = coot::cpu_count();
+	 int n = coot::sysdep::cpu_count();
 	 if (n > 0)
 	    coot_n_threads = n;
       }

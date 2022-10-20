@@ -74,8 +74,8 @@ coot::util::append_dir_file(const std::string &s1, const std::string &file) {
 // as a label in the database.  Not important to get right.
 //
 std::pair<std::string, std::string> coot::get_userid_name_pair() {
-   std::string username = coot::user_account_name();
-   std::string full_name = coot::user_full_name();
+   std::string username = coot::sysdep::user_account_name();
+   std::string full_name = coot::sysdep::user_full_name();
 
    return {
       username.empty() ? "unknown" : std::move(username),
@@ -89,7 +89,7 @@ std::pair<std::string, std::string> coot::get_userid_name_pair() {
 //
 int
 coot::util::create_directory(const std::string &dir_name) {
-   return coot::create_directory(dir_name);
+   return coot::sysdep::create_directory(dir_name);
 }
 
 
@@ -577,7 +577,7 @@ std::string coot::util::file_name_directory(const std::string &file_name) {
 
 std::string
 coot::util::current_working_dir() {
-   return coot::current_working_dir();
+   return coot::sysdep::current_working_dir();
 }
 
 // If cwd is a substring of f (starting at 0), then return the
@@ -1148,7 +1148,7 @@ bool coot::is_directory_p(const std::string &filename) {
 }
 
 bool coot::is_dir_or_link(const std::string &filename) {
-   return coot::is_dir(filename) || coot::is_link(filename);
+   return coot::sysdep::is_dir(filename) || coot::sysdep::is_link(filename);
 }
 
 

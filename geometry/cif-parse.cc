@@ -101,7 +101,7 @@ coot::protein_geometry::init_refmac_mon_lib(std::string ciffilename, int read_nu
    //    int istat = stat(ciffilename.c_str(), &buf);
    // Thanks Ezra Peisach for this this bug report
 
-   if (! is_regular_file(ciffilename)) {
+   if (!sysdep::is_regular_file(ciffilename)) {
       std::string s = "WARNING: in init_refmac_mon_lib, file \"";
       s += ciffilename;
       s += "\" not found.";
@@ -1987,7 +1987,7 @@ coot::protein_geometry::init_standard() {
 	 filename += "/list/mon_lib_list.cif";
       }
       // now check that that file is there:
-      if (! is_regular_file(filename)) {
+      if (!sysdep::is_regular_file(filename)) {
 	 std::cout << "ERROR: dictionary " << filename << " is not a regular file"
 		   << std::endl;
       } else {
@@ -2038,7 +2038,7 @@ coot::protein_geometry::refmac_monomer(const std::string &s, // dir
    int imol_enc = IMOL_ENC_ANY; // maybe pass this?
    
    std::string filename = util::append_dir_file(s, protein_mono);
-   if (is_regular_file(filename)) {
+   if (sysdep::is_regular_file(filename)) {
       init_refmac_mon_lib(filename, read_number, imol_enc);
       read_number++;
    } else {
@@ -2401,7 +2401,7 @@ coot::dictionary_residue_restraints_t::write_cif_pdbx_chem_comp_descriptor(mmdb:
 coot::simple_cif_reader::simple_cif_reader(const std::string &cif_dictionary_file_name) {
    
    mmdb::mmcif::File ciffile;
-   if (! is_regular_file(cif_dictionary_file_name)) {
+   if (!sysdep::is_regular_file(cif_dictionary_file_name)) {
       std::cout << "WARNIG:: cif dictionary " << cif_dictionary_file_name
 		<< " not found" << std::endl;
    } else {

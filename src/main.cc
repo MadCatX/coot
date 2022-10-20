@@ -209,7 +209,7 @@ GtkWidget *do_splash_screen(const command_line_data &cld) {
 
          while(gtk_main_iteration() == FALSE);
          while (gtk_events_pending()) {
-            coot::usleep(3000);
+            coot::sysdep::usleep(3000);
             gtk_main_iteration();
          }
       }
