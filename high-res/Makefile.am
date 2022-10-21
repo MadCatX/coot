@@ -71,7 +71,6 @@ testatomgraph_LDADD =  libcoot-high-res.la \
 #	$(top_builddir)/coot-utils/libcoot-shelx.la       \
 #	$(top_builddir)/utils/libcoot-utils.la       \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la   \
-#	$(top_builddir)/compat/libcoot-compat.la          \
 #	$(GSL_LIBS)			                  \
 #	$(CLIPPER_LIBS)
 
@@ -88,7 +87,6 @@ testatomgraph_LDADD =  libcoot-high-res.la \
 #	$(top_builddir)/coot-utils/libcoot-coord-utils.la \
 #	$(top_builddir)/coot-utils/libcoot-shelx.la       \
 #	$(top_builddir)/utils/libcoot-utils.la       \
-#	$(top_builddir)/compat/libcoot-compat.la          \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la   \
 #	$(GSL_LIBS)				          \
 #	$(CLIPPER_LIBS)
@@ -101,7 +99,6 @@ tracehighres_LDADD = libcoot-high-res.la \
    $(top_builddir)/coot-utils/libcoot-map-utils.la   \
    $(top_builddir)/mini-mol/libcoot-mini-mol.la      \
    $(top_builddir)/utils/libcoot-utils.la \
-   $(top_builddir)/compat/libcoot-compat.la \
    $(CLIPPER_LIBS)
 
 
@@ -117,7 +114,6 @@ tracehighres_LDADD = libcoot-high-res.la \
 #	$(top_builddir)/coot-utils/libcoot-coord-utils.la \
 #	$(top_builddir)/coot-utils/libcoot-shelx.la       \
 #	$(top_builddir)/utils/libcoot-utils.la       \
-#	$(top_builddir)/compat/libcoot-compat.la          \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la   \
 #	$(GSL_LIBS)				          \
 #	$(CLIPPER_LIBS)
@@ -139,7 +135,6 @@ tracehighres_LDADD = libcoot-high-res.la \
 #	$(top_builddir)/coot-utils/libcoot-shelx.la       \
 #	$(top_builddir)/utils/libcoot-utils.la       \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la   \
-#	$(top_builddir)/compat/libcoot-compat.la          \
 #	$(GSL_LIBS)				          \
 #	$(CLIPPER_LIBS)
 
@@ -159,7 +154,6 @@ tracehighres_LDADD = libcoot-high-res.la \
 #	$(top_builddir)/coot-utils/libcoot-shelx.la       \
 #	$(top_builddir)/utils/libcoot-utils.la       \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la   \
-#	$(top_builddir)/compat/libcoot-compat.la          \
 #	$(GSL_LIBS)				          \
 #	$(CLIPPER_LIBS)
 

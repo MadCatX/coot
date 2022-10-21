@@ -73,7 +73,6 @@ libcoot_ligand_la_LIBADD = \
    $(top_builddir)/coot-utils/libcoot-map-utils.la    \
    $(top_builddir)/analysis/libcoot-analysis.la	      \
    $(top_builddir)/utils/libcoot-utils.la             \
-   $(top_builddir)/compat/libcoot-compat.la           \
    $(CLIPPER_LIBS) $(MMDB_LIBS) $(SQLITE3_LIBS) $(GSL_LIBS) $(RDKIT_LIBS) -lpthread
 
 libcoot_ligand_la_LDFLAGS = $(SHARED_LDFLAGS)
@@ -165,7 +164,6 @@ test_trace_LDADD = ./libcoot-ligand.la                \
    $(top_builddir)/geometry/libcoot-geometry.la       \
    $(top_builddir)/mini-mol/libcoot-mini-mol.la       \
    $(top_builddir)/utils/libcoot-utils.la             \
-   $(top_builddir)/compat/libcoot-compat.la           \
    $(CLIPPER_LIBS) $(MMDB_LIBS)
 
 coot_make_ligands_db_SOURCES = make-ligands-db.cc
@@ -182,8 +180,7 @@ coot_make_ligands_db_LDADD = ./libcoot-ligand.la \
 	$(top_builddir)/utils/libcoot-utils.la             \
         $(top_builddir)/lidia-core/libcoot-lidia-core.la   \
 	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
-        $(top_builddir)/analysis/libcoot-analysis.la	   \
-	$(top_builddir)/compat/libcoot-compat.la
+        $(top_builddir)/analysis/libcoot-analysis.la
 
 identify_protein_bin_SOURCES = identify-protein.cc
 
@@ -202,8 +199,7 @@ identify_protein_bin_LDADD = ./libcoot-ligand.la           \
 
 ligand_percentiles_SOURCES = ligand-percentiles.cc
 ligand_percentiles_LDADD = ./libcoot-ligand.la     \
-	$(top_builddir)/utils/libcoot-utils.la     \
-	$(top_builddir)/compat/libcoot-compat.la
+	$(top_builddir)/utils/libcoot-utils.la
 
 # wrong build order - coords depends on this directory (because it uses rotamer info)
 # solve by changing the directory for test-side-chain-densities to be in coords
@@ -240,7 +236,6 @@ test_ligand_SOURCES = test-ligand.cc
 #	$(top_builddir)/utils/libcoot-utils.la             \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la    \
 #	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
-#	$(top_builddir)/compat/libcoot-compat.la           \
 #	$(CLIPPER_LIBS) $(MMDB_LIBS) $(GSL_LIBS)
 
 test_ligand_LDADD = \
@@ -263,7 +258,6 @@ test_ligand_LDADD = \
 #	$(top_builddir)/utils/libcoot-utils.la             \
 #	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
 #	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la    \
-#	$(top_builddir)/compat/libcoot-compat.la           \
 #	$(CLIPPER_LIBS) $(MMDB_LIBS) $(GSL_LIBS)
 
 test_fffear_in_coot_SOURCES = test-fffear-in-coot.cc
@@ -282,7 +276,6 @@ test_fffear_in_coot_LDADD = \
 	$(top_builddir)/utils/libcoot-utils.la             \
 	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
 	$(top_builddir)/ccp4mg-utils/libccp4mg-utils.la    \
-	$(top_builddir)/compat/libcoot-compat.la           \
 	$(CLIPPER_LIBS) $(MMDB_LIBS) $(GSL_LIBS)
 
 # testwlig_SOURCES = testwlig.cc
@@ -309,7 +302,6 @@ findligand_bin_LDADD = \
         $(top_builddir)/lidia-core/libcoot-lidia-core.la   \
 	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
         $(top_builddir)/analysis/libcoot-analysis.la	   \
-	$(top_builddir)/compat/libcoot-compat.la           \
         $(GLOB_LIBS) \
         $(RDKIT_LIBS) \
 	$(CLIPPER_LIBS) $(MMDB_LIBS) $(GSL_LIBS)
@@ -332,7 +324,6 @@ findwaters_bin_LDADD = \
         $(top_builddir)/lidia-core/libcoot-lidia-core.la   \
 	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
         $(top_builddir)/analysis/libcoot-analysis.la	   \
-	$(top_builddir)/compat/libcoot-compat.la           \
         $(GLOB_LIBS) \
         $(RDKIT_LIBS) \
 	$(CLIPPER_LIBS) $(MMDB_LIBS) $(GSL_LIBS)

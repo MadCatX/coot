@@ -91,8 +91,7 @@ COOT_EXTRA_LIBS = \
 	$(top_builddir)/analysis/libcoot-analysis.la 		\
 	$(top_builddir)/protein_db/libcoot-protein-db.la      	\
 	$(top_builddir)/cootilus/libcootilus.la 		\
-	$(top_builddir)/cootaneer/libcootaneer.la 		\
-	$(top_builddir)/compat/libcoot-compat.la
+	$(top_builddir)/cootaneer/libcootaneer.la
 
 
 
@@ -849,7 +848,6 @@ test_cholesky_LDADD =	\
 
 
 # test_command_line_SOURCES = test-command-line.cc
-# test_command_line_LDADD = -L$(top_srcdir)/compat      -lcoot-compat
 
 # if you like, you can investigate why coot-geometry and clipper is needed here:
 test_coot_align_SOURCES = align.cc
@@ -887,7 +885,6 @@ coot_density_score_by_residue_bin_LDADD  =	\
         $(top_builddir)/lidia-core/libcoot-lidia-core.la        \
 	$(top_builddir)/utils/libcoot-utils.la  		\
 	$(top_builddir)/cootaneer/libcootaneer.la 		\
-	$(top_builddir)/compat/libcoot-compat.la  		\
         $(GLOB_LIBS)  		 \
         $(RDKIT_LIBS) 		\
 	$(CLIPPER_LIBS) 	\
@@ -912,7 +909,6 @@ dynarama_bin_LDADD = \
 	$(top_builddir)/db-main/libcoot-db-main.la     		\
 	$(top_builddir)/analysis/libcoot-analysis.la 		\
 	$(top_builddir)/cootaneer/libcootaneer.la 		\
-        $(top_builddir)/compat/libcoot-compat.la                \
         $(top_builddir)/utils/libcoot-utils.la                  \
         $(CLIPPER_LIBS)         \
         $(MMDB_LIBS)            \
