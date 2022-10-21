@@ -23,8 +23,8 @@
 #include <Python.h>
 
 #include <iostream>
-#include "utils/win-compat.hh"
 #include "lbg-drag-and-drop.hh"
+#include "utils/coot-utils.hh"
 
 #include "lbg.hh"
 
@@ -362,7 +362,7 @@ lbg_info_t::handle_lbg_drag_and_drop_filesystem_file(const std::string &uri) {
    if (uri.length() > 7) {
       if (uri.substr(0,7)== "file://") {
 	 // std::cout << "---:" << uri << ": was a file:// string " << std::endl;
-	 std::string file_name = coot::uri_to_file_name(uri);
+	 std::string file_name = coot::util::uri_to_file_name(uri);
 	 std::string ext = coot::util::file_name_extension(file_name);
 	 if (ext == ".mdl" || ext == ".mol" || ext == ".mol2" || ext == ".sdf") { 
 	    import_mol_from_file(file_name);

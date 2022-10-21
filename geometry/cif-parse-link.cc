@@ -34,8 +34,6 @@
 
 #include "clipper/core/clipper_util.h"
 
-#include "utils/win-compat.hh"
-
 #include "lbg-graph.hh"
 
 

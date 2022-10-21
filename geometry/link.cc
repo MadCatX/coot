@@ -29,7 +29,6 @@
 #include <algorithm>  // needed for sort? Yes.
 #include <stdexcept>  // Thow execption.
 
-#include "utils/win-compat.hh"
 #include "mini-mol/atom-quads.hh"
 #include "geometry/protein-geometry.hh"
 #include "utils/coot-utils.hh"
