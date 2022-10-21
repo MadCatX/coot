@@ -46,7 +46,6 @@ libcoot_geometry_la_SOURCES = cif-parse.cc protein-geometry.cc protein-geometry-
 libcoot_geometry_la_LIBADD = \
         $(top_builddir)/mini-mol/libcoot-mini-mol.la \
         $(top_builddir)/utils/libcoot-utils.la       \
-        $(top_builddir)/compat/libcoot-compat.la     \
         $(CLIPPER_LIBS) $(CCP4SRS_LIBS) $(MMDB_LIBS)
 
 libcoot_geometry_la_LDFLAGS = $(SHARED_LDFLAGS)
@@ -85,7 +84,7 @@ coot_compare_dictionaries_SOURCES = compare-dictionaries.cc
 coot_compare_dictionaries_LDADD = ./libcoot-geometry.la \
         $(top_builddir)/mini-mol/libcoot-mini-mol.la    \
         $(top_builddir)/utils/libcoot-utils.la          \
-        $(top_builddir)/compat/libcoot-compat.la $(MMDB_LIBS)
+        $(MMDB_LIBS)
 
 coot_make_shelx_restraints_SOURCES = make-shelx-restraints.cc
 

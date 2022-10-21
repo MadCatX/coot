@@ -102,7 +102,7 @@ crankshaft_test_LDADD = ./libcoot-ideal.la \
 	$(top_builddir)/coot-utils/libcoot-map-utils.la   \
 	$(top_builddir)/geometry/libcoot-geometry.la      \
 	$(top_builddir)/utils/libcoot-utils.la            \
-        $(top_builddir)/compat/libcoot-compat.la -lm -lpthread
+        -lm -lpthread
 
 # with_geometry_SOURCES = with-geometry.cc
 
@@ -125,7 +125,7 @@ coot_ligand_validation_bin_LDADD = ./libcoot-ideal.la      \
 	$(top_builddir)/geometry/libcoot-geometry.la       \
 	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
 	$(top_builddir)/utils/libcoot-utils.la             \
-        $(top_builddir)/compat/libcoot-compat.la -lpthread
+        -lpthread
 
 # test_indexing_SOURCES = test-indexing.cc
 
@@ -165,7 +165,6 @@ mini_rsr_bin_LDADD =  \
         $(top_builddir)/lidia-core/libcoot-lidia-core.la  \
 	$(top_builddir)/utils/libcoot-utils.la        \
 	$(top_builddir)/mini-mol/libcoot-mini-mol.la       \
-        $(top_builddir)/compat/libcoot-compat.la           \
 	$(GLOB_LIBS) \
 	$(RDKIT_LIBS) \
         $(CLIPPER_LIBS) $(MMDB_LIBS) $(GSL_LIBS) -lpthread
