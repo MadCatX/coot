@@ -38,8 +38,6 @@
 #include <mmdb2/mmdb_tables.h>  // for mmdb::Get1LetterCode()
 #include <mmdb2/mmdb_math_graph.h> // for graph matching
 
-#include "compat/coot-sysdep.h"
-
 #include "clipper/mmdb/clipper_mmdb.h"
 #include "geometry/main-chain.hh"
 #include "geometry/mol-utils.hh"

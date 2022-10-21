@@ -1,10 +1,8 @@
 
-#include <compat/coot-sysdep.h>
 #include <fstream>
 #include <mmdb2/mmdb_manager.h>
 #include <clipper/core/coords.h>
 
-#include "compat/coot-sysdep.h"
 #include "utils/coot-utils.hh"
 #include "coot-utils/coot-coord-utils.hh"
 #include "cablam-markup.hh"

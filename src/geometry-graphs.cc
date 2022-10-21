@@ -23,7 +23,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
 #include "utils/win-compat.hh"
 #include "coot-utils/coot-coord-utils.hh" // compilation error on MacOSX if this
                                // doesn't come before the next 3 lines
@@ -1323,7 +1322,7 @@ coot::geometry_graphs::setup_internal() {
    colour_list.push_back("red");
 
    // fixed_font_str = "fixed";
-   fixed_font_str = coot::sysdep::get_fixed_font();
+   fixed_font_str = util::get_fixed_font();
 
    tooltip_item = NULL;
    tooltip_item_text = NULL;

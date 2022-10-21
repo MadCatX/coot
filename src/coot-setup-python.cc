@@ -26,7 +26,6 @@
 
 #include <cstring>
 
-#include "compat/coot-sysdep.h"
 #include <gtk/gtk.h>
 #include "coot-setup-python.hh"
 #include "python-classes.hh"
@@ -40,6 +39,8 @@
 
 #include "graphics-info.h"
 #include "command-line.hh"
+
+#include "utils/coot-utils.hh"
 
 #include <string>
 #include <iostream>
@@ -152,14 +153,14 @@ void try_load_dot_coot_py_and_python_scripts(const std::string &home_directory) 
       // (if it is not a file already)
       //
       std::string startup_scripts_dir = graphics_info_t::add_dir_file(home_directory, ".coot");
-      bool have_startup_scripts_dir = coot::sysdep::is_dir(startup_scripts_dir);
+      bool have_startup_scripts_dir = coot::util::is_dir(startup_scripts_dir);
 
       if (!have_startup_scripts_dir) {
          std::cout << "INFO:: preferences directory " << startup_scripts_dir
                    << " does not exist. Won't read preferences." << std::endl;;
       } else {
 	 // load all .py files
-	 std::vector<std::string> py_files = coot::sysdep::gather_files_by_patterns(startup_scripts_dir, { "*.py" });
+	 std::vector<std::string> py_files = coot::util::gather_files_by_patterns(startup_scripts_dir, { "*.py" });
 
 	 // dont load the coot_toolbuttons.py if no graphics
 	 // same for key_bindings (and potentially others)

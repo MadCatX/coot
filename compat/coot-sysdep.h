@@ -24,22 +24,14 @@
 #ifndef COMPAT_COOT_SYSDEP_H
 #define COMPAT_COOT_SYSDEP_H
 
+#include <utils/gather-options.hh>
+
 #include <string>
 #include <vector>
 #include <type_traits>
 
 namespace coot {
 namespace sysdep {
-	enum GatherOptions {
-		GATHER_FILES       = 1 << 0,
-		GATHER_DIRECTORIES = 1 << 1,
-		GATHER_LINKS       = 1 << 2
-	};
-    inline GatherOptions operator|(GatherOptions lhs, GatherOptions rhs) {
-		using UT = std::underlying_type<GatherOptions>::type;
-		return static_cast<GatherOptions>(static_cast<UT>(lhs) | static_cast<UT>(rhs));
-	}
-
 	int cpu_count();
     std::string current_working_dir();
     int create_directory(const std::string &path);

@@ -23,12 +23,12 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-#include "compat/coot-sysdep.h"
-
 // for stat()
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "utils/coot-utils.hh"
 
 #include "coot-utils/coot-map-utils.hh" // for variance map
 #include "coot-utils/xmap-stats.hh"
@@ -1472,8 +1472,8 @@ int handle_read_emdb_data(const std::string &dir_name) {
    int status = 0;
    std::string map_dir = coot::util::append_dir_dir(dir_name, "map");
    std::string pdb_dir = coot::util::append_dir_dir(coot::util::append_dir_dir(dir_name, "fittedModels"), "PDB");
-   std::vector<std::string> map_files = coot::sysdep::gather_files_by_patterns(map_dir, { "*.map" });
-   std::vector<std::string> pdb_files = coot::sysdep::gather_files_by_patterns(pdb_dir, { "*.ent" });
+   std::vector<std::string> map_files = coot::util::gather_files_by_patterns(map_dir, { "*.map" });
+   std::vector<std::string> pdb_files = coot::util::gather_files_by_patterns(pdb_dir, { "*.ent" });
    for (auto map_file : map_files)
       handle_read_ccp4_map(map_file, 0);
    for (auto pdb_file : pdb_files)

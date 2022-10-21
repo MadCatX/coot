@@ -41,7 +41,6 @@
 #include "clipper/clipper-cif.h"
 #include "clipper/contrib/sfcalc.h"
 
-#include "compat/coot-sysdep.h"
 #include "utils/coot-utils.hh"
 #include "geometry/residue-and-atom-specs.hh"
 

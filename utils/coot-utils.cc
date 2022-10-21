@@ -44,6 +44,10 @@
 
 #include "coot-utils.hh"
 
+std::string
+coot::util::get_fixed_font() {
+   return coot::sysdep::get_fixed_font();
+}
 
 std::string
 coot::util::append_dir_dir (const std::string &s1, const std::string &dir) {
@@ -92,6 +96,10 @@ coot::util::create_directory(const std::string &dir_name) {
    return coot::sysdep::create_directory(dir_name);
 }
 
+std::vector<std::string>
+coot::util::gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options) {
+   return coot::sysdep::gather_files_by_patterns(dir_path, pattern, options);
+}
 
 std::string
 coot::util::intelligent_debackslash(const std::string &s) {
@@ -580,6 +588,18 @@ coot::util::current_working_dir() {
    return coot::sysdep::current_working_dir();
 }
 
+bool coot::util::is_dir(const std::string &path) {
+   return coot::sysdep::is_dir(path);
+}
+
+bool coot::util::is_link(const std::string &path) {
+   return coot::sysdep::is_dir(path);
+}
+
+bool coot::util::is_regular_file(const std::string &path) {
+   return coot::sysdep::is_regular_file(path);
+}
+
 // If cwd is a substring of f (starting at 0), then return the
 // basename of f (i.e. cwd stripped from f).  If cwd is not a
 // substring of f, then return f;
@@ -757,6 +777,15 @@ coot::util::extension_is_for_scripts(const std::string &ext) {
    return r;
 }
 
+void
+coot::util::sleep(unsigned int secs) {
+   return coot::sysdep::sleep(secs);
+}
+
+void
+coot::util::usleep(unsigned int usecs) {
+   return coot::sysdep::usleep(usecs);
+}
 
 short int
 coot::is_mmcif_filename(const std::string &filename) {
