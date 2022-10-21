@@ -67,7 +67,6 @@
 #include "clipper/core/clipper_instance.h"
 
 #include "c-interface-gui.hh"
-#include "utils/win-compat.hh"
 
 #include "widget-from-builder.hh"
 

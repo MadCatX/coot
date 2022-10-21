@@ -43,8 +43,6 @@
 
 #include "canvas-fixes.hh"
 
-#include "utils/win-compat.hh"
-
 exptl::nsv::nsv(mmdb::Manager *mol,
 		const std::string &molecule_name,
 		int molecule_number_in,
