@@ -1,3 +1,5 @@
+AM_CPPFLAGS = \
+	-I$(top_srcdir)
 
 lib_LTLIBRARIES = libcoot-compat.la
 pkginclude_HEADERS = coot-getopt.h coot-sysdep.h coot-sysdep-c.h coot-win32.h

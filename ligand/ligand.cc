@@ -59,8 +59,6 @@
 #include "coot-utils/coot-coord-utils.hh"
 #include "coot-utils/coot-map-utils.hh"
 
-#include "compat/coot-sysdep.h"
-
 std::pair<coot::minimol::molecule, coot::minimol::molecule>
 coot::make_mols_from_atom_selection_string(mmdb::Manager *mol,
 					   std::string atom_selection_string,
@@ -222,7 +220,7 @@ coot::ligand::map_fill_from_mtz(std::string mtz_file_name,
    clipper::MTZcrystal myxtl;
 
   std::cout << "reading mtz file " << mtz_file_name << std::endl;
-  if (! coot::sysdep::is_regular_file(mtz_file_name))
+  if (!util::is_regular_file(mtz_file_name))
      return 0;
 
   clipper::CCP4MTZfile mtzin;

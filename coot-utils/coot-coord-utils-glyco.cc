@@ -22,7 +22,6 @@
 #include <list>
 #include <algorithm>
 
-#include "compat/coot-sysdep.h"
 #include "utils/coot-utils.hh"
 #include "coot-coord-extras.hh"
 

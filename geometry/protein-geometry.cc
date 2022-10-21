@@ -48,8 +48,6 @@
 
 #include "clipper/core/clipper_util.h"
 
-#include "compat/coot-sysdep.h"
-
 #include "lbg-graph.hh"
 
 // std::string 
@@ -638,7 +636,7 @@ coot::protein_geometry::try_dynamic_add(const std::string &resname, int read_num
 	 struct stat buf;
 	 int istat = stat(filename.c_str(), &buf);
 	 if (istat == 0) {
-	    if (coot::sysdep::is_regular_file(filename)) {
+	    if (util::is_regular_file(filename)) {
 
 	       coot::read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(filename, read_number);
 	       success = rmit.success;

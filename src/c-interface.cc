@@ -104,8 +104,6 @@
 #include "cmtz-interface.hh"
 // #include "mtz-bits.h" stuff from here moved to cmtz-interface
 
-#include "compat/coot-sysdep.h"
-
 // This is (already) in git-revision-count.cc
 //
 int svn_revision() {
@@ -1320,7 +1318,7 @@ std::vector<std::string> filtered_by_glob(const std::string &pre_directory,
    std::transform(globs.begin(), globs.end(), globs.begin(), [](const std::string &s) { return "*" + s; });
 
    if (globs.size() > 0) {
-      std::vector<std::string> gathered = coot::sysdep::gather_files_by_patterns(pre_directory, globs);
+      std::vector<std::string> gathered = coot::util::gather_files_by_patterns(pre_directory, globs);
 
       for (const auto &f : gathered) {
          if (!string_member(f, v)) {
@@ -9202,7 +9200,7 @@ void set_socket_string_waiting(const char *s) {
       std::cout << "Waiting for lock! "
 		<< graphics_info_t::socket_string_waiting_mutex_lock
 		<< std::endl;
-      coot::sysdep::usleep(1000000);
+      coot::util::usleep(1000000);
    }
 
    std::cout << " =============== setting mutex lock (scheme version) =========" << std::endl;

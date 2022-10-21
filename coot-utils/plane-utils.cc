@@ -5,8 +5,6 @@
 #include "plane-utils.hh"
 #include "coot-coord-utils.hh"
 
-#include <compat/coot-sysdep.h>
-
 // the vector points towards the ring
 std::pair<bool, double>
 coot::angle_betwen_plane_and_vector(mmdb::Residue *residue_p,

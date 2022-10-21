@@ -1,6 +1,5 @@
 
 #include <string.h> // bleugh
-#include "compat/coot-sysdep.h"
 #include "geometry/main-chain.hh"
 #include "coot-coord-utils.hh"
 

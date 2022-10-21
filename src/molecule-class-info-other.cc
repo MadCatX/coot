@@ -75,8 +75,6 @@
 
 #include "rotamer-search-modes.hh"
 
-#include "compat/coot-sysdep.h"
-
 std::vector<std::pair<mmdb::Atom *, float> >
 coot::dots_representation_info_t::solvent_exposure(int SelHnd_in, mmdb::Manager *mol) const {
 
@@ -3807,7 +3805,7 @@ molecule_class_info_t::recent_backup_file_info() const {
       std::string backup_dir = "coot-backup/";
 
       char *es = getenv("COOT_BACKUP_DIR");
-      if (es && coot::sysdep::is_dir(es)) {
+      if (es && coot::util::is_dir(es)) {
          backup_dir = es;
 	 if (backup_dir.back() != '/') {
             backup_dir += "/";
@@ -3816,7 +3814,7 @@ molecule_class_info_t::recent_backup_file_info() const {
 
       backup_dir += t_name_glob;
 
-      std::vector<std::string> v = coot::sysdep::gather_files_by_patterns(backup_dir, { "*.pdb", ".pdb.gz" });
+      std::vector<std::string> v = coot::util::gather_files_by_patterns(backup_dir, { "*.pdb", ".pdb.gz" });
 
       if (v.size() > 0) {
 

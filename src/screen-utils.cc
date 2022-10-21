@@ -4,7 +4,6 @@
 #include <sys/stat.h>
 #include <gtk/gtk.h>
 #include "utils/coot-utils.hh"
-#include "compat/coot-sysdep.h"
 
 // this returns the effective screen height if possible otherwise an estimate
 int
@@ -114,7 +113,7 @@ void setup_application_icon(GtkWindow *window) {
 
    // now add the application icon
    std::string app_icon_path = coot::util::append_dir_file(splash_screen_pixmap_dir, "coot-icon.png");
-   bool have_splash_screen = coot::sysdep::is_regular_file(app_icon_path);
+   bool have_splash_screen = coot::util::is_regular_file(app_icon_path);
    if (have_splash_screen) { // icon file was found
 
       GdkPixbuf *icon_pixbuf =
@@ -142,7 +141,7 @@ void setup_application_icon(GtkWindow *window) {
    GdkPixbuf* pixbuf;
 
    std::string icons_dir = splash_screen_pixmap_dir;
-   std::vector<std::string> icon_files = coot::sysdep::gather_files_by_patterns(icons_dir, { ".svg", "*.png" });
+   std::vector<std::string> icon_files = coot::util::gather_files_by_patterns(icons_dir, { ".svg", "*.png" });
 
    for (const auto &filename : icon_files) {
       pixbuf = gdk_pixbuf_new_from_file(filename.c_str(), &error);

@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 #include "colour-holder.hh"
+#include "gather-options.hh"
 
 namespace coot {
 
@@ -82,9 +83,16 @@ namespace coot {
    namespace util {
 
       int round_up_by_hundreds(int num);
+
+      std::string get_fixed_font();
+
       std::string current_working_dir();
       std::string append_dir_dir (const std::string &s1, const std::string &dir);
       std::string append_dir_file(const std::string &s1, const std::string &file);
+      std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options = (GATHER_FILES | GATHER_LINKS));
+      bool is_dir(const std::string &path);
+      bool is_link(const std::string &path);
+      bool is_regular_file(const std::string &path);
 
       // If cwd is a substring of f, then return the basename of f (i.e. cwd
       // stripped from f).  If cwd is not a substring of f, then return f;
@@ -173,6 +181,8 @@ namespace coot {
 	 return p1.second < p2.second;
       }
 
+      void sleep(unsigned int secs);
+      void usleep(unsigned int usecs);
 
    } // end of util name space
 

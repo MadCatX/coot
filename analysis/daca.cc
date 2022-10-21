@@ -2,7 +2,6 @@
 #include <map>
 #include <iomanip>
 #include <fstream>
-#include "compat/coot-sysdep.h"
 #include "utils/coot-utils.hh"
 #include "geometry/residue-and-atom-specs.hh"
 #include "coot-utils/coot-coord-utils.hh"
@@ -646,7 +645,7 @@ coot::daca::read_tables(const std::string &dir) {
    if (! boxes_have_been_resized)
       presize_boxes();
 
-   std::vector<std::string> files = coot::sysdep::gather_files_by_patterns(dir, { "*.table" });
+   std::vector<std::string> files = util::gather_files_by_patterns(dir, { "*.table" });
    for (unsigned int i=0; i<files.size(); i++) {
       std::string file_name = files[i];
       // std::cout << "read table file " << file_name << std::endl;
@@ -940,7 +939,7 @@ coot::daca::write_tables_using_reference_structures_from_dir(const std::string &
 
    protein_geometry geom;
    geom.init_standard();
-   std::vector<std::string> files = coot::sysdep::gather_files_by_patterns(dir_name, { "*.pdb" });
+   std::vector<std::string> files = util::gather_files_by_patterns(dir_name, { "*.pdb" });
 
    std::cout << "in write_tables_using_reference_structures_from_dir()  " << dir_name << " "
              << output_tables_dir << std::endl;
