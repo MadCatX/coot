@@ -107,6 +107,22 @@ coot::util::append_dir_file(const std::string &s1, const std::string &file) {
    return s;
 }
 
+bool
+coot::util::change_to_writeable_base_dir() {
+   std::string cwd = current_working_dir();
+
+   if (!is_dir(cwd) || !coot::sysdep::is_file_writeable(cwd)) {
+      std::string homeDir = get_home_dir();
+      if (!homeDir.empty()) {
+         return coot::sysdep::set_current_directory(homeDir);
+      }
+
+      return false;
+   } else {
+      return false;
+   }
+}
+
 // Return the userid and name (e.g ("paule", "Paul Emsley")) for use
 // as a label in the database.  Not important to get right.
 //
@@ -888,15 +904,7 @@ coot::prefix_dir() {
 
 std::string
 coot::get_home_dir() {
-   const char *s = getenv("HOME");
-   if (s) {
-      return std::string(s);
-   } else {
-      s = getenv("COOT_HOME");
-      if (s)
-         return std::string(s);
-   }
-   return ""; //empty
+   return coot::sysdep::get_home_dir();
 }
 
 

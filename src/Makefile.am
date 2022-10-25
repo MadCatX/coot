@@ -441,12 +441,10 @@ libcootsumo_la_SOURCES = \
 	cc-interface-user-defined-atom-colours.hh \
 	cc-interface-user-defined-atom-colours.cc \
 	cc-interface-molecular-representation.hh  \
-	canvas-fixes.hh          \
-	cfc.cc cfc.hh            \
-	cfc-widgets.hh           \
-	cfc-widgets-c-interface.h \
-	change-dir.cc		 \
-	change-dir.hh		 \
+        canvas-fixes.hh          \
+        cfc.cc cfc.hh            \
+        cfc-widgets.hh           \
+        cfc-widgets-c-interface.h \
 	cmtz-interface-gui.hh	 \
 	cmtz-interface.hh	 \
 	cmtz-interface.cc	 \

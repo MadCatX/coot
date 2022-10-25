@@ -101,12 +101,33 @@ std::string get_fixed_font() {
     return "Sans 9";
 }
 
+std::string get_home_dir() {
+    const char *s = getenv("HOME");
+    if (s) {
+        return std::string(s);
+    } else {
+        s = getenv("COOT_HOME");
+        if (s)
+            return std::string(s);
+    }
+
+    return {};
+}
+
 bool is_dir(const std::string &file_path) {
     struct stat buf;
     if (stat(file_path.c_str(), &buf) == -1)
         return false;
 
     return S_ISDIR(buf.st_mode);
+}
+
+bool is_file_writeable(const std::string &file_path) {
+    struct stat buf;
+    if (stat(file_path.c_str(), &s) == -1)
+        return false;
+
+    return buf.st_mode & S_IWUSR;
 }
 
 bool is_link(const std::string &file_path) {
@@ -132,6 +153,10 @@ bool rename(const char *old_file_path, const char *new_file_path, std::string &e
     error_message = std::string{std::strerror(ret)};
 
     return false;
+}
+
+bool set_current_directory(const std::string &path) {
+    return chdir(path.c_str()) == 0;
 }
 
 void set_os_error_mode() {
