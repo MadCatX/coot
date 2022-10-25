@@ -443,8 +443,6 @@ libcootsumo_la_SOURCES = \
         cfc.cc cfc.hh            \
         cfc-widgets.hh           \
         cfc-widgets-c-interface.h \
-	change-dir.cc		 \
-	change-dir.hh		 \
 	cmtz-interface-gui.hh	 \
 	cmtz-interface.hh	 \
 	cmtz-interface.cc	 \

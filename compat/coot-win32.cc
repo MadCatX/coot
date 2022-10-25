@@ -3,7 +3,10 @@
 #include "coot-sysdep.h"
 
 #include <windows.h>
+#include <bcrypt.h>
+#include <ntstatus.h>
 #include <secext.h>
+#include <ShlObj.h>
 
 #include <algorithm>
 #include <cwctype>
@@ -16,6 +19,7 @@
 
 // Let us just declare all of the internal utility functions here
 static std::wstring absolute_path(const std::wstring &path);
+static bool file_exists_internal(const std::wstring &w_file_path);
 static std::string get_error_string(DWORD error_code);
 static DWORD get_file_attributes(const std::wstring &w_file_path);
 static bool is_dir_attrs(DWORD attrs);
@@ -135,6 +139,39 @@ std::string get_fixed_font() {
     return "monospace";
 }
 
+std::string get_home_dir() {
+    // WARNING: This is a deprecated function from pre-Vista era.
+    // Wo should call SHGetKnownFolderPathW instead but there is a nasty technical catch:
+    // SHGetKnownFolderPath() takes KNOWNFOLDERID is a parameter. KNOWNFOLDERID is a const object
+    // that lives in Uuid.lib library. We therefore need to link against that library.
+    // Unfortunately, there is no Uuid.dll but just the static Uuid.lib (or libuuid.a in MSYS2)
+    // We need to build all of coot modules as DLLs on Windows to avoid other linking issues
+    // in the end but linking a static library against a dynamic library is apparently a no-go for MSYS2 libtool.
+    // SHGetFolderPath() use different parameters, allowing us to sidestep the problem.
+    wchar_t shPath[MAX_PATH];
+    auto shRet = SHGetFolderPathW(
+        NULL,
+        CSIDL_LOCAL_APPDATA,
+        NULL,
+        SHGFP_TYPE_CURRENT,
+        shPath
+    );
+    if (SUCCEEDED(shRet)) {
+        shPath[MAX_PATH-1] = 0;
+        return wide_string_to_local(shPath, nullptr);
+    }
+
+    wchar_t buf[256];
+    DWORD ret = GetEnvironmentVariableW(L"COOT_HOME", buf, 256);
+    buf[255] = 0;
+
+    if (ret == 256 || ret < 1) {
+        return {};  // Could not get COOT_HOME or the length of COOT_HOME is too long to fit into the buffer
+    }
+
+    return wide_string_to_local(buf, nullptr);
+}
+
 bool is_dir(const std::string &file_path) {
     bool ok;
     std::wstring w_file_path = windowsize_path(file_path, &ok);
@@ -143,6 +180,81 @@ bool is_dir(const std::string &file_path) {
     }
 
     return is_dir_internal(w_file_path);
+}
+
+bool is_file_writeable(const std::string &file_path) {
+    // According to MSDN, the only reliable way how to check current
+    // writeability of a file is to try to write to it.
+
+    bool ok;
+    std::wstring w_file_path = windowsize_path(file_path, &ok);
+    if (!ok) {
+        return false;
+    }
+
+    bool isDir = is_dir_internal(w_file_path);
+    bool deleteAfterCheck = false;
+    if (isDir) {
+        // We are checking writeability of a directory. To do that, we must create a dummy
+        // file, try to write to and then delete it.
+
+        // Let us create a randoom file name to test with.
+        // The buffer for the file name
+        wchar_t random[16];
+        random[15] = 0;
+
+        // Set up windows facilities to generate random data
+        NTSTATUS status;
+        BCRYPT_ALG_HANDLE hAlg;
+        status = BCryptOpenAlgorithmProvider(&hAlg, L"DUALECRNG", NULL, 0);
+        if (status != STATUS_SUCCESS) {
+            return false;
+        }
+
+        for (size_t idx = 0; idx < 15; idx++) {
+            UCHAR r;
+            status = BCryptGenRandom(hAlg, &r, 1, 0);
+            if (status != STATUS_SUCCESS) {
+                break;
+            }
+
+            // Clamp the value to lowercase letters. We do not want to accidentally generate an invalid file name.
+            // Windows strings are UTF-16 so we can do it like this.
+            r = (r % 26) + 97;
+            random[idx] = r;
+        }
+
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        if (status != STATUS_SUCCESS) {
+            return false;
+        }
+
+        // We have a random file name
+        w_file_path += std::wstring{L"\\"} + random;
+
+        // There is a small chance that a file with such a name already exists so let us account for that.
+        deleteAfterCheck = !file_exists_internal(w_file_path);
+    }
+
+    HANDLE fh = CreateFileW(
+        w_file_path.c_str(),
+        GENERIC_WRITE,                       // Try to open for writing
+        FILE_SHARE_READ | FILE_SHARE_WRITE,  // Do not disrupt any other processes that may want to manipulate with the file
+        NULL,
+        CREATE_NEW,                          // CREATE_NEW creates a new file only if the file does not exist
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if (fh == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    CloseHandle(fh);
+    if (deleteAfterCheck) {
+        DeleteFileW(w_file_path.c_str());
+    }
+
+    return true;
 }
 
 bool is_link(const std::string &file_path) {
@@ -233,6 +345,16 @@ bool rename(const char *old_file_path, const char *new_file_path, std::string &e
     return false;
 }
 
+bool set_current_directory(const std::string &path) {
+    bool ok;
+    std::wstring w_path = local_to_wide_string(path, &ok);
+    if (ok) {
+        return SetCurrentDirectoryW(w_path.c_str());
+    } {
+        return false;
+    }
+}
+
 void set_os_error_mode() {
     SetErrorMode(SetErrorMode(SEM_NOGPFAULTERRORBOX) | SEM_NOGPFAULTERRORBOX);
 }
@@ -303,6 +425,26 @@ std::wstring absolute_path(const std::wstring &path) {
         return {};
 
     return std::wstring{buf.data()};
+}
+
+static
+bool file_exists_internal(const std::wstring &w_file_path) {
+    HANDLE fh = CreateFileW(
+        w_file_path.c_str(),
+        0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    if (fh == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    CloseHandle(fh);
+    return true;
 }
 
 static

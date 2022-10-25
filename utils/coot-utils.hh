@@ -86,6 +86,7 @@ namespace coot {
 
       std::string get_fixed_font();
 
+      bool change_to_writeable_base_dir();
       std::string current_working_dir();
       std::string append_dir_dir (const std::string &s1, const std::string &dir);
       std::string append_dir_file(const std::string &s1, const std::string &file);

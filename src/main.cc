@@ -122,7 +122,6 @@
 
 #include "rotate-translate-modes.hh"
 
-#include "change-dir.hh"
 #include "curlew.hh"
 
 void show_citation_request();
@@ -514,7 +513,7 @@ main(int argc, char *argv[]) {
 
    // Mac users often start somewhere where they can't write files
    //
-   change_directory_maybe();
+   coot::util::change_to_writeable_base_dir();
 
 #if !defined(USE_GUILE) && !defined(USE_PYTHON)
    handle_command_line_data(cld);  // and add a flag if listener

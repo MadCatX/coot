@@ -14,4 +14,9 @@ if COOT_BUILD_WINDOWS
 libcoot_compat_la_SOURCES += coot-win32.cc
 endif
 
+if COOT_BUILD_WINDOWS
+libcoot_compat_la_LIBADD = -lBcrypt
+endif
+
 libcoot_compat_la_LDFLAGS = $(SHARED_LDFLAGS)
+
