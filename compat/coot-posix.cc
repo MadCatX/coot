@@ -124,7 +124,7 @@ bool is_dir(const std::string &file_path) {
 
 bool is_file_writeable(const std::string &file_path) {
     struct stat buf;
-    if (stat(file_path.c_str(), &s) == -1)
+    if (stat(file_path.c_str(), &buf) == -1)
         return false;
 
     return buf.st_mode & S_IWUSR;
