@@ -135,6 +135,30 @@ std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, c
     return found;
 }
 
+bool file_exists(const std::string &file_path) {
+    bool ok;
+    std::wstring w_file_path = windowsize_path(file_path, &ok);
+    if (!ok) {
+        return false;
+    }
+
+    HANDLE fh = CreateFileW(
+        w_file_path.c_str(),
+        0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if (fh == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    CloseHandle(fh);
+    return true;
+}
+
 std::string get_fixed_font() {
     return "monospace";
 }

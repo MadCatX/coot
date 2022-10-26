@@ -33,18 +33,6 @@
 #include "geometry/protein-geometry.hh"
 #include "utils/coot-utils.hh"
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define DATADIR "C:/coot/share"
-#define PKGDATADIR DATADIR
-#define S_ISDIR(m)  (((m) & S_IFMT) == S_IFDIR)
-#define S_ISREG(m)  (((m) & S_IFMT) == S_IFREG)
-#endif
-
 #include "clipper/core/clipper_util.h"
 
 #include "lbg-graph.hh"
@@ -631,61 +619,32 @@ coot::protein_geometry::try_dynamic_add(const std::string &resname, int read_num
 	 alt_alpha_anomer_name += "-A-L.cif";
 	 filename += ".cif";
 	 upcased_resname_filename += ".cif";
-	 
-	 struct stat buf;
-	 int istat = stat(filename.c_str(), &buf);
-	 if (istat == 0) {
-	    if (util::is_regular_file(filename)) {
 
-	       coot::read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(filename, read_number);
-	       success = rmit.success;
-	    } else {
+	 std::vector<std::string> candidateDictionaryFilenames{{
+	    filename,
+	    upcased_resname_filename,
+	    beta_anomer_name,
+	    alt_beta_anomer_name,
+	    alpha_anomer_name,
+	    alt_alpha_anomer_name
+	 }};
 
-	       // error/warning
-	       if (! coot::is_dir_or_link(filename)) {
-		  std::cout << "WARNING: " << filename << ": no such file (or directory)\n";
-	       } else {
-		  std::cout << "ERROR: dictionary " << filename << " is not a regular file" << std::endl;
-	       }
+	 for (const auto &fn : candidateDictionaryFilenames) {
+	    if (!util::file_exists(fn)) {
+	       std::cout << "WARNING: " << fn << ": no such file (or directory)" << std::endl;
+
+	       continue;
 	    }
-	 } else { 
-	    
-	    // Regular file doesn't exist,
-	    
-	    // Try the upcased filename
-	    // 
-	    istat = stat(upcased_resname_filename.c_str(), &buf);
-	    if (istat == 0) {
-	       read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(upcased_resname_filename, read_number);
-	       success = rmit.success;
-	    } else { 
 
-	       // try the beta anomer version
-	       istat = stat(beta_anomer_name.c_str(), &buf);
-	       if (istat == 0) {
-		  read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(beta_anomer_name, read_number);
-		  success = rmit.success;
-	       } else {
-		  // try the upcased file name e.g. xxx/NAG-B-D.cif
-		  istat = stat(alt_beta_anomer_name.c_str(), &buf);
-		  if (istat == 0) {
-		     read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(alt_beta_anomer_name, read_number);
-		     success = rmit.success;
-		  } else {
-		     // alpha?
-		     istat = stat(alpha_anomer_name.c_str(), &buf);
-		     if (istat == 0) {
-			read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(alpha_anomer_name, read_number);
-			success = rmit.success;
-		     } else {
-			istat = stat(alt_alpha_anomer_name.c_str(), &buf);
-			if (istat == 0) {
-			   read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(alt_alpha_anomer_name, read_number);
-			   success = rmit.success;
-			}
-		     }
-		  }
-	       }
+	    if (util::is_regular_file(fn)) {
+	       coot::read_refmac_mon_lib_info_t rmit = init_refmac_mon_lib(fn, read_number);
+	       success = rmit.success;
+
+	       // TODO: Would it make sense to check if "success" indicated a failure and keep going?
+
+	       break;
+	    } else {
+	       std::cout << "ERROR: dictionary " << fn << " is not a regular file" << std::endl;
 	    }
 	 }
       }
