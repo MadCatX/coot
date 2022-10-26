@@ -1,7 +1,5 @@
-
-#define _USE_MATH_DEFINES
 #include <cmath>
-const double pi = M_PI;
+static constexpr double pi = M_PI;
 
 #include <iostream>
 #include "cylinder.hh"

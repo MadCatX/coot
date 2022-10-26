@@ -19,7 +19,6 @@
  * 02110-1301, USA
  */
 
-#define _USE_MATH_DEFINES
 #include <algorithm> // for sorting
 
 #include "stats.hh"

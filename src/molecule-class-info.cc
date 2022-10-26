@@ -35,9 +35,8 @@
 #include <vector>
 #include <stdexcept>
 
-#define _USE_MATH_DEFINES
 #include <cmath>
-const double pi = M_PI;
+static constexpr double pi = M_PI;
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
