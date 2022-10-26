@@ -1,7 +1,6 @@
 
 #include <algorithm>
 
-#define _USE_MATH_DEFINES
 #include <math.h> // come on C++, get this sorted
 
 #include "utils/coot-utils.hh"

@@ -275,8 +275,8 @@ case "$target" in
 	AC_SUBST(SHARED_LDFLAGS)
     ;;
    *linux* )
-        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_POSIX"
-        CFLAGS="$CFLAGS -DCOOT_BUILD_POSIX"
+        CXXFLAGS="$CXXFLAGS -DCOOT_BUILD_POSIX -D_USE_MATH_DEFINES"
+        CFLAGS="$CFLAGS -DCOOT_BUILD_POSIX -D_USE_MATH_DEFINES"
         coot_build_platform=posix
    ;;
 esac

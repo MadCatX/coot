@@ -1,8 +1,7 @@
 
 #include <iostream>
-#define _USE_MATH_DEFINES
 #include <cmath>
-const double pi = M_PI;
+static constexpr double pi = M_PI;
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "g_triangle.hh"
