@@ -48,6 +48,7 @@
 static constexpr char PATH_DELIMITER = '/';
 #elif defined(COOT_BUILD_WINDOWS)
 static constexpr char PATH_DELIMITER = '\\';
+static constexpr char UNIX_PATH_DELIMITER = '/';
 #else
 # error "Unsupported or misdetected platform"
 #endif // COOT_BUILD_
@@ -156,19 +157,18 @@ coot::util::gather_files_by_patterns(const std::string &dir_path, const std::vec
 }
 
 std::string
-coot::util::intelligent_debackslash(const std::string &s) {
-
-   std::string filename_str = s;
-
-#ifdef WINDOWS_MINGW
-   int slen = s.length();
-   for (int i=0; i<slen; i++) {
-       if (filename_str[i] == '\\') {
-          filename_str.replace (i,1,"/");
-       }
+coot::util::intelligent_debackslash(std::string s) {
+#ifdef COOT_BUILD_WINDOWS
+   for (size_t idx = 0; idx < s.length(); idx++) {
+      if (s[idx] == PATH_DELIMITER) {
+         s[idx] = UNIX_PATH_DELIMITER;
+      }
    }
-#endif
-  return filename_str;
+
+   return s;
+#else
+   return s;
+#endif // COOT_BUILD_WINDOWS
 }
 
 std::string
