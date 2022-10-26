@@ -162,7 +162,7 @@ namespace coot {
       // return a long int between 0 and RAND_MAX
       long int random();
       float random_f();
-      std::string intelligent_debackslash(const std::string &s);
+      std::string intelligent_debackslash(std::string s);
       std::string remove_trailing_slash(const std::string &s);
 
       // remove the first bit from long
