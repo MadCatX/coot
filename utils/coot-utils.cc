@@ -44,6 +44,14 @@
 
 #include "coot-utils.hh"
 
+#if defined(COOT_BUILD_POSIX)
+static constexpr char PATH_DELIMITER = '/';
+#elif defined(COOT_BUILD_WINDOWS)
+static constexpr char PATH_DELIMITER = '\\';
+#else
+# error "Unsupported or misdetected platform"
+#endif // COOT_BUILD_
+
 static
 std::pair<std::string, std::string> split_uri(const std::string &uri) {
    static const std::string DELIM{"://"};
@@ -83,28 +91,25 @@ coot::util::get_fixed_font() {
 }
 
 std::string
-coot::util::append_dir_dir (const std::string &s1, const std::string &dir) {
+coot::util::append_dir_dir(const std::string &s1, const std::string &dir) {
+   if (s1.empty()) {
+      return dir;
+   }
 
-   std::string s;
-
-   s = s1;
-   s += "/";
-   s += dir;
-
-   return s;
-
+   if (s1.back() == PATH_DELIMITER) {
+      return s1.substr(0, s1.length() - 1) + std::string{PATH_DELIMITER} + dir;
+   } else {
+      return s1 + std::string{PATH_DELIMITER} + dir;
+   }
 }
 
 std::string
 coot::util::append_dir_file(const std::string &s1, const std::string &file) {
+   // NOTE: This function originally contained its own code but at the time
+   // when this function has been changed to its current form the code was doing
+   // exactly the same thing as append_dir_dir()
 
-   std::string s;
-
-   s = s1;
-   s += "/";
-   s += file;
-
-   return s;
+   return append_dir_dir(s1, file);
 }
 
 bool
