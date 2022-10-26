@@ -97,6 +97,11 @@ std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, c
     return found;
 }
 
+bool file_exists(const std::string &file_path) {
+    struct stat buf;
+    return stat(file_path.c_str(), &buf) == 0;
+}
+
 std::string get_fixed_font() {
     return "Sans 9";
 }
