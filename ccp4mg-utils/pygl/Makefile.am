@@ -91,8 +91,7 @@ libccp4mg_psutil_la_SOURCES = \
 AM_CXXFLAGS = \
 	-DPKGDATADIR='"$(pkgdatadir)"' \
 	-DPACKAGE_LOCALE_DIR='"$(pkgdatadir)/locale"' \
-	-DDATADIR='"$(datadir)"'    \
-	$(COOT_WINDOWS_CFLAGS) 
+	-DDATADIR='"$(datadir)"'
 
 
 # SWIG_FLAGS is something of a misnomer.  It actually defines

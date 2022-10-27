@@ -33,7 +33,7 @@ AM_CPPFLAGS = \
 	$(RDKIT_CXXFLAGS) 		  \
 	$(BOOST_CPPFLAGS) 	          \
 	$(SQLITE3_CFLAGS)                 \
-        $(CLIPPER_CXXFLAGS) $(MMDB_CXXFLAGS) $(COOT_WINDOWS_CFLAGS) $(BOOST_CPPFLAGS)
+        $(CLIPPER_CXXFLAGS) $(MMDB_CXXFLAGS) $(BOOST_CPPFLAGS)
 
 libcoot_lidia_core_la_SOURCES = lbg-shared.cc lbg-molfile.cc lig-build.cc \
 	rdkit-interface.cc cod-types.cc atom-types.cc bond-record-container-t.cc \

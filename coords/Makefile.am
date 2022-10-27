@@ -36,8 +36,7 @@ AM_CPPFLAGS = \
 
 AM_CXXFLAGS = \
 	-DPKGDATADIR='"$(pkgdatadir)"' \
-	-DDATADIR='"$(datadir)"'       \
-	$(COOT_WINDOWS_CFLAGS)
+	-DDATADIR='"$(datadir)"'
 
 # other in merge:
 # libcoot_coords_la_SOURCES = Bond_lines.cc Cartesian.cc cos-sin.cc \

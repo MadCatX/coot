@@ -25,8 +25,6 @@ AM_CPPFLAGS = \
 	  -I$(top_srcdir) \
 	 $(MMDB_CXXFLAGS) $(CLIPPER_CXXFLAGS) 
 
-AM_CXXFLAGS = $(COOT_WINDOWS_CFLAGS)
-
 pkginclude_HEADERS = graphical_skel.h dm-utils.h BuildCas.h
 pkgincludedir = $(includedir)/coot/skeleton
 

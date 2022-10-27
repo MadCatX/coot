@@ -33,8 +33,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 
 AM_CXXFLAGS = \
 	-DDATADIR='"$(datadir)"'       \
-	-DPKGDATADIR='"$(pkgdatadir)"' \
-	$(COOT_WINDOWS_CFLAGS)
+	-DPKGDATADIR='"$(pkgdatadir)"'
 
 
 libcoot_geometry_la_SOURCES = cif-parse.cc protein-geometry.cc protein-geometry-mmdb.cc \
