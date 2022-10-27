@@ -311,40 +311,8 @@ graphics_info_t::do_mutation_auto_fit(const std::string &residue_type,
 
 void
 graphics_info_t::read_standard_residues() {
-
-   std::string standard_env_dir = "COOT_STANDARD_RESIDUES";
-
-   const char *filename = getenv(standard_env_dir.c_str());
-   if (! filename) {
-
-      std::string standard_file_name = coot::package_data_dir();
-      standard_file_name += "/";
-      standard_file_name += "standard-residues.pdb";
-
-      struct stat buf;
-      int status = stat(standard_file_name.c_str(), &buf);
-      if (status != 0) { // standard-residues file was not found in
-	                 // default location either...
-	 std::cout << "WARNING: Can't find standard residues file in the "
-		   << "default location \n";
-	 std::cout << "         and environment variable for standard residues ";
-	 std::cout << standard_env_dir << "\n";
-	 std::cout << "         is not set.";
-	 std::cout << " Mutations will not be possible\n";
-	 // mark as not read then:
-	 standard_residues_asc.read_success = 0;
-	 standard_residues_asc.n_selected_atoms = 0;
-	 // std::cout << "DEBUG:: standard_residues_asc marked as empty" << std::endl;
-      } else {
-	 // stat success:
-	 standard_residues_asc = get_atom_selection(standard_file_name, true, false, false);
-      }
-   } else { 
-      standard_residues_asc = get_atom_selection(filename, true, false, false);
-   }
+   standard_residues_asc = ::read_standard_residues(); // calls read_standard_residues() from mmdb-crystal
 }
-
-
 
 void
 graphics_info_t::mutate_chain(int imol, const std::string &chain_id,
