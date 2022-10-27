@@ -655,6 +655,11 @@ coot::util::file_exists(const std::string &path) {
    return coot::sysdep::file_exists(path);
 }
 
+int_least64_t
+coot::util::get_file_size(const std::string &path) {
+   return coot::sysdep::get_file_size(path);
+}
+
 coot::FileTimes
 coot::util::get_file_times(const std::string &path) {
    return coot::sysdep::get_file_times(path);

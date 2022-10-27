@@ -41,35 +41,45 @@ coot::util::slurp_fill_xmap_from_map_file(const std::string &file_name,
 
    // std::cout << "slurp_fill_xmap_from_map_file() callled with check_only " << check_only << std::endl;
 
-   bool status = false;
-   if (file_exists(file_name)) {
-      struct stat s;
-      int fstat = stat(file_name.c_str(), &s);
-      if (fstat == 0) {
-         FILE *fptr = fopen(file_name.c_str(), "rb");
-         int st_size = s.st_size;
-         void *space = malloc(st_size);
-         // Happy Path
-         size_t st_size_2 = fread(space, st_size, 1, fptr);
-         char *data = static_cast<char *>(space);
-         fclose(fptr);
-         if (st_size_2 == 1) {
-            // Happy Path
-            if (st_size > 1024) {
-               status = slurp_parse_xmap_data(data, xmap_p, check_only); // fill xmap
-            } else {
-               std::cout << "WARNING:: bad read " << file_name << std::endl;
-            }
-         } else {
-            std::cout << "WARNING:: bad read " << file_name << std::endl;
-         }
-      }
-   } else {
-      std::cout << "WARNING:: file does not exist " << file_name << std::endl;
+   if (!file_exists(file_name)) {
+      std::cout << "WARNING: File " << file_name << " does not exist" << std::endl;
+      return false;
    }
 
-   // std::cout << "debug:: slurp_fill_xmap_from_map_file() returning " << status << std::endl;
-   return status;
+   auto file_size = get_file_size(file_name);
+   if (file_size < 0) {
+       std::cout << "WARNING: Could not determine size of file " << file_name << std::endl;
+       return false;
+   }
+   if (file_size <= 1024) {
+      std::cout << "WARNING: File " << file_name << " appears to be of wrong type or corrupted" << std ::endl;
+      return false;
+   }
+
+   char *data = static_cast<char *>(malloc(file_size));
+   if (!data) {
+      std::cout << "WARNING: Insufficient memory to read file " << file_name << std::endl;
+      return false;
+   }
+
+   FILE *fptr = fopen(file_name.c_str(), "rb");
+   if (!fptr) {
+      std::cout << "WARNING: Could not open file " << file_name << " for reading" << std::endl;
+      return false;
+   }
+
+   auto chunks_read = fread(data, file_size, 1, fptr);
+   fclose(fptr);
+
+   if (chunks_read != 1) {
+      std::cout << "WARNING: Failed to read file " << file_name << std::endl;
+      free(data);
+   }
+
+   bool ret = slurp_parse_xmap_data(data, xmap_p, check_only);
+   free(data);
+
+   return ret;
 }
 
 #include "utils/split-indices.hh"

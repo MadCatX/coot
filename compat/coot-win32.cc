@@ -155,6 +155,36 @@ bool file_exists(const std::string &file_path) {
     return true;
 }
 
+int_least64_t get_file_size(const std::string &file_size) {
+    bool ok;
+    std::wstring w_file_path = windowsize_path(file_path, &ok);
+    if (!ok) {
+        return -1;
+    }
+
+    HANDLE fh = CreateFileW(
+        w_file_path.c_str(),
+        GENERIC_READ,
+        FILE_SHARE_READ,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if (fh == INVALID_HANDLE_VALUE) {
+        return -1;
+    }
+
+    LARGE_INTEGER size;
+    if (GetFileSizeEx(fh, &size) == FALSE) {
+        CloseHandle(fh);
+        return -1;
+    }
+    CloseHandle(fh);
+
+    return size.QuadPart;
+}
+
 FileTimes get_file_times(const std::string &file_path) {
     bool ok;
     std::wstring w_file_path = windowsize_path(file_path, &ok);
