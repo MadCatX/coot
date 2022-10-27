@@ -164,7 +164,7 @@ namespace coot {
       long int random();
       float random_f();
       std::string intelligent_debackslash(std::string s);
-      std::string remove_trailing_slash(const std::string &s);
+      std::string remove_trailing_path_delimiter(const std::string &s);
 
       // remove the first bit from long
       std::string remove_string(const std::string &long_string, const std::string &bit);

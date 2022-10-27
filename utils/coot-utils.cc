@@ -172,35 +172,43 @@ coot::util::intelligent_debackslash(std::string s) {
 }
 
 std::string
-coot::util::remove_trailing_slash(const std::string &s) {
+coot::util::remove_trailing_path_delimiter(const std::string &s) {
+#if defined(COOT_BUILD_POSIX)
 
-   // BL says:: On Windows the null termination doesnt seem to work
-   //    by subsituting null.
-   // That was ugly anyway, let's erase the last character.
-   std::string scratch = s;
-
-   if (s.length() > 0) {
-#ifdef HAVE_CXX11
-      if (s.back() == '/')
-         scratch.erase(scratch.end()-1);
-      if (s.back() == '\\')
-         scratch.erase(scratch.end()-1);
-#else
-      std::string g = scratch.substr(scratch.length()-1);
-      if (scratch.substr(scratch.length()-1) == "/") {
-	 std::string::iterator it = scratch.end();
-         // scratch.erase(it-1);
-	 std::string::size_type l = scratch.length();
-	 scratch=scratch.substr(0,l-1);
-      } else {
-	 // we need an else, because above makes "/" -> ""
-	 // so scratch.length would be 0
-	 if (scratch.substr(scratch.length()-1) == "\\")
-	    scratch.erase(scratch.end()-1);
-      }
-#endif
+   if (s.length() <= 1) {
+      // Either zero length or a string that may but just "/" and we do not want
+      // to remove "/" if it is the only character in the path
+      return s;
    }
-   return scratch;
+
+   size_t last = s.length() - size_t(s.back() == PATH_DELIMITER);
+   return s.substr(0, last);
+
+#elif defined(COOT_BUILD_WINDOWS)
+
+   if (s.length() <= 1) {
+      // Either zero length or a string that may but just "\" and we do not want
+      // to remove "\" if it is the only character in the path
+      return s;
+   }
+
+   char last = s.back();
+   if (last == PATH_DELIMITER || last == UNIX_PATH_DELIMITER) { // Windows can deal with both kinds of delimiters
+      if (s[s.length() - 2] == ':') {
+	 // We have a string that ends with ":\". This must mean that the path indicates a drive, i. e. "C:\"
+	 // because ":" is a reserved character and cannot be used in a file path anywhere else than right
+	 // after the drive letter. We do not want to remove this trailing slash.
+         return s;
+      }
+
+      return s.substr(0, s.length() - 1);
+   } else {
+      return s;
+   }
+
+#else
+# error "Unsupported or misdetected platform"
+#endif // COOT_BUILD_
 }
 
 bool

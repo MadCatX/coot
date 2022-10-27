@@ -2841,23 +2841,23 @@ int test_trailing_slash() {
 
    int status = 1; // OK
    std::string s = "x/";
-   if (coot::util::remove_trailing_slash(s) != "x") {
+   if (coot::util::remove_trailing_path_delimiter(s) != "x") {
       status = 0;
    }
    s = "/";
-   if (coot::util::remove_trailing_slash(s) != "") {
+   if (coot::util::remove_trailing_path_delimiter(s) != "") {
       status = 0;
    }
    s = "ss";
-   if (coot::util::remove_trailing_slash(s) != "ss") {
+   if (coot::util::remove_trailing_path_delimiter(s) != "ss") {
       status = 0;
    }
    s = "\\"; // single
-   if (coot::util::remove_trailing_slash(s) != "") {
+   if (coot::util::remove_trailing_path_delimiter(s) != "") {
       status = 0;
    }
    s = "";
-   if (coot::util::remove_trailing_slash(s) != "") {
+   if (coot::util::remove_trailing_path_delimiter(s) != "") {
       status = 0;
    }
    return status;
