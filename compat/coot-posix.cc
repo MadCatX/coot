@@ -125,6 +125,18 @@ FileTimes get_file_times(const std::string &file_path) {
     };
 }
 
+int_least64_t get_file_size(const std::string &file_path) {
+    int fd = open(file_path.c_str(), O_RDONLY | O_NOATIME);
+    if (fd == -1) {
+        return -1;
+    }
+
+    auto size = lseek(fd, 0, SEEK_END);
+    close(fd);
+
+    return size;
+}
+
 std::string get_fixed_font() {
     return "Sans 9";
 }

@@ -27,6 +27,7 @@
 #include <utils/gather-options.hh>
 #include <utils/file-times.hh>
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <type_traits>
@@ -39,6 +40,7 @@ namespace sysdep {
     std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options = (GATHER_FILES | GATHER_LINKS));
     bool file_exists(const std::string &file_path);
     FileTimes get_file_times(const std::string &file_path);
+    int_least64_t get_file_size(const std::string &file_path);
     std::string get_fixed_font();
     std::string get_home_dir();
     bool is_dir(const std::string &file_path);
