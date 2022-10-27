@@ -159,6 +159,72 @@ bool file_exists(const std::string &file_path) {
     return true;
 }
 
+FileTimes get_file_times(const std::string &file_path) {
+    bool ok;
+    std::wstring w_file_path = windowsize_path(file_path, &ok);
+    if (!ok) {
+        return {};
+    }
+
+    HANDLE fh = CreateFileW(
+        w_file_path.c_str(),
+        0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if (fh == INVALID_HANDLE_VALUE) {
+        return {};
+    }
+
+    FILETIME wCreation;
+    FILETIME wLastModification;
+    FILETIME wLastAccess;
+
+    if (GetFileTime(fh, &wCreation, &wLastAccess, &wLastModification) == FALSE) {
+        CloseHandle(fh);
+        return {};
+    }
+    CloseHandle(fh);
+
+    // Windows times are 100ns long intervals - aka 10ths of msecs - since 1/1/1601 UTC
+    // We need to convert them to Unix epoch.
+    using TV = uint_least64_t;
+    const TV TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH = 116444736000000000ULL;
+
+    // Pack to 64bit integer
+    TV creation         = (TV(wCreation.dwHighDateTime) << 32) | wCreation.dwLowDateTime;
+    TV lastModification = (TV(wLastModification.dwHighDateTime) << 32) | wLastModification.dwLowDateTime;
+    TV lastAccess       = (TV(wLastAccess.dwHighDateTime) << 32) | wLastAccess.dwLowDateTime;
+
+    // Check that neither time is before the Unix epoch to avoid overflows
+    if (
+        creation < TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH ||
+        lastModification < TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH ||
+        lastAccess < TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH
+    ) {
+        return {};
+    }
+
+    // Convert to Unix epoch
+    creation         -= TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH;
+    lastModification -= TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH;
+    lastAccess       -= TENTHS_OF_MSECS_BETWEEN_WIN_AND_UNIX_EPOCH;
+
+    // Convert to nsecs
+    creation *= 100;
+    lastModification *= 100;
+    lastAccess *= 100;
+
+    return {
+        creation,
+        lastModification,
+        lastAccess
+    };
+}
+
 std::string get_fixed_font() {
     return "monospace";
 }

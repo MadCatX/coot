@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 #include "colour-holder.hh"
+#include "file-times.hh"
 #include "gather-options.hh"
 
 namespace coot {
@@ -92,6 +93,7 @@ namespace coot {
       std::string append_dir_file(const std::string &s1, const std::string &file);
       bool file_exists(const std::string &path);
       std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, const std::vector<std::string> &pattern, GatherOptions options = (GATHER_FILES | GATHER_LINKS));
+      FileTimes get_file_times(const std::string &path);
       bool is_dir(const std::string &path);
       bool is_link(const std::string &path);
       bool is_regular_file(const std::string &path);

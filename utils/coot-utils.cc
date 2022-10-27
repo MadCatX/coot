@@ -650,8 +650,14 @@ coot::util::current_working_dir() {
    return coot::sysdep::current_working_dir();
 }
 
-bool coot::util::file_exists(const std::string &path) {
+bool
+coot::util::file_exists(const std::string &path) {
    return coot::sysdep::file_exists(path);
+}
+
+coot::FileTimes
+coot::util::get_file_times(const std::string &path) {
+   return coot::sysdep::get_file_times(path);
 }
 
 bool coot::util::is_dir(const std::string &path) {
