@@ -1915,7 +1915,7 @@ coot::protein_geometry::init_standard() {
       if (s) {
 
 	 std::string ss(s); // might have trailing "/"
-	 ss = coot::util::remove_trailing_slash(ss);
+	 ss = coot::util::remove_trailing_path_delimiter(ss);
 	 if (! is_dir_or_link(ss)) { 
 	    env_dir_fails = 1;
 	 } else {
@@ -1982,7 +1982,7 @@ coot::protein_geometry::init_standard() {
       // contains the linkages:
       filename += "/data/monomers/list/mon_lib_list.cif";
       if (using_clibd_mon) {
-	 filename = util::remove_trailing_slash(mon_lib_dir);
+	 filename = util::remove_trailing_path_delimiter(mon_lib_dir);
 	 filename += "/list/mon_lib_list.cif";
       }
       // now check that that file is there:
