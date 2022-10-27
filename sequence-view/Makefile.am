@@ -65,7 +65,7 @@ AM_CPPFLAGS = \
 
 # CPPFLAGS = -DSEQ_VIEW_STANDALONE
 AM_CXXFLAGS = 	-DPKGDATADIR='"$(pkgdatadir)"' \
-	$(COOT_GSL_FLAGS) $(GSL_CFLAGS) $(COOT_WINDOWS_CFLAGS)
+	$(COOT_GSL_FLAGS) $(GSL_CFLAGS)
 
 libcoot_sequence_view_la_SOURCES = sequence-view.cc  seq-view-interface.c
 

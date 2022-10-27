@@ -21,8 +21,7 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)
 
-AM_CXXFLAGS = $(COOT_WINDOWS_CFLAGS) \
-	$(GLOB_CFLAGS)		     \
+AM_CXXFLAGS = $(GLOB_CFLAGS) \
 	-DPKGDATADIR='"$(pkgdatadir)"'
 
 lib_LTLIBRARIES=libcoot-utils.la

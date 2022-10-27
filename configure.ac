@@ -222,6 +222,8 @@ if test -z "$BOOST_PYTHON_LIB" ; then
    exit
 fi
 
+CXXFLAGS="$CXXFLAGS -DBOOST_SYSTEM_NO_DEPRECATED"
+
 # So now BOOST_PYTHON_LIB is set (and that is typically "boost_python").
 # How do we use that?  At the moment we want to only use
 # -l$(BOOST_PYTHON_LIB) when we have RDKIT_LIBS set
@@ -233,9 +235,6 @@ else
       :
    else
       L_BOOST_PYTHON=-l$BOOST_PYTHON_LIB
-      if test "$have_windows_mingw" = yes; then
-         COOT_WINDOWS_CFLAGS+=" -DBOOST_SYSTEM_NO_DEPRECATED"
-      fi
    fi
 fi
 AC_SUBST(L_BOOST_PYTHON)

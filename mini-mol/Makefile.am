@@ -28,8 +28,6 @@ AM_CPPFLAGS =  \
 	$(CLIPPER_CXXFLAGS)    \
 	$(MMDB_CXXFLAGS)
 
-AM_CXXFLAGS = $(COOT_WINDOWS_CFLAGS)
-
 check_PROGRAMS = testminimol
 
 testminimol_SOURCES = testminimol.cc
