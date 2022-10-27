@@ -29,8 +29,6 @@
 #include <stdlib.h>
 
 #include <string.h>  // strncpy
-#include <sys/types.h>  // for stating
-#include <sys/stat.h>
 
 #include <iostream>
 #include <vector>
@@ -43,7 +41,6 @@
 
 #include "coords/mmdb-extras.h"
 #include "coords/mmdb.h"
-#include "coords/mmdb-crystal.h"
 
 #include "graphics-info.h"
 #include "xmap-utils.h"
@@ -3816,42 +3813,30 @@ molecule_class_info_t::recent_backup_file_info() const {
 
       std::vector<std::string> v = coot::util::gather_files_by_patterns(backup_dir, { "*.pdb", ".pdb.gz" });
 
-      if (v.size() > 0) {
+      if (!v.empty()) {
+         coot::FileTimes times = coot::util::get_file_times(name_);
 
-         struct stat buf;
+         if (times.valid) {
+            const auto name_mtime = times.lastModification;
 
-         // get the time of name_ file
-         int status = stat(name_.c_str(), &buf);
-         if (status == 0) {
-
-            time_t name_mtime;
-            name_mtime = buf.st_mtime;
-
-            // now stat for dated back files:
-            time_t mtime;
-            time_t mtime_youngest = 1000000000;
-            short int set_something = 0;
             std::string backup_filename;
-
-            for (unsigned int i=0; i<v.size(); i++) {
-               status = stat(v[i].c_str(),&buf);
-               if (status == 0) {
-                  mtime = buf.st_mtime;
-                  if (mtime > mtime_youngest) {
-                     set_something = 1;
-                     mtime_youngest = mtime;
-                     backup_filename = v[i];
+            auto mtime_youngest = name_mtime;
+            for (const auto &fn : v) {
+               times = coot::util::get_file_times(fn);
+               if (times.valid) {
+                  if (times.lastModification > mtime_youngest) {
+                     mtime_youngest = times.lastModification;
+                     backup_filename = fn;
                   }
                }
             }
-            if (set_something) {
-               if (mtime_youngest > name_mtime) {
+
+            if (!backup_filename.empty()) {
 //                   std::cout << "Restoring from a recent backup "
 //                             << backup_filename << std::endl;
-                  info.name = name_;
-                  info.backup_file_name = backup_filename;
-                  info.status = 1; // There is a file.
-               }
+               info.name = name_;
+               info.backup_file_name = backup_filename;
+               info.status = 1; // There is a file.
             }
          }
       }

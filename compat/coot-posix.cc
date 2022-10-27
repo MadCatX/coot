@@ -15,6 +15,14 @@
 
 #define COOT_PATH_MAX 4096UL
 
+static
+uint_least64_t timespec_to_nsec(const struct timespec &ts) {
+    // 2^64 as time in nsecs covers about 584 years.
+    // Considering the Unix epoch as t=0, we are good until about year 2555.
+
+    return ts.tv_sec * 1e9 + ts.tv_nsec;
+}
+
 namespace coot {
 namespace sysdep {
 
@@ -100,6 +108,21 @@ std::vector<std::string> gather_files_by_patterns(const std::string &dir_path, c
 bool file_exists(const std::string &file_path) {
     struct stat buf;
     return stat(file_path.c_str(), &buf) == 0;
+}
+
+FileTimes get_file_times(const std::string &file_path) {
+    struct stat buf;
+
+    int ret = stat(file_path.c_str(), &buf);
+    if (ret != 0) {
+        return {};
+    }
+
+    return {
+        timespec_to_nsec(buf.st_ctim),
+        timespec_to_nsec(buf.st_mtim),
+        timespec_to_nsec(buf.st_atim)
+    };
 }
 
 std::string get_fixed_font() {
