@@ -32,10 +32,6 @@ static std::string user_account_info_internal(EXTENDED_NAME_FORMAT fmt);
 static std::wstring windowsize_path(const std::wstring &path);
 static std::wstring windowsize_path(const std::string &path, bool *ok);
 
-// Getting Secur32.lib to link correctly has proven troublesome
-// so we will just grab the library dynamically in runtime
-typedef BOOLEAN SEC_ENTRY (*FuncGetUserNameExW)(EXTENDED_NAME_FORMAT NameFormat, LPWSTR lpNameBuffer, PULONG nSize);
-
 namespace coot {
 namespace sysdep {
 
@@ -641,24 +637,13 @@ std::string user_account_info_internal(EXTENDED_NAME_FORMAT fmt) {
     ULONG length = 32;
     BOOLEAN ret;
 
-    HMODULE hSecur32 = LoadLibraryW(L"secur32.dll");
-    if (hSecur32 == NULL) {
-        return {};
-    }
-    FuncGetUserNameExW _GetUserNameExW = (FuncGetUserNameExW)GetProcAddress(hSecur32, "GetUserNameExW");
-    if (_GetUserNameExW == nullptr) {
-        FreeLibrary(hSecur32);
-        return {};
-    }
-
     // MSDN docn does not specify if we can pass NULL to GetUserNameExW()
     // Let us allocate a "large enough" buffer and try.
     auto buf = std::unique_ptr<wchar_t[]>(new wchar_t[length + 1]);
 
-    ret = _GetUserNameExW(fmt, NULL, &length);
+    ret = GetUserNameExW(fmt, NULL, &length);
     if (!ret && GetLastError() != ERROR_MORE_DATA) {
         // We failed but not because the buffer is too small
-        FreeLibrary(hSecur32);
         return {};
     }
 
@@ -668,8 +653,7 @@ std::string user_account_info_internal(EXTENDED_NAME_FORMAT fmt) {
     // Let us add 1 to be on the safe side.
     buf = std::unique_ptr<wchar_t[]>(new wchar_t[length + 1]);
 
-    ret = _GetUserNameExW(NameUserPrincipal, NULL, &length);
-    FreeLibrary(hSecur32);
+    ret = GetUserNameExW(NameUserPrincipal, NULL, &length);
 
     return ret ? coot::sysdep::wide_string_to_local(std::wstring{buf.get()}, nullptr) : std::string{};
 }
