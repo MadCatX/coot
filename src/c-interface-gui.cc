@@ -1356,7 +1356,7 @@ void graphics_window_size_and_position_to_preferences() {
    if (!h.empty()) {
       // 20220507-PE pref_dir is now .coot
       std::string pref_dir = coot::util::append_dir_dir(h, ".coot");
-      if (! coot::is_directory_p(pref_dir)) {
+      if (!coot::util::is_dir(pref_dir)) {
          // make it
 	 // pref_dir = coot::get_directory(pref_dir); // oops not in this branch.
 	 struct stat s;
@@ -1371,7 +1371,8 @@ void graphics_window_size_and_position_to_preferences() {
             }
 	 }
       }
-      if (coot::is_directory_p(pref_dir)) {
+
+      if (coot::util::is_dir(pref_dir)) {
          graphics_info_t g;
          int x  = g.graphics_x_position;
          int y  = g.graphics_y_position;

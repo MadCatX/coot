@@ -1258,24 +1258,6 @@ coot::file_exists_and_non_tiny(const std::string &file_name, unsigned int tiny_s
    return status;
 }
 
-
-bool coot::is_directory_p(const std::string &filename) {
-
-   bool st = 0;
-   struct stat s;
-   int fstat = stat(filename.c_str(), &s);
-   if ( fstat == -1 ) { // file not exist
-      return 0;
-   } else {
-      if (S_ISDIR(s.st_mode)) {
-	 return 1;
-      } else {
-	 return 0;
-      }
-   }
-   return st;
-}
-
 bool coot::is_dir_or_link(const std::string &filename) {
    return coot::sysdep::is_dir(filename) || coot::sysdep::is_link(filename);
 }
