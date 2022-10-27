@@ -72,7 +72,6 @@ static constexpr double pi = M_PI;
 
 #include "coords/Bond_lines.h"
 
-#include "gl-matrix.h"
 #include "graphics-info.h"
 
 #include "coords/Bond_lines_ext.h"
@@ -91,14 +90,8 @@ static constexpr double pi = M_PI;
 #include "ligand/residue_by_phi_psi.hh"
 #include "mini-mol/mini-mol-utils.hh"
 
-// #include "cylinder-with-rotation-translation.hh" // for bonds
-
 // for debugging
 #include "c-interface.h"
-
-#include "molecular-mesh-generator.hh"
-#include "make-a-dodec.hh"
- 
 
 
 glm::vec3
