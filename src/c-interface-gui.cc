@@ -3532,7 +3532,7 @@ int is_mtz_file_p(const char *mtz_file_name) {
    // Let's say that we have to find some F columns in an file for it
    // to be counted as an mtz file.
    //
-   if (coot::file_exists(mtz_file_name)) {
+   if (coot::util::file_exists(mtz_file_name)) {
 
       coot::mtz_column_types_info_t r = coot::get_mtz_columns(mtz_file_name);
       if (r.f_cols.size() > 0)
@@ -3548,7 +3548,7 @@ int is_mtz_file_p(const char *mtz_file_name) {
 int cns_file_has_phases_p(const char *cns_file_name) {
 
    int r = 0;
-   if (coot::file_exists(cns_file_name)) {
+   if (coot::util::file_exists(cns_file_name)) {
       FILE* file = fopen( cns_file_name, "r" );
       if (! file) {
 	 std::cout << "WARNING:: oops! failed to open " << cns_file_name << std::endl;
@@ -6166,7 +6166,7 @@ curlew_install_extension_file(const std::string &file_name, const std::string &c
          std::cout << "WARNING:: bad URL retrieve " << file_name << std::endl;
       } else {
          // Happy path
-         if (coot::file_exists(dl_fn)) {
+         if (coot::util::file_exists(dl_fn)) {
             std::pair<bool, std::string> checksum_result = checksums_match(dl_fn, checksum);
             if (checksum_result.first) {
                // I want a function that returns preferences_dir
@@ -6216,7 +6216,7 @@ curlew_uninstall_extension_file(const std::string &file_name) {
       std::string preferences_dir = coot::util::append_dir_dir(home_directory, ".coot");
       std::string preferences_file_name = coot::util::append_dir_file(preferences_dir, file_name);
       std::string renamed_file_name = preferences_file_name + "_uninstalled";
-      if (coot::file_exists(preferences_file_name)) {
+      if (coot::util::file_exists(preferences_file_name)) {
 #ifndef WINDOWS_MINGW
          int status = rename(preferences_file_name.c_str(), renamed_file_name.c_str());
 #else
@@ -6299,7 +6299,7 @@ void curlew_dialog_install_extensions(GtkWidget *curlew_dialog, int n_extensions
 		     if (r) {
 			std::cout << "WARNING:: bad URL retrieve " << file_name << std::endl;
 		     } else {
-			if (coot::file_exists(dl_fn)) {
+			if (coot::util::file_exists(dl_fn)) {
 			   std::string checksum;
 			   if (checksum_cstr) checksum = checksum_cstr;
                            std::pair<bool, std::string> checksum_result = checksums_match(dl_fn, checksum);

@@ -15,7 +15,7 @@ std::pair<GtkWidget *, GtkBuilder *> create_single_map_properties_dialog_gtk3() 
    std::string dir_glade = coot::util::append_dir_dir(dir, "glade");
    std::string glade_file_name = "single-map-properties-dialog.glade";
    std::string glade_file_full = coot::util::append_dir_file(dir_glade, glade_file_name);
-   if (coot::file_exists(glade_file_name))
+   if (coot::util::file_exists(glade_file_name))
       glade_file_full = glade_file_name;
 
    guint add_from_file_status = gtk_builder_add_from_file(builder, glade_file_full.c_str(), NULL);

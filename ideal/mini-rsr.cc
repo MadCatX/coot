@@ -348,7 +348,7 @@ main(int argc, char **argv) {
 	    
 	 } else {
 
-	    if (coot::file_exists(inputs.map_file_name)) {
+	    if (coot::util::file_exists(inputs.map_file_name)) {
 	       // should we try/catch around this read?
 	       clipper::CCP4MAPfile file;
 	       file.open_read(inputs.map_file_name);

@@ -194,7 +194,7 @@ validate_ligand(const std::string &pdb_file_name,
 void
 read_data_validate_ligand(const input_data_t &input_data) {
 
-   if (coot::file_exists(input_data.pdb_file_name)) {
+   if (coot::util::file_exists(input_data.pdb_file_name)) {
 
       // ReadCoorFile doesn't add atom indexes UDData. So I get warning messages in
       // create_mmdbmanager_from_residue_vector(). So let's use get_atom_selection
@@ -212,7 +212,7 @@ read_data_validate_ligand(const input_data_t &input_data) {
          coot::residue_spec_t spec(input_data.chain_id, res_no, "");
          mmdb::Residue *residue_p = coot::util::get_residue(spec, mol);
          if (residue_p) {
-            if (coot::file_exists(input_data.dictionary)) {
+            if (coot::util::file_exists(input_data.dictionary)) {
 
                coot::protein_geometry geom;
                geom.set_verbose(false);

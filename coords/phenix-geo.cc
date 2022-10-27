@@ -75,7 +75,7 @@ coot::phenix_geo_bonds::phenix_geo_bonds(const std::string &file_name) {
 
    bool debug = false;
 
-   if (! file_exists(file_name)) {
+   if (!util::file_exists(file_name)) {
       std::cout << "File not found: " << file_name << std::endl;
    } else { 
 

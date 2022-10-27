@@ -589,7 +589,7 @@ match_residue_and_dictionary(int imol, std::string chain_id, int res_no, std::st
 
    int result = 0;
 
-   if (coot::file_exists(cif_dict_in)) {
+   if (coot::util::file_exists(cif_dict_in)) {
       coot::protein_geometry geom_local;
       geom_local.try_dynamic_add(reference_comp_id, 0);
       std::pair<short int, coot::dictionary_residue_restraints_t> rp_1 =

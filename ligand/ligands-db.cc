@@ -34,7 +34,7 @@
 coot::ligand_metrics::ligand_metrics(const std::string &db_file_name) {
 
    init();
-   if (file_exists(db_file_name)) {
+   if (util::file_exists(db_file_name)) {
       int rc = sqlite3_open(db_file_name.c_str(), &db_);
    } else {
       std::cout << "WARNING:: File not found " << db_file_name << std::endl;
@@ -336,7 +336,7 @@ void
 coot::ligand_metrics::parse_core_metrics(const std::string &input_file_name,
 					 const std::string &db_file_name) {
 
-   if (! file_exists(db_file_name)) {
+   if (!util::file_exists(db_file_name)) {
 
       std::ifstream f(input_file_name.c_str());
       if (f) {
@@ -347,7 +347,7 @@ coot::ligand_metrics::parse_core_metrics(const std::string &input_file_name,
 	 }
 
 	 sqlite3 *db = NULL;
-	 if (! file_exists(db_file_name))
+	 if (!util::file_exists(db_file_name))
 	    db = make_db(db_file_name); // database empty but with ligands table
 
 	 if (db) {
@@ -374,7 +374,7 @@ sqlite3 *
 coot::ligand_metrics::make_db(const std::string &db_file_name) const {
 
    sqlite3 *db = NULL;
-   if (! file_exists(db_file_name)) {
+   if (!util::file_exists(db_file_name)) {
       int rc = sqlite3_open(db_file_name.c_str(), &db);
       char *zErrMsg = 0;
       std::string command;
@@ -625,7 +625,7 @@ coot::ligand_metrics::update_resolutions(const std::string &resolutions_table_fi
 
    if (db_) {
 
-      if (file_exists(resolutions_table_file_name)) {
+      if (util::file_exists(resolutions_table_file_name)) {
 
 	 std::ifstream f(resolutions_table_file_name.c_str());
 	 if (f) {
@@ -658,7 +658,7 @@ coot::ligand_metrics::update_headers(const std::string &headers_file_name) {
 
    if (db_) {
 
-      if (file_exists(headers_file_name)) {
+      if (util::file_exists(headers_file_name)) {
 
 	 std::ifstream f(headers_file_name.c_str());
 	 if (f) {
@@ -769,7 +769,7 @@ coot::ligand_metrics::update_edstats_results(const std::string &edstats_file_nam
 
    if (db_) {
 
-      if (file_exists(edstats_file_name)) {
+      if (util::file_exists(edstats_file_name)) {
 
 	 std::ifstream f(edstats_file_name.c_str());
 	 if (f) {

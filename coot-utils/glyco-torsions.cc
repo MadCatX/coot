@@ -141,7 +141,7 @@ coot::link_by_torsion_t::link_by_torsion_t(const std::string &link_type,
    // now handle the decorations
    // 
    std::string decor_file_name = comp_id_to_decoration_file_name(new_residue_comp_id_in);
-   if (! file_exists(decor_file_name)) {
+   if (!util::file_exists(decor_file_name)) {
       std::cout << "No file " << decor_file_name << std::endl;
    } else { 
       coot::link_by_torsion_t decor(decor_file_name);
@@ -166,7 +166,7 @@ coot::link_by_torsion_t::link_type_to_file_name(const std::string &link_type,
 
    std::cout << "......... checking for " << ff << std::endl;
 
-   if (file_exists(ff)) {
+   if (util::file_exists(ff)) {
       return ff;
    } else {
       f = "link-by-torsion-to-pyranose-core-" + link_type + ".tab";
@@ -612,7 +612,7 @@ coot::link_by_torsion_t::write(const std::string &file_name) const {
 void
 coot::link_by_torsion_t::read(const std::string &file_name) {
 
-   if (! file_exists(file_name)) {
+   if (!util::file_exists(file_name)) {
       std::cout << "ERROR:: file not found " << file_name << std::endl;
       return;
    } else {

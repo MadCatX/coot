@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
          std::cout << "INFO:: pdb read success " << pdb_file_name << std::endl;
 
-         if (coot::file_exists(map_file_name)) {
+         if (coot::util::file_exists(map_file_name)) {
             clipper::CCP4MAPfile file;
             clipper::Xmap<float> xmap;
             std::cout << "# reading map" << std::endl;

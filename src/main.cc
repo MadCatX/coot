@@ -297,14 +297,14 @@ bool init_from_gtkbuilder() {
    std::string glade_file_full = coot::util::append_dir_file(dir_glade, "a6.glade");
 
    GtkBuilder *builder = gtk_builder_new();
-   if (coot::file_exists("a6.glade"))  // Hack for now
+   if (coot::util::file_exists("a6.glade"))  // Hack for now
       glade_file_full = "a6.glade";
 
    const char *env = getenv("COOT_GLADE");
    if (env)
       glade_file_full = std::string(env);
 
-   if (coot::file_exists(glade_file_full)) {
+   if (coot::util::file_exists(glade_file_full)) {
       std::cout << "debug:: file exists " << glade_file_full << std::endl;
 
       GError *error = NULL;

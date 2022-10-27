@@ -1138,7 +1138,7 @@ coot::ligand_report_absolute_t::make_percentiles() const {
    // hack, for testing ligands.db in the working directory.
    // f = ligands_db_file_name;
 
-   if (! coot::file_exists(f)) {
+   if (!coot::util::file_exists(f)) {
       std::cout << "WARNING:: No such file: " << f << std::endl;
    } else {
       sqlite3 *db;

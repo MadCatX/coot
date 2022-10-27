@@ -4355,7 +4355,7 @@ int find_nucleic_acids_local( float radius )
    const char *cp = getenv("COOT_PREFIX");
    if (cp) nafile = std::string(cp) + "/share/coot/nautilus_lib.pdb";
    else    nafile = std::string(PKGDATADIR) + "/nautilus_lib.pdb";
-   if (!coot::file_exists(nafile)) {
+   if (!coot::util::file_exists(nafile)) {
       std::cout << "Ooops! Can't find nautilus data! - fail" << std::endl;
       return -1;
    }

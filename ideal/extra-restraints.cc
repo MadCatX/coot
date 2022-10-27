@@ -32,7 +32,7 @@
 void
 coot::extra_restraints_t::read_refmac_extra_restraints(const std::string &file_name) {
 
-   if (file_exists(file_name)) {
+   if (util::file_exists(file_name)) {
       std::string line;
       std::vector<std::string> lines;
       std::ifstream f(file_name.c_str());

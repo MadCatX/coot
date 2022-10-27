@@ -9028,7 +9028,7 @@ coot::mtrix_info(const std::string &file_name) {
    
    std::vector<clipper::RTop_orth> r;
 
-   if (file_exists(file_name)) {
+   if (util::file_exists(file_name)) {
       std::ifstream f(file_name.c_str());
       if (f) {
          std::vector<std::string> lines;

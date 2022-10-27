@@ -1300,7 +1300,7 @@ coot::side_chain_densities::write_density_box(const coot::density_box_t &db, con
       std::string rot_dir = dir + "/" + res_name + "/" + rot_name;
       std::string file_name = rot_dir + "/" + id + "-" + residue_p->GetChainID() + util::int_to_string(residue_p->GetSeqNum()) + ".tab";
 
-      if (! file_exists(rot_dir))
+      if (!util::file_exists(rot_dir))
          util::create_directory(rot_dir);
       // std::cout << "write_density_box() to filename " << file_name << std::endl;
 

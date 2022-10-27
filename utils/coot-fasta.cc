@@ -200,7 +200,7 @@ coot::fasta::is_fasta_aa(const std::string &a) const {
 void
 coot::fasta_multi::read(const std::string &file_name) {
 
-   if (file_exists(file_name)) {
+   if (util::file_exists(file_name)) {
       std::ifstream f(file_name.c_str());
       if (f) {
 	 std::vector<std::string> lines;

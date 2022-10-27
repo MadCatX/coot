@@ -393,7 +393,7 @@ Mesh::load_from_glTF(const std::string &file_name_in, bool include_call_to_setup
    std::string warn;
 
    std::string file_name = file_name_in;
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
       // do nothing
       std::cout << "debug:: file " << file_name << " exists and will be  read" << std::endl;
    } else {

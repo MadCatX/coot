@@ -430,7 +430,7 @@ int test_output_link_distances_are_correct() {
    status = 0;
 
    std::string filename = greg_test("pdb4rdq.ent");
-   if (coot::file_exists("pdb4rdq.ent")) {
+   if (coot::util::file_exists("pdb4rdq.ent")) {
       atom_selection_container_t atom_sel = get_atom_selection(filename, true, false, false);
       if (atom_sel.mol) {
 	 mmdb::Residue *r = test_get_residue(atom_sel.mol, "E", 502);
@@ -447,7 +447,7 @@ int test_output_link_distances_are_correct() {
 	    atom_sel.mol->FinishStructEdit();
 	    filename = "pdb4rqd-with-moved-CA.pdb";
 	    coot::write_coords_pdb(atom_sel.mol, filename);
-	    if (coot::file_exists(filename)) {
+	    if (coot::util::file_exists(filename)) {
 	       atom_sel = get_atom_selection(filename, true, true, false);
 	       if (atom_sel.mol) {
 		  mmdb::Model *model_p = atom_sel.mol->GetModel(1);

@@ -4097,7 +4097,7 @@ molecule_class_info_t::associate_sequence_from_file(const std::string &seq_file_
 
    std::string extension = coot::util::file_name_extension(seq_file_name);
    std::string chain_id;
-   if (coot::file_exists(seq_file_name)) {
+   if (coot::util::file_exists(seq_file_name)) {
       std::string seq = file_to_string(seq_file_name);
       if (extension == ".pir") {
          assign_pir_sequence(chain_id, seq);
@@ -4204,7 +4204,7 @@ molecule_class_info_t::assign_sequence_from_file(const std::string &filename) {
 
    if (! atom_sel.mol) return;
 
-   if (! coot::file_exists(filename)) {
+   if (!coot::util::file_exists(filename)) {
       std::cout << "Sequence file not found: " << filename << std::endl;
    } else {
 

@@ -3325,7 +3325,7 @@ molecule_class_info_t::make_map_from_phs(const clipper::Spacegroup &sg,
 
    clipper::PHSfile phs;
 
-   if (! coot::file_exists(phs_filename)) {
+   if (!coot::util::file_exists(phs_filename)) {
       std::cout << "INFO:: file " << phs_filename << " does not exit " << std::endl;
       return -1;
    }

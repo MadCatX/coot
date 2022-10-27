@@ -181,7 +181,7 @@ coot::flips_container::get_user_mods(const std::string &filename) const {
 void 
 coot::flips_container::handle_user_mods(const std::string &filename) {
 
-   if (coot::file_exists(filename)) { 
+   if (coot::util::file_exists(filename)) { 
       std::vector<std::string> user_mod_strings = 
 	 get_user_mods(filename);
       store(user_mod_strings);

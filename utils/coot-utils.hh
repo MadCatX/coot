@@ -199,8 +199,6 @@ namespace coot {
    short int
    is_mmcif_filename(const std::string &filename);
 
-   bool file_exists(const std::string &filename);
-
    bool file_is_empty(const std::string &filename);
 
    bool file_exists_and_non_empty(const std::string &file_name);

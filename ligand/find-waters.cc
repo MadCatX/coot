@@ -326,7 +326,7 @@ main(int argc, char **argv) {
 	 if (have_map) {
 	    clipper::CCP4MAPfile file;
 	    clipper::Xmap<float> xmap;
-	    if (coot::file_exists(map_file_name)) {
+	    if (coot::util::file_exists(map_file_name)) {
 	       file.open_read(map_file_name);
 	       file.import_xmap(xmap);
 	       file.close_read();

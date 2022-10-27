@@ -70,7 +70,7 @@ molecule_class_info_t::make_patterson(std::string mtz_file_name,
 				      float map_sampling_rate) {
 
    bool ret_val = 0;
-   if (coot::file_exists(mtz_file_name)) {
+   if (coot::util::file_exists(mtz_file_name)) {
 
       try {
 	 // KDC Code (examples/cpatterson.cpp)
@@ -162,7 +162,7 @@ molecule_class_info_t::make_patterson_using_intensities(std::string mtz_file_nam
 							float map_sampling_rate) {
 
    bool ret_val = false;
-   if (coot::file_exists(mtz_file_name)) {
+   if (coot::util::file_exists(mtz_file_name)) {
 
       try {
 	 clipper::HKL_info hkls, hklp;

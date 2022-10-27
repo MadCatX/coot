@@ -60,7 +60,7 @@ coot::operator<<(std::ostream &s, const mogul_item &it) {
 void
 coot::mogul::parse(const std::string &file_name) {
 
-   if (! file_exists(file_name)) {
+   if (!util::file_exists(file_name)) {
       std::cout << "filename " << file_name << " does not exist " << std::endl;
    } else {
       std::ifstream f(file_name.c_str());

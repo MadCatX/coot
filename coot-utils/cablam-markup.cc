@@ -211,7 +211,7 @@ coot::make_cablam_markups(mmdb::Manager *mol, const std::string &cablam_output_f
    std::vector<cablam_markup_t> v;
 
    std::vector<std::pair<residue_spec_t, double> > scored_baddie_specs;
-   if (file_exists(cablam_output_file_name)) {
+   if (util::file_exists(cablam_output_file_name)) {
       std::ifstream f(cablam_output_file_name.c_str());
       if (f) {
          std::cout << "debug:: opened " << cablam_output_file_name << std::endl;

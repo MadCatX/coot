@@ -7424,7 +7424,7 @@ run_python_script(const char *filename_in) {
    PyRun_SimpleString(simple.c_str());
 #endif
 
-   if (coot::file_exists(filename_in)) {
+   if (coot::util::file_exists(filename_in)) {
       FILE *fp = fopen(filename_in, "r");
       PyRun_SimpleFile(fp, filename_in);
       fclose(fp);
