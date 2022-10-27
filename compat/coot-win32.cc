@@ -155,7 +155,7 @@ bool file_exists(const std::string &file_path) {
     return true;
 }
 
-int_least64_t get_file_size(const std::string &file_size) {
+int_least64_t get_file_size(const std::string &file_path) {
     bool ok;
     std::wstring w_file_path = windowsize_path(file_path, &ok);
     if (!ok) {
