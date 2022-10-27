@@ -66,10 +66,6 @@ static constexpr double pi = M_PI;
 #include "coords/mmdb-crystal.h"
 #include "gtk-manual.hh"
 
-// For stat, mkdir:
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #include "coords/Bond_lines.h"
 
 #include "graphics-info.h"
@@ -386,20 +382,13 @@ molecule_class_info_t::handle_read_draw_molecule(int imol_no_in,
 
    // need to check that filename exists and is a file.
    //
-   struct stat s;
-   int status = stat(filename.c_str(), &s);
-
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
+   if (!coot::util::is_regular_file(filename)) {
       std::cout << "WARNING:: Error reading " << filename << std::endl;
-      if (S_ISDIR(s.st_mode)) {
+      if (coot::util::is_dir(filename)) {
          std::cout << filename << " is a directory." << std::endl;
       }
-      return -1; // which is status in an error
+      return -1;
    }
-
 
    // Read in pdb, [shelx files use the read_shelx_ins_file method]
    //
