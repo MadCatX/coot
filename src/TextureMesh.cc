@@ -1528,7 +1528,7 @@ TextureMesh::load_from_glTF(const std::string &file_name_in, bool include_call_t
    std::string warn;
 
    std::string file_name = file_name_in;
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
       // do nothing
    } else {
       std::string dir = coot::package_data_dir();

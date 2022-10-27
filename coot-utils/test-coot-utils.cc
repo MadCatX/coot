@@ -512,7 +512,7 @@ int test_glyco_link_by_geometry() {
 
    for (std::size_t i=0; i<file_names.size(); i++) {
       const std::string &file_name = file_names[i];
-      if (coot::file_exists(file_name)) {
+      if (coot::util::file_exists(file_name)) {
          mmdb::Manager *mol = new mmdb::Manager;
          mol->ReadCoorFile(file_name.c_str());
 

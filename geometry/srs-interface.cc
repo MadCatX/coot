@@ -14,13 +14,13 @@ coot::get_srs_dir() {
    const char *d2 = getenv("CCP4");
 
    if (d1) {
-      if (file_exists(d1))
+      if (util::file_exists(d1))
 	 dir = d1;
    } else {
       if (d2) {
 	 std::string dir_a = util::append_dir_dir(d2, "share");
 	 std::string dir_b = util::append_dir_dir(dir_a, "ccp4srs");
-	 if (file_exists(dir_b))
+	 if (util::file_exists(dir_b))
 	    dir = dir_b;
       }
    }

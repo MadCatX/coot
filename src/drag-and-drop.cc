@@ -208,7 +208,7 @@ int handle_drag_and_drop_string(const std::string &uri_in) {
 
    if (! tried_already) {
       std::cout << "here at the end of handle_drag_and_drop_string() " << std::endl;
-      if (coot::file_exists(url)) {
+      if (coot::util::file_exists(url)) {
 	 handled = handle_drag_and_drop_single_item(url);
       } 
    } 

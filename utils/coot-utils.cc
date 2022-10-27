@@ -1180,21 +1180,6 @@ coot::util::random_f() {
    return r * irm;
 }
 
-
-
-bool
-coot::file_exists(const std::string &filename) {
-
-   struct stat s;
-   int fstat = stat(filename.c_str(), &s);
-   if ( fstat == -1 ) { // file not exist
-      return false;
-   } else {
-      return true;
-   }
-}
-
-
 bool
 coot::file_is_empty(const std::string &filename) {
 
@@ -1212,33 +1197,19 @@ coot::file_is_empty(const std::string &filename) {
 
 bool
 coot::file_exists_and_non_empty(const std::string &file_name) {
-   bool status = false;
-   if (coot::file_exists(file_name)) {
-      struct stat buf;
-      int istat = stat(file_name.c_str(), &buf);
-      if (istat == 0) { // success
-         if (buf.st_size > 0) {
-            status = true;
-         }
-      }
+   if (util::file_exists(file_name)) {
+      return util::get_file_size(file_name) > 0;
    }
-   return status;
+   return false;
 }
 
 bool
 coot::file_exists_and_non_tiny(const std::string &file_name, unsigned int tiny_size_max) {
-
-   bool status = false;
-   if (coot::file_exists(file_name)) {
-      struct stat buf;
-      int istat = stat(file_name.c_str(), &buf);
-      if (istat == 0) { // success
-         if (buf.st_size > tiny_size_max) {
-            status = true;
-         }
-      }
+   if (util::file_exists(file_name)) {
+      auto size = util::get_file_size(file_name);
+      return size > tiny_size_max;
    }
-   return status;
+   return false;
 }
 
 bool coot::is_dir_or_link(const std::string &filename) {
@@ -1654,7 +1625,7 @@ coot::copy_file(const std::string &from_file, const std::string &to_file) {
                    };
 
    bool success = false;
-   if (file_exists(from_file)) {
+   if (util::file_exists(from_file)) {
       std::string s = file_to_string(from_file);
       success = string_to_file(s, to_file);
    }

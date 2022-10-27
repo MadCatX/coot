@@ -142,11 +142,11 @@ Texture::init(const std::string &file_name_in) {
       default_directory = coot::util::append_dir_dir(pkg_data_dir, "textures");
    }
 
-   if (! coot::file_exists(file_name)) {
+   if (!coot::util::file_exists(file_name)) {
       file_name = coot::util::append_dir_file(default_directory, file_name);
    }
 
-   if (! coot::file_exists(file_name)) {
+   if (!coot::util::file_exists(file_name)) {
       std::cout << "ERROR:: missing file " << file_name << std::endl;
       std::cout << "ERROR:: not in " << default_directory << std::endl;
       return;

@@ -114,7 +114,7 @@ coot::beam_in_linked_residue::setup_by_comp_id(const std::string &comp_id_ref,
    full_path_pdb_filename += "/";
    full_path_pdb_filename += file_name;
    
-   if (coot::file_exists(full_path_pdb_filename)) {
+   if (util::file_exists(full_path_pdb_filename)) {
    
       mmdb::Manager *t_mol = new mmdb::Manager;
       int read_status = t_mol->ReadPDBASCII(full_path_pdb_filename.c_str());
@@ -173,7 +173,7 @@ coot::beam_in_linked_residue::setup_by_group_group(const std::string &group_ref,
       std::cout << "debug:: setup_by_group() full_path_pdb_filename "
                 << full_path_pdb_filename
                 << std::endl;
-   if (! coot::file_exists(full_path_pdb_filename)) {
+   if (!util::file_exists(full_path_pdb_filename)) {
       std::cout << "WARNING:: link template file " << full_path_pdb_filename
                 << " does not exist " << std::endl;
    } else { 
@@ -230,7 +230,7 @@ coot::beam_in_linked_residue::setup_by_comp_id_group(const std::string &comp_id_
    std::string full_path_pdb_filename = pkgdatadir; // and then add to it...
    full_path_pdb_filename += "/";
    full_path_pdb_filename += file_name;
-   if (! coot::file_exists(full_path_pdb_filename)) {
+   if (!util::file_exists(full_path_pdb_filename)) {
       std::cout << "WARNING:: link template file " << full_path_pdb_filename
                 << " does not exist " << std::endl;
    } else {

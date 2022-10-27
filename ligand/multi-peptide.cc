@@ -51,7 +51,7 @@ coot::multi_build_terminal_residue_addition::setup_standard_residues_mol() {
       filename = std::string(filename_str);
    }
 
-   if (file_exists(filename)) {
+   if (util::file_exists(filename)) {
 
       mmdb::Manager *mol = new mmdb::Manager;
       mmdb::ERROR_CODE err = mol->ReadCoorFile(filename.c_str());
@@ -341,7 +341,7 @@ coot::stored_fragment_t::try_assign_sidechains(coot::stored_fragment_t &stored_f
 	 llkdfile = cp;
 	 llkdfile += "/share/coot/cootaneer-llk-2.40.dat";
       }
-      if (!file_exists(llkdfile)) {
+      if (!util::file_exists(llkdfile)) {
 	 std::cout << "Ooops! Can't find cootaneer likelihood data! - failure"
 		   << std::endl;
       } else {

@@ -214,7 +214,7 @@ int cootaneer_internal(int imol_map, int imol_model, const coot::atom_spec_t &at
 	    llkdfile += "/share/coot/cootaneer-llk-2.40.dat";
 	 }
 
-	 if (!coot::file_exists(llkdfile)) {
+	 if (!coot::util::file_exists(llkdfile)) {
 
 	    std::cout << "Ooops! Can't find cootaneer likelihood data! - failure"
 		      << std::endl;

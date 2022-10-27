@@ -135,7 +135,7 @@ coot::numerical_gradients(gsl_vector *v,
 
    bool done_by_file = false;
    if (! gradients_file_name.empty()) {
-      if (! file_exists(gradients_file_name)) {
+      if (!util::file_exists(gradients_file_name)) {
          done_by_file = true;
 
 	 std::ofstream f(gradients_file_name.c_str());

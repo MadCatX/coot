@@ -24,7 +24,7 @@ graphics_info_t::load_freetype_font_textures() {
    std::string pkgdatadir = coot::package_data_dir();
    std::string font_dir  = coot::util::append_dir_dir(pkgdatadir, "fonts");
    std::string font_path = coot::util::append_dir_file(font_dir, "Vera.ttf");
-   if (! coot::file_exists(font_path))
+   if (!coot::util::file_exists(font_path))
        font_path = "fonts/Vera.ttf";
    if (FT_New_Face(ft, font_path.c_str(), 0, &face)) {
       std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;

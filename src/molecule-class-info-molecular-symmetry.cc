@@ -38,7 +38,7 @@ molecule_class_info_t::add_molecular_symmetry_from_mtrix_from_self_file() {
 
    if (has_model()) {
       std::string file_name = name_;
-      if (coot::file_exists(file_name)) {
+      if (coot::util::file_exists(file_name)) {
          add_molecular_symmetry_from_mtrix_from_file(file_name);
       }
    }

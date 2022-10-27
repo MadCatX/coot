@@ -97,7 +97,7 @@ int map_from_mtz_by_calc_phases(const char *mtz_file_name,
   map_from_mtz_by_refmac_calc_phases() */
 void calc_phases_generic(const char *mtz_file_name) {
 
-   if (coot::file_exists(mtz_file_name)) {
+   if (coot::util::file_exists(mtz_file_name)) {
       graphics_info_t g;
       coot::mtz_column_types_info_t r = coot::get_mtz_columns(mtz_file_name);
       if (r.f_cols.size() == 0) {
@@ -661,7 +661,7 @@ std::vector<int> auto_read_make_and_draw_maps(const char *mtz_file_name) {
    std::vector<int> imol_vec;
    int imol = -1;
 
-   if (! coot::file_exists(mtz_file_name)) {
+   if (!coot::util::file_exists(mtz_file_name)) {
       std::cout << "WARNING:: file " << mtz_file_name << " does not exist" << std::endl;
    } else {
       if ( is_mtz_file_p(mtz_file_name) ) {
@@ -798,7 +798,7 @@ int auto_read_make_and_draw_maps_old(const char *mtz_file_name) {
    int imol2 = -1;
    graphics_info_t g;
 
-   if (! coot::file_exists(mtz_file_name)) {
+   if (!coot::util::file_exists(mtz_file_name)) {
       std::cout << "WARNING:: file " << mtz_file_name << " does not exist" << std::endl;
       return -1;
    }

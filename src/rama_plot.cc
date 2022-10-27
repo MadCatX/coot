@@ -198,7 +198,7 @@ coot::rama_plot::create_dynarama_window() {
       std::string pkg_data_dir = coot::package_data_dir();
       std::string glade_dir = coot::util::append_dir_dir(pkg_data_dir, "glade");
       std::string glade_file_full = coot::util::append_dir_file(glade_dir, glade_file_name);
-      if (coot::file_exists(glade_file_name))
+      if (coot::util::file_exists(glade_file_name))
          glade_file_full = glade_file_name;
 
       guint add_from_file_status = gtk_builder_add_from_file(builder, glade_file_full.c_str(), NULL);

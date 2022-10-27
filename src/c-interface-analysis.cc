@@ -360,7 +360,7 @@ void import_bild(const std::string &file_name) {
                             graphics_info_t::generic_display_objects.push_back(m);
                          };
 
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
       std::ifstream f(file_name.c_str());
       if (f) {
          std::vector<std::string> lines;
