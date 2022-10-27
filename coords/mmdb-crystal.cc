@@ -28,9 +28,6 @@
 #include <vector>
 #include <math.h>
 
-#include <sys/types.h>  // stating
-#include <sys/stat.h>
-
 #if !defined _MSC_VER
 #include <unistd.h>
 #else
@@ -1115,40 +1112,31 @@ int set_mmdb_cell_and_symm(atom_selection_container_t asc,
    return istat;
 }
 
-
-
 atom_selection_container_t read_standard_residues() {
+   static const char * ENV_VAR_NAME = "COOT_STANDARD_RESIDUES";
 
-   std::string standard_env_dir = "COOT_STANDARD_RESIDUES";
-   atom_selection_container_t standard_residues_asc;
-   
-   const char *filename = getenv(standard_env_dir.c_str());
-   if (! filename) {
+   const char *filename_c = getenv(ENV_VAR_NAME);
 
-      std::string standard_file_name = PKGDATADIR;
-      standard_file_name += "/";
-      standard_file_name += "standard-residues.pdb";
-
-      struct stat buf;
-      int status = stat(standard_file_name.c_str(), &buf);  
-      if (status != 0) { // standard-residues file was not found in
-			 // default location either...
-	 std::cout << "WARNING: environment variable for standard residues ";
-	 std::cout << standard_env_dir << "\n";
-	 std::cout << "         is not set.";
-	 std::cout << " Mutations will not be possible\n";
-	 // mark as not read then:
-	 standard_residues_asc.read_success = 0;
-	 // std::cout << "DEBUG:: standard_residues_asc marked as
-	 // empty" << std::endl;
-      } else { 
-	 // stat success:
-	 standard_residues_asc = get_atom_selection(standard_file_name, true, false, false);
-      }
-   } else { 
-      standard_residues_asc = get_atom_selection(filename, true, false, false);
+   std::string filename;
+   if (filename_c) {
+      filename = filename_c;
+   } else {
+      filename = coot::util::append_dir_dir(PKGDATADIR, "standard-residues.pdb");
    }
 
-   return standard_residues_asc;
-}
+   if (!coot::util::is_regular_file(filename)) {
+      std::cout << "WARNING: Cannot read file with standard residues. Mutations will not be possible." << std::endl;
+      if (!filename_c) {
+         std::cout
+            << "         "  // Pad to the width of "WARNING: "
+            << "Maybe you wanted to set " << ENV_VAR_NAME << " environment variable to something?" << std::endl;
+      }
 
+      atom_selection_container_t standard_residues_asc;
+      standard_residues_asc.read_success = 0;
+
+      return standard_residues_asc;
+   }
+
+   return get_atom_selection(filename, true, false, false);
+}
