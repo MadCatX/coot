@@ -20,14 +20,9 @@
  * 02110-1301, USA
  */
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-#include <string.h>
-
 #include <algorithm>
 
 #if !defined _MSC_VER
-#include <unistd.h>
 #else
 #define DATADIR "C:/coot/share"
 #endif
@@ -276,18 +271,15 @@ coot::db_main::get_reference_pdb_list() const {
    std::vector<std::string> pdb_list; 
    std::string mapview_ref_structs("COOT_REF_STRUCTS"); 
    
-   char *dir = getenv(mapview_ref_structs.c_str()); 
+   const char *dir = getenv(mapview_ref_structs.c_str());
    std::string d(DATADIR); // prefix/share
    std::string ref_struct_dir = coot::util::append_dir_dir(d, "coot");
    ref_struct_dir = coot::util::append_dir_dir(ref_struct_dir, "reference-structures");
 
-   if (!dir) { 
+   if (!dir) {
       // Let's try the "standard" place DATADIR/coot/reference-structures
-
-      struct stat buf;
-      int istat = stat(ref_struct_dir.c_str(), &buf);
-      if (istat == 0) { 
-	 dir = (char *) ref_struct_dir.c_str();
+      if (util::is_dir(ref_struct_dir)) {
+         dir = ref_struct_dir.c_str();
       }
    }
 
@@ -298,64 +290,48 @@ coot::db_main::get_reference_pdb_list() const {
 		<< "       Cannot continue with mainchain building.\n";
    } else { 
       std::string ref_str_dir_str(dir); 
-      
-      DIR *ref_struct_dir = opendir(ref_str_dir_str.c_str()); 
 
-      if (ref_struct_dir == NULL) { 
-	 std::cout << "An error occured on opendir" << std::endl;
-      } else { 
+      std::vector<std::string> files = util::gather_files_by_patterns(ref_str_dir_str, { ".pdb", ".pdb.gz", ".gz" });
+      for (const auto &f : files) {
+         // If file has a plain ".gz" suffix but does not begin with "pdb" do not consider it a valid file
+         auto lowercased = util::downcase(f);
+         if (util::ends_with(lowercased, ".gz") && !util::ends_with(lowercased, ".pdb.gz")) {
+	         if (util::begins_with(lowercased, "pdb")) {
+               pdb_list.push_back(util::append_dir_file(dir, f));
+            }
+         } else {
+            pdb_list.push_back(util::append_dir_file(dir, f));
+         }
+      }
+   }
 
-	 std::cout << ref_str_dir_str << " successfully opened" << std::endl; 
+   std::cout << "PDB files read from " << dir << ":";
+   if (pdb_list.empty()) {
+      std::cout << " (None)" << std::endl;
+   } else {
+      std::cout << "\n";
+      for (const auto &f : pdb_list) {
+         std::cout << f << "\n";
+      }
+      std::cout << std::endl;
+   }
 
-	 // loop until the end of the filelist (readdir returns NULL)
-	 // 
-	 struct dirent *dir_ent; 
-
-	 while(1) { 
-	    dir_ent = readdir(ref_struct_dir); 
-
-	    if (dir_ent != NULL) { 
-
-	       std::string file_str(dir_ent->d_name); 
-	       if (coot::matches_pdb_name(file_str)) {
-
-		  // Construct a file in a unix directory - non-portable?
-		  // 
-		  std::string s(dir);
-		  s += "/"; 
-		  s += file_str; 
-
-		  pdb_list.push_back(s); 
-	       }
-	    } else { 
-	       break;
-	    }
-	 }
-	 closedir(ref_struct_dir); 
-      } 
-   } 
    return pdb_list; 
 } 
 
 bool
-coot::matches_pdb_name(std::string file_str) { 
+coot::matches_pdb_name(const std::string &file_str) {
+   const auto lwr = util::downcase(file_str);
 
-   bool match_flag = false; 
-
-   // did it end in: .pdb .pdb.gz or was it pdb*.gz?
-
-   std::string::size_type t1 = file_str.find(".pdb");
-   std::string::size_type t2 = file_str.find(".pdb.gz");
-   std::string::size_type t3 = file_str.find("pdb");
-   std::string::size_type t4 = file_str.find(".gz");
-
-   if (t1 != std::string::npos) match_flag = true;
-   if (t2 != std::string::npos) match_flag = true;
-   if (t3 != std::string::npos && t4 != std::string::npos) match_flag = true;
-   
-   return match_flag; 
+   if (util::ends_with(lwr, ".pdb")) {
+      return true;
+   } else if (util::ends_with(lwr, ".pdb.gz")) {
+      return true;
+   } else if (util::ends_with(lwr, ".gz") && util::begins_with(lwr, "pdb")) {
+      return true;
+   }
+   return false;
 }
-
 
 std::vector<clipper::Coord_orth>
 coot::db_main::get_target_ca_coords(int iresno, int ilength,

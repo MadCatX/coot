@@ -33,7 +33,7 @@
 
 namespace coot { 
 
-   bool matches_pdb_name(std::string file_str);
+   bool matches_pdb_name(const std::string &file_str);
    
    class coord_fragment_wrapper_t {
       

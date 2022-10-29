@@ -645,6 +645,21 @@ std::string coot::util::file_name_directory(const std::string &file_name) {
    return rstring;
 }
 
+bool
+coot::util::begins_with(const std::string &s, const std::string &beginning) {
+   if (s.empty() || beginning.empty()) {
+      return false;
+   }
+   return s.find(beginning) == 0;
+}
+
+bool coot::util::ends_with(const std::string &s, const std::string &ending) {
+   if (s.empty() || ending.empty() || s.length() < ending.length()) {
+      return false;
+   }
+   return s.rfind(ending) == s.length() - ending.length();
+}
+
 std::string
 coot::util::current_working_dir() {
    return coot::sysdep::current_working_dir();
@@ -1123,29 +1138,25 @@ coot::util::split_string_on_whitespace_no_blanks(const std::string &string_in) {
 
 
 std::string
-coot::util::downcase(const std::string &s) {
+coot::util::downcase(std::string s) noexcept {
+   std::string::iterator it=s.begin();
 
-   std::string r = s;
-   std::string::iterator it=r.begin();
-
-   while ( (it!=r.end()) ) {
+   while ( (it!=s.end()) ) {
       *it = ::tolower(*it);
       it++;
    }
-   return r;
+   return s;
 }
 
 std::string
-coot::util::upcase(const std::string &s) {
+coot::util::upcase(std::string s) noexcept {
+   std::string::iterator it=s.begin();
 
-   std::string r = s;
-   std::string::iterator it=r.begin();
-
-   while (it!=r.end()) {
+   while (it!=s.end()) {
       *it = ::toupper(*it);
       it++;
    }
-   return r;
+   return s;
 }
 
 //

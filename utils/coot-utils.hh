@@ -85,6 +85,9 @@ namespace coot {
 
       int round_up_by_hundreds(int num);
 
+      bool begins_with(const std::string &s, const std::string &beginning);
+      bool ends_with(const std::string &s, const std::string &ending);
+
       std::string get_fixed_font();
 
       bool change_to_writeable_base_dir();
@@ -154,8 +157,8 @@ namespace coot {
       // as above but only nucleotide names allowed.
       bool is_standard_nucleotide_name(const std::string &residue_name);
 
-      std::string downcase(const std::string &s);
-      std::string upcase(const std::string &s);
+      std::string downcase(std::string s) noexcept;
+      std::string upcase(std::string s) noexcept;
       std::string capitalise(const std::string &s); // capitalise first, downcase rest
 
       std::vector<std::pair<std::string, int> > atomic_number_atom_list();
