@@ -5,7 +5,9 @@ bin_PROGRAMS = srs-inspect
 
 srs_inspect_SOURCES = srs-inspect.cc
 
-srs_inspect_LDADD = $(CCP4SRS_LIBS)
+srs_inspect_LDADD = \
+    $(top_builddir)/compat/libcoot-compat.la \
+    $(CCP4SRS_LIBS)
 
 EXTRA_DIST = install-sh missing mkinstalldirs
 

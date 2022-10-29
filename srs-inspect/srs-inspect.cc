@@ -19,15 +19,11 @@
  * 02110-1301, USA
  */
 
-#include <sys/types.h>
-#include <sys/stat.h> 
-#include <unistd.h>
-
 #include <iostream>
 #include <string>
 
 #include "ccp4srs/ccp4srs_manager.h"
-
+#include "compat/coot-sysdep.h"
 
     
 bool
@@ -57,7 +53,7 @@ exists_in_refmac(const std::string &id,
       full_path +=  id;
       full_path +=  ".cif";
 
-      if (file_exists(full_path)) { 
+      if (coot::sysdep::file_exists(full_path)) {
 	 // std::cout << "checked " << full_path << " exists "  << std::endl;
 	 exists = true;
       } else { 
