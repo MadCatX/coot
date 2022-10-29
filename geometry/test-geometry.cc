@@ -20,16 +20,15 @@
  */
 
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 
 #include <iostream>
 
 #include "protein-geometry.hh"
 #include "protein-donor-acceptors.hh"
+
+#include "utils/coot-utils.hh"
 
 std::vector <std::string> protein_monomers();
 
@@ -76,9 +75,8 @@ ccp4_setup(int argc, char **argv) {
 	 // contains the linkages:
 	 filename += "/lib/data/monomers/list/mon_lib_list.cif";
 	 // now check that that file is there:
-	 struct stat buf;
-	 stat(filename.c_str(), &buf);
-	 if (S_ISREG(buf.st_mode)) {
+
+	 if (coot::util::is_regular_file(filename)) {
 	    std::cout << "reading mon_lib_list..." << std::endl; 
 	    coot::protein_geometry prot;
 	    prot.init_refmac_mon_lib(filename, -1);
@@ -91,8 +89,7 @@ ccp4_setup(int argc, char **argv) {
 	       filename += protein_mono[i];
 
 	       // filename = "ALA.cif";
-	       stat(filename.c_str(), &buf);
-	       if (S_ISREG(buf.st_mode)) {
+	       if (coot::util::is_regular_file(filename)) {
 		  prot.init_refmac_mon_lib(filename, read_number++);
 	       } else {
 		  std::cout << "ERROR: dictionary " << filename

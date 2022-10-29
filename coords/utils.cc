@@ -29,24 +29,10 @@
 #include <stdio.h>  // for printf
 
 #include "utils.h"
+#include "utils/coot-utils.hh"
 
 int 
 does_file_exist(const char *file_name) { 
-
-   int iout;
-   int i;
-
-   struct stat buf;
-
-   i = stat(file_name, &buf);
-
-   if (i == 0) { 
-      printf("%s is statable\n", file_name); 
-      iout = 1;
-   } else { 
-      printf("%s is not statable\n", file_name); 
-      iout = 0;
-   } 
-   return iout;
+   return coot::util::file_exists(file_name);
 } 
 
