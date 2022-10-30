@@ -41,8 +41,6 @@
 #endif // HAVE_STRING
 
 #include <string.h> // strlen, strncpy
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
 
 #include "guile-fixups.h"
 
@@ -65,6 +63,8 @@
 #include "cmtz-interface-gui.hh"
 #include "coords/mmdb.h"  // for centre of molecule
 #include "clipper/core/clipper_instance.h"
+
+#include "utils/coot-utils.hh"
 
 #include "c-interface-gui.hh"
 
@@ -1344,9 +1344,6 @@ store_window_position(int window_type, GtkWidget *widget) {
    }
 }
 
-#include "utils/coot-utils.hh"
-
-
 /*! \brief store the graphics window position and size to zenops-graphics-window-size-and-postion.scm in
  *         the preferences directory. */
 void graphics_window_size_and_position_to_preferences() {
@@ -1359,9 +1356,7 @@ void graphics_window_size_and_position_to_preferences() {
       if (!coot::util::is_dir(pref_dir)) {
          // make it
 	 // pref_dir = coot::get_directory(pref_dir); // oops not in this branch.
-	 struct stat s;
-	 int fstat = stat(pref_dir.c_str(), &s);
-	 if (fstat == -1 ) { // file not exist
+	 if (!coot::util::file_exists(pref_dir)) { // file not exist
 	    int status = coot::util::create_directory(pref_dir);
             if (status != 0) {
                std::cout << "status " << status << std::endl;
