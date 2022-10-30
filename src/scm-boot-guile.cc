@@ -34,12 +34,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#if !defined _MSC_VER
-#include <unistd.h>
-#endif
-
 #include "utils/coot-utils.hh"
 #include "scm-boot-guile.hh"
 #include "boot-python.hh"
@@ -114,19 +108,6 @@ void my_wrap_scm_boot_guile(int argc, char** argv) {
 
 void try_load_dot_coot_and_preferences() {
 
-   auto file_is_directory = [] (const std::string &file_name) {
-                               struct stat s;
-                               int status = stat(file_name.c_str(), &s);
-                               if (status == 0) {            /* the file existed */
-                                  if (S_ISDIR(s.st_mode)) {
-                                     return true;
-                                  }
-                               } else {
-                                  std::cout << "WARNING:: oops - stating " << file_name << " return non-zero status" << std::endl;
-                               }
-                               return false;
-                            };
-
    // python versionn in coot-setup-python.cc
 
    bool run_startup_scripts_flag = run_startup_scripts_state();
@@ -140,10 +121,7 @@ void try_load_dot_coot_and_preferences() {
 	 std::string preferences_dir = graphics_info_t::add_dir_file(directory, ".coot");
 	 std::string full_path_coot_pref_scm = graphics_info_t::add_dir_file(preferences_dir,
 									     "coot-preferences.scm");
-	 struct stat buff;
-	 int preferences_dir_status = stat(preferences_dir.c_str(), &buff);
-     
-	 if (preferences_dir_status != 0) { 
+	 if (coot::util::is_dir(preferences_dir)) { 
 	    std::cout << "INFO:: preferences directory " << preferences_dir 
 		      << " does not exist. Won't read .scm preferences." << std::endl;;
 	 } else {
@@ -181,17 +159,6 @@ void try_load_dot_coot_and_preferences() {
          make_preferences_internal();
 
 	 // Now ~/.coot
-
-#if 0 // 20220507-PE old code, when coot was a file. Can be deleted when startup code works properly
-	 std::string fn = coot::util::append_dir_file(directory, ".coot");
-	 if (coot::file_exists(fn)) {
-            if (file_is_directory(fn)) {
-               std::cout << "INFO:: Not Loading ~/.coot - it's a directory " << std::endl;
-            } else {
-               scm_c_primitive_load(fn.c_str());
-            }
-	 }
-#endif
       }
    }
 }
