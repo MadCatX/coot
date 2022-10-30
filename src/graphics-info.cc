@@ -41,10 +41,6 @@
 // #include <GL/glut.h>  // Timing
 
 #include <iostream>
-#include <dirent.h>   // for refmac dictionary files
-
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
 
 #include <mmdb2/mmdb_manager.h>
 #include "coords/mmdb-extras.h"
@@ -485,82 +481,50 @@ graphics_info_t::import_all_refmac_cifs() {
 
       // is coot_refmac_lib_dir a directory?
 
-      struct stat buf;
-      int status = stat(coot_refmac_lib_dir.c_str(), &buf);
-      if (status != 0) {
+      if (!coot::util::is_dir(coot_refmac_lib_dir)) {
          std::cout << "Error finding directory " << coot_refmac_lib_dir << std::endl;
       } else {
-         if (S_ISDIR(buf.st_mode)) {
-            std::cout << coot_refmac_lib_dir << " is a directory (good). " << std::endl;
+         std::cout << coot_refmac_lib_dir << " is a directory (good). " << std::endl;
 
-            std::string data_dir = add_dir_file(coot_refmac_lib_dir, "data");
-            std::string monomer_dir = add_dir_file(data_dir, "monomers");
+         std::string monomers_dir = coot::util::append_dir_dir(
+            coot::util::append_dir_dir(coot_refmac_lib_dir, "data"),
+            "monomers"
+         );
 
-            // good
+         if (!coot::util::is_dir(monomers_dir)) {
+            std::cout << "An ERROR occured on opening the directory "
+                      << monomers_dir << std::endl;
+         } else {
+            const auto all_files = coot::util::gather_files_by_patterns(monomers_dir, { "*" });
 
-            DIR *lib_dir = opendir(monomer_dir.c_str());
-            if (lib_dir == NULL) {
-               std::cout << "An ERROR occured on opening the directory "
-                         << monomer_dir << std::endl;
-            } else {
+            // loop until the end of the filelist (readdir returns NULL)
+            //
+            for (const auto &f : all_files) {
+               auto subdir = coot::util::append_dir_dir(monomers_dir, f);
 
-               struct dirent *dir_ent;
-
-               // loop until the end of the filelist (readdir returns NULL)
+               // we need to test that sub_dir_part is a directory:
+               // (if not, silently skip over it)
                //
-               while (1) {
-                  dir_ent = readdir(lib_dir);
-                  if (dir_ent == NULL) {
-                     break;
-                  } else {
+               if (!coot::util::is_dir(subdir)) {
+                  continue;
+               }
 
-                     std::string sub_dir_part(std::string(dir_ent->d_name));
+               auto all_subdir_files = coot::util::gather_files_by_patterns(subdir, { "*.cif" });
+               if (all_subdir_files.empty()) {
+                  // This is unexpected
+                  std::cout << "WARNING: Directory " << subdir << " does not contain any Cif files" << std::endl;
+               } else {
+                  for (const auto &sf : all_subdir_files) {
+                     auto file = coot::util::append_dir_file(subdir, sf);
 
-                     if ( ! (sub_dir_part == ".") ) {
-                        std::string subdirname = add_dir_file(monomer_dir, sub_dir_part);
+                     if (coot::util::is_regular_file(file)) {
+                        add_cif_dictionary(file, coot::protein_geometry::IMOL_ENC_ANY, 0);
 
-                        // we need to test that sub_dir_part is a directory:
-                        // (if not, silently skip over it)
-                        //
-                        status = stat(subdirname.c_str() , &buf);
-                        if (S_ISDIR(buf.st_mode)) {
-
-                           DIR *sub_dir = opendir(subdirname.c_str());
-
-                           if (sub_dir == NULL) {
-                              std::cout << "An ERROR occured on opening the subdirectory "
-                                        << subdirname << std::endl;
-                           } else {
-
-                              struct dirent *sub_dir_ent;
-
-                              while (1) {
-                                 sub_dir_ent = readdir(sub_dir);
-                                 if (sub_dir_ent == NULL) {
-                                    break;
-                                 } else {
-                                    std::string cif_filename =
-                                       add_dir_file(subdirname, std::string(sub_dir_ent->d_name));
-                                    status = stat(cif_filename.c_str(), &buf);
-                                    if (status == 0) {
-                                       if (S_ISREG(buf.st_mode)) {
-                                          add_cif_dictionary(cif_filename,
-                                                             coot::protein_geometry::IMOL_ENC_ANY, 0);
-                                       }
-                                    }
-                                 }
-                              }
-                           }
-                           closedir(sub_dir);
-                        }
-                     } // not "."
+                        std::cout << "Added " << file << " to Cif dictionary\n";
+                     }
                   }
                }
-               closedir(lib_dir);
             }
-         } else {
-            std::cout << "Failure to import - " << coot_refmac_lib_dir
-                      << " is not a directory\n";
          }
       }
    }
