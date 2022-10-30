@@ -41,21 +41,12 @@
 #include <stdlib.h> // for getenv
 #include <glib.h>
 
-/* for stat */
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#if !defined _MSC_VER
-#include <unistd.h>
-#else
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-#endif
-
 #include  <gtk/gtk.h> /* needed for c-interface.h */
 #include "c-interface.h" /* needed for set_guile_gui_loaded_flag() and run_command_line_scripts() */
 #include "c-inner-main.h"
 #include "c-interface-preferences.h"
 
+#include "utils/coot-utils.hh"
 
 #if defined (USE_GUILE) || defined (USE_PYTHON)
 extern void SWIG_init();
@@ -89,16 +80,7 @@ does_file_exist                      (const char     *directory,
 
 short int
 file_is_directory(const char *file_name) {
-
-  struct stat s;
-  int status = stat(file_name, &s);
-  if (status == 0) {            /* the file existed */
-    if (s.st_mode == S_IFDIR) {
-      return 1;
-    }
-  }
-  return 0;
-
+  return coot::util::is_dir(file_name);
 }
 
 
@@ -124,8 +106,6 @@ c_inner_main(void *closure, int argc, char** argv) {
   char *thunk_str; 
   char *tmp_str;
   char *preferences_dir;
-  struct stat buf;
-  int istat = 1; // fail initially (fake a stat() results). 
   short int use_graphics_flag = use_graphics_interface_state();
   short int python_at_prompt_flag = python_at_prompt_at_startup_state();
   glob_t myglob;
@@ -158,11 +138,7 @@ c_inner_main(void *closure, int argc, char** argv) {
      Recall that COOT_SCHEME_DIR is #defined to be "COOT_SCHEME_DIR" */
   gui_lib = getenv(COOT_SCHEME_DIR);
 
-  if (gui_lib) { 
-    istat = stat(gui_lib, &buf);
-  }
-
-  if (istat || !gui_lib) {	/* failed or env var was not defined*/
+  if (gui_lib == NULL || !coot::util::is_dir(gui_lib)) {	/* failed or env var was not defined*/
 
 /*    so that failed, let's build the hard-coded default directory and
       stat it.  If it exists let's set gui_lib to that value. 
@@ -173,9 +149,8 @@ c_inner_main(void *closure, int argc, char** argv) {
     strcat (tmp_str, "/");	/* something else for Windwoes? */
     strcat (tmp_str, "scheme");
     gui_lib = tmp_str;
-    istat = stat(gui_lib, &buf);
 
-    if (istat) { 			/* failed */
+    if (!coot::util::is_dir(gui_lib)) { 			/* failed */
       gui_lib = NULL;
       printf("WARNING: Scheme directory: %s not found\n", tmp_str);
       printf("         and environment variable %s not defined\n", 
@@ -262,8 +237,7 @@ c_inner_main(void *closure, int argc, char** argv) {
     }
     strcat (tmp_str, ".coot-preferences");
     preferences_dir = tmp_str;
-    istat = stat(preferences_dir, &buf);
-    if (istat != 0) { 
+    if (!coot::util::is_dir(preferences_dir)) {
       printf("INFO:: preferences directory %s \n", preferences_dir);
       printf("       does not exist. Won't read preferences.\n");
      } else {
