@@ -57,7 +57,7 @@ coot::protein_geometry::read_energy_lib(const std::string &file_name) {
 void
 coot::energy_lib_t::read(const std::string &file_name, bool print_info_message_flag) {
 
-   if (util::is_regular_file(file_name)) {
+   if (!util::is_regular_file(file_name)) {
       std::cout << "WARNING:: energy lib " << file_name << " not found or it is not a file.\n";
       return;
    }
