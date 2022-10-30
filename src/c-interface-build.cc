@@ -37,8 +37,6 @@
 
 #define HAVE_CIF  // will become unnessary at some stage.
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
 #include <string.h> // strncmp
 
 #include <mmdb2/mmdb_manager.h>
@@ -5449,42 +5447,30 @@ int handle_cns_data_file_with_cell(const char *filename, int imol, float a, floa
 
 
 int handle_cns_data_file(const char *filename, int imol_coords) {
+   int did_draw = -1; // -1 means false
 
-   int istat = -1; // returned int
-   // first, does the file exist?
-   struct stat s;
-   int status = stat(filename, &s);
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
-      std::cout << "Error reading " << filename << std::endl;
-      return -1; // which is status in an error
-   } else {
-      if (S_ISDIR(s.st_mode)) {
-	 std::cout << filename << " is a directory." << std::endl;
-      } else {
-	 if (is_valid_model_molecule(imol_coords)) {
-	    int imol = graphics_info_t::create_molecule();
-	    std::pair<bool, clipper::Spacegroup> sg =
-	       graphics_info_t::molecules[imol_coords].space_group();
-	    std::pair<bool,clipper::Cell> cell =  graphics_info_t::molecules[imol_coords].cell();
-	    if (sg.first && cell.first) {
-	       istat = graphics_info_t::molecules[imol].make_map_from_cns_data(sg.second,
-									       cell.second,
-									       filename);
-	       if (istat != -1) {
-		  graphics_draw();
-	       } else {
-		  graphics_info_t::erase_last_molecule();
-	       }
-	    } else {
-	       graphics_info_t::erase_last_molecule();
-	    }
-	 }
+   if (coot::util::is_regular_file(filename)) {
+      if (is_valid_model_molecule(imol_coords)) {
+         int imol = graphics_info_t::create_molecule();
+         std::pair<bool, clipper::Spacegroup> sg = graphics_info_t::molecules[imol_coords].space_group();
+         std::pair<bool, clipper::Cell> cell = graphics_info_t::molecules[imol_coords].cell();
+
+         if (sg.first && cell.first) {
+            int ret = graphics_info_t::molecules[imol].make_map_from_cns_data(sg.second,
+                                                                              cell.second,
+                                                                              filename);
+            if (ret != -1) {
+               graphics_draw();
+               did_draw = ret;
+            } else {
+               graphics_info_t::erase_last_molecule();
+            }
+         } else {
+            graphics_info_t::erase_last_molecule();
+         }
       }
    }
-   return istat;
+   return did_draw;
 }
 
 
