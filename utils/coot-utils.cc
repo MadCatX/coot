@@ -654,7 +654,7 @@ coot::util::begins_with(const std::string &s, const std::string &beginning) {
 }
 
 bool coot::util::ends_with(const std::string &s, const std::string &ending) {
-   if (s.empty() || ending.empty() || s.length() < ending.length()) {
+   if (ending.empty() || s.length() < ending.length()) {
       return false;
    }
    return s.rfind(ending) == s.length() - ending.length();

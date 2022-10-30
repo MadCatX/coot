@@ -7184,29 +7184,17 @@ int full_atom_spec_to_atom_index(int imol, const char *chain, int resno,
 // based on filename extension.
 void
 run_script(const char *filename) {
-
-   struct stat buf;
-   int status = stat(filename, &buf);
    std::string fn(filename);
-   if (status == 0) {
 
-      bool is_python = false;
-
-      std::string::size_type ipy = fn.rfind(".py");
-      if (ipy != std::string::npos) {
-	 if (fn.substr(ipy) == ".py")
-	    is_python = true;
-      }
-
-      if (is_python) {
-	 run_python_script(filename);
-      } else {
-	 // std::cout << "DEBUG:: calling run_guile_script() " << filename << std::endl;
-	 run_guile_script(filename);
-      }
+   if (coot::util::file_exists(fn)) {
+      std::cout << "WARNING:: Can't run script: " << fn
+                << " no such file." << std::endl;
    } else {
-      std::cout  << "WARNING:: Can't run script: " << filename
-		 << " no such file." << std::endl;
+      if (coot::util::ends_with(coot::util::downcase(fn), ".py")) {
+         run_python_script(filename);
+      } else {
+         run_guile_script(filename);
+      }
    }
 }
 
@@ -7217,18 +7205,14 @@ run_state_file() {
    std::string filename;
 #ifdef USE_GUILE
    filename = "0-coot.state.scm";
-   struct stat buf;
-   int status = stat(filename.c_str(), &buf);
-   if (status == 0) {
+   if (coot::util::is_regular_file(filename)) {
       run_guile_script(filename.c_str());
       graphics_info_t::state_file_was_run_flag = true;
    }
 #else
 #ifdef USE_PYTHON
    filename = "0-coot.state.py";
-   struct stat buf;
-   int status = stat(filename.c_str(), &buf);
-   if (status == 0) {
+   if (coot::util::is_regular_file(filename)) {
       run_python_script(filename.c_str());
       graphics_info_t::state_file_was_run_flag = true;
    }
@@ -7239,11 +7223,8 @@ run_state_file() {
 #ifdef USE_PYTHON
 void
 run_state_file_py() {
-   std::string filename;
-   filename = "0-coot.state.py";
-   struct stat buf;
-   int status = stat(filename.c_str(), &buf);
-   if (status == 0) {
+   std::string filename = "0-coot.state.py";
+   if (coot::util::is_regular_file(filename)) {
       run_python_script(filename.c_str());
       graphics_info_t::state_file_was_run_flag = true;
    }
@@ -7283,11 +7264,7 @@ run_state_file_maybe() {
    /*  2: always run it */
    if (g.run_state_file_status == 1 || g.run_state_file_status == 2) {
 
-      // can we stat a status file?
-      //
-      struct stat buf;
-      int status = stat(filename.c_str(), &buf);
-      if (status == 0) {
+      if (coot::util::is_regular_file(filename)) {
 	 if (g.run_state_file_status == 2) {
 	    run_script(filename.c_str());
 	    graphics_info_t::state_file_was_run_flag = true;
@@ -7687,52 +7664,57 @@ void change_peptide_carbonyl_by_current_button_pos(int ix, int iy) {
 /*                  cif stuff                                               */
 /*  ----------------------------------------------------------------------- */
 
+enum class make_map_variant {
+   SIGMA_A,
+   TWO_FOFC,
+   FOFC
+};
+
+static
+int make_map_from_cif(const std::string &filename, int imol_coordinates, make_map_variant var) {
+   if (!is_valid_model_molecule(imol_coordinates)) {
+      std::cout << "WARNING:: " << imol_coordinates << " is not a valid model molecule" << std::endl;
+      return -1;
+   }
+
+   if (!coot::util::is_regular_file(filename)) {
+      std::cout << "INFO:: Error reading " << filename << std::endl;
+      return -1;
+   }
+
+   graphics_info_t g;
+   int imol = g.create_molecule();
+
+   int ret = -1;
+   switch (var) {
+   case make_map_variant::SIGMA_A:
+      ret = g.molecules[imol].make_map_from_cif(imol, filename, imol_coordinates);
+      break;
+   case make_map_variant::TWO_FOFC:
+      ret = g.molecules[imol].make_map_from_cif_2fofc(imol, filename, imol_coordinates);
+      break;
+   case make_map_variant::FOFC:
+      ret = g.molecules[imol].make_map_from_cif_fofc(imol, filename, imol_coordinates);
+      break;
+   }
+
+   if (ret == -1) {
+      g.erase_last_molecule();
+      imol = -1;
+   } else {
+      graphics_draw();
+   }
+
+   return imol;
+}
+
 // and make (and display) a sigma_a map.
 //
 // Pass the file name of the cif file and the molecule number for which
 // we will calculate sfs.
 //
 int read_cif_data(const char *filename, int imol_coordinates) {
-
-   int r = -1;
-      // This function is the .cif equivalent of
-      // c.f. read_phs_and_coords_and_make_map or make_and_draw_map,
-      // map_fill_from_mtz.
-
-   // first, does the file exist?
-
-   if (is_valid_model_molecule(imol_coordinates)) {
-      struct stat s;
-      int status = stat(filename, &s);
-      // stat check the link targets not the link itself, lstat stats the
-      // link itself.
-      //
-      if (status != 0 || !S_ISREG (s.st_mode)) {
-	 std::cout << "INFO:: Error reading " << filename << std::endl;
-	 if (S_ISDIR(s.st_mode)) {
-	    std::cout << filename << " is a directory." << std::endl;
-	 }
-	 return -1; // which is status in an error
-      } else {
-	 std::cout << "INFO:: Reading cif file: " << filename << std::endl;
-	 graphics_info_t g;
-	 int imol = g.create_molecule();
-	 int istat =
-	    g.molecules[imol].make_map_from_cif(imol, std::string(filename), imol_coordinates);
-
-	 if (istat != -1) {
-	    graphics_draw();
-	 } else {
-	    g.erase_last_molecule();
-	    imol = -1;
-	 }
-	 return imol;
-
-      }
-   } else {
-      std::cout << "WARNING:: " << imol_coordinates << " is not a valid model molecule" << std::endl;
-   }
-   return -1; // which is status in an error
+   return make_map_from_cif(filename, imol_coordinates, make_map_variant::SIGMA_A);
 }
 
 // and make (and display) a 2fofc map.
@@ -7741,49 +7723,7 @@ int read_cif_data(const char *filename, int imol_coordinates) {
 // we will calculate sfs.
 //
 int read_cif_data_2fofc_map(const char *filename, int imol_coordinates) {
-
-   int imol = -1;
-      // This function is the .cif equivalent of
-      // c.f. read_phs_and_coords_and_make_map or make_and_draw_map,
-      // map_fill_from_mtz.
-
-   // first, does the file exist?
-   struct stat s;
-   int status = stat(filename, &s);
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
-      std::cout << "Error reading " << filename << std::endl;
-      if (S_ISDIR(s.st_mode)) {
-	 std::cout << filename << " is a directory." << std::endl;
-      }
-      return -1; // which is status in an error
-   } else {
-
-
-      if (is_valid_model_molecule(imol_coordinates)) {
-
-	 std::cout << "INFO:: Reading cif file: " << filename << std::endl;
-
-	 graphics_info_t g;
-
-	 imol = g.create_molecule();
-	 int istat = g.molecules[imol].make_map_from_cif_2fofc(imol,
-							       std::string(filename),
-							       imol_coordinates);
-	 if (istat != -1) {
-	    graphics_draw();
-	 } else {
-	    g.erase_last_molecule();
-	    imol = -1;
-	 }
-      } else {
-	 std::cout << "WARNING:: molecule " << imol_coordinates
-		   << " is not a valid model molecule " << std::endl;
-      }
-   }
-   return imol;
+   return make_map_from_cif(filename, imol_coordinates, make_map_variant::TWO_FOFC);
 }
 
 
@@ -7793,43 +7733,45 @@ int read_cif_data_2fofc_map(const char *filename, int imol_coordinates) {
 // we will calculate sfs.
 //
 int read_cif_data_fofc_map(const char *filename, int imol_coordinates) {
-
-      // This function is the .cif equivalent of
-      // c.f. read_phs_and_coords_and_make_map or make_and_draw_map,
-      // map_fill_from_mtz.
-
-   // first, does the file exist?
-   struct stat s;
-   int status = stat(filename, &s);
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
-      std::cout << "Error reading " << filename << std::endl;
-      if (S_ISDIR(s.st_mode)) {
-	 std::cout << filename << " is a directory." << std::endl;
-      }
-      return -1; // which is status in an error
-   } else {
-      
-      std::cout << "Reading cif file: " << filename << std::endl;
-
-      graphics_info_t g;
-
-      int imol = g.create_molecule();
-      int istat = g.molecules[imol].make_map_from_cif_fofc(imol,
-							   std::string(filename),
-							   imol_coordinates);
-
-      if (istat != -1) {
-	 graphics_draw();
-	 return imol;
-      }
-      return -1; // an error
-   }
+   return make_map_from_cif(filename, imol_coordinates, make_map_variant::FOFC);
 }
 
+enum class read_phases_variant {
+   SIGMA_A,
+   DIFF_SIGMA_A
+};
 
+static
+int read_cif_data_with_phases_internal(const std::string &filename, read_phases_variant var) {
+   if (!coot::util::is_regular_file(filename)) {
+      std::cout << "Error reading " << filename << std::endl;
+      return -1;
+   }
+
+   graphics_info_t g;
+   int imol = g.create_molecule();
+
+   int ret = -1;
+   switch (var) {
+   case read_phases_variant::SIGMA_A:
+      ret = g.molecules[imol].make_map_from_cif(imol, filename);
+      break;
+   case read_phases_variant::DIFF_SIGMA_A:
+      ret = g.molecules[imol].make_map_from_cif_diff_sigmaa(imol, filename);
+      break;
+   }
+
+   if (ret == -1) {
+      g.erase_last_molecule();
+      imol = -1;
+   } else {
+      g.scroll_wheel_map = imol;
+      g.activate_scroll_radio_button_in_display_manager(imol);
+      graphics_draw();
+   }
+
+   return imol;
+}
 
 // This cif file, we presume, has phases.
 // So we don't need a molecule to calculate them from.
@@ -7842,81 +7784,12 @@ int auto_read_cif_data_with_phases(const char *filename) {
 }
 
 int read_cif_data_with_phases_sigmaa(const char *filename) {
-
-   graphics_info_t g;
-   int imol = -1;
-
-   // first, does the file exist?
-   struct stat s;
-   int status = stat(filename, &s);
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
-      std::cout << "Error reading " << filename << std::endl;
-      if (S_ISDIR(s.st_mode)) {
-	 std::cout << filename << " is a directory." << std::endl;
-      }
-      return -1; // which is status in an error
-   } else {
-
-      // This function is the .cif equivalent of
-      // c.f. read_phs_and_coords_and_make_map or make_and_draw_map,
-      // map_fill_from_mtz.
-      std::string fn = filename;
-      imol = g.create_molecule();
-      int istat = g.molecules[imol].make_map_from_cif(imol, fn);
-      if (istat != -1) {
-	 g.scroll_wheel_map = imol;
-	 g.activate_scroll_radio_button_in_display_manager(imol);
-	 graphics_draw();
-      } else {
-	 g.erase_last_molecule();
-	 imol = -1;
-      }
-   }
-   return imol;
+   return read_cif_data_with_phases_internal(filename, read_phases_variant::SIGMA_A);
 }
 
 int read_cif_data_with_phases_diff_sigmaa(const char *filename) {
-
-   graphics_info_t g;
-   int imol = -1;
-
-   // first, does the file exist?
-   struct stat s;
-   int status = stat(filename, &s);
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
-      std::cout << "Error reading " << filename << std::endl;
-      if (S_ISDIR(s.st_mode)) {
-	 std::cout << filename << " is a directory." << std::endl;
-      }
-      return -1; // which is status in an error
-   } else {
-
-      std::cout << "Reading cif file (with phases - diff) : " << filename << std::endl;
-
-      // This function is the .cif equivalent of
-      // c.f. read_phs_and_coords_and_make_map or make_and_draw_map,
-      // map_fill_from_mtz.
-      std::string fn = filename;
-      imol = g.create_molecule();
-      int istat = g.molecules[imol].make_map_from_cif_diff_sigmaa(imol, fn);
-      if (istat != -1) {
-	 g.scroll_wheel_map = imol;
-	 g.activate_scroll_radio_button_in_display_manager(imol);
-	 graphics_draw();
-      } else {
-	 g.erase_last_molecule();
-	 imol = -1;
-      }
-   }
-   return imol;
+   return read_cif_data_with_phases_internal(filename, read_phases_variant::DIFF_SIGMA_A);
 }
-
 
 int read_cif_data_with_phases_fo_fc(const char *filename) {
 
@@ -7932,44 +7805,28 @@ int read_cif_data_with_phases_fo_alpha_calc(const char *filename) {
    return read_cif_data_with_phases_nfo_fc(filename, molecule_map_type::TYPE_FO_ALPHA_CALC);
 }
 
-int read_cif_data_with_phases_nfo_fc(const char *filename,
-				     int map_type) {
-   // first, does the file exist?
-   struct stat s;
-   int status = stat(filename, &s);
-   // stat check the link targets not the link itself, lstat stats the
-   // link itself.
-   //
-   if (status != 0 || !S_ISREG (s.st_mode)) {
+int read_cif_data_with_phases_nfo_fc(const char *filename, int map_type) {
+   const std::string fn = filename;
+
+   if (!coot::util::is_regular_file(fn)) {
       std::cout << "Error reading " << filename << std::endl;
-      if (S_ISDIR(s.st_mode)) {
-	 std::cout << filename << " is a directory." << std::endl;
-      }
-      return -1; // which is status in an error
-   } else {
-
-      // This function is the .cif equivalent of
-      // c.f. read_phs_and_coords_and_make_map or make_and_draw_map,
-      // map_fill_from_mtz.
-
-      graphics_info_t g;
-
-      int imol = g.create_molecule();
-      std::string f(filename);
-      short int swap_col = graphics_info_t::swap_difference_map_colours;
-
-      int istat = g.molecules[imol].make_map_from_cif_nfofc(imol, f, map_type, swap_col);
-
-      if (istat != -1) {
-
-	 g.scroll_wheel_map = imol; // change the current scrollable map.
-	 graphics_draw();
-	 return imol;
-      } else {
-	 g.erase_last_molecule();
-      }
-      return -1; // error
+      return -1;
    }
+
+   graphics_info_t g;
+
+   short int swap_col = graphics_info_t::swap_difference_map_colours;
+   int imol = g.create_molecule();
+   int ret = g.molecules[imol].make_map_from_cif_nfofc(imol, fn, map_type, swap_col);
+   if (ret == -1) {
+      g.scroll_wheel_map = imol; // change the current scrollable map.
+      graphics_draw();
+   } else {
+      g.erase_last_molecule();
+      imol -1;
+   }
+
+   return imol;
 }
 
 int handle_shelx_fcf_file_internal(const char *filename) {
