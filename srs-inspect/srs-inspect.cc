@@ -28,16 +28,8 @@
     
 bool
 file_exists(const std::string &filename) {
-
-   struct stat s;
-   int fstat = stat(filename.c_str(), &s);
-   if (fstat == -1) { // file not exist
-      return false;
-   } else {
-      return true;
-   }
+   return coot::sysdep::file_exists(filename);
 }
-
 
 bool
 exists_in_refmac(const std::string &id,
