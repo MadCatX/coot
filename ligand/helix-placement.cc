@@ -47,9 +47,6 @@
 #include "mini-mol/mini-mol-utils.hh"
 #include "db-main/db-strands.hh"
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
 coot::helix_placement_info_t
 coot::helix_placement::place_alpha_helix_near(const clipper::Coord_orth &pt,
 					      int n_residues,
@@ -936,10 +933,8 @@ coot::helix_placement::get_20_residue_helix(int n_residues) const {
    coot::minimol::molecule m;
    short int success = 0;
    std::string failure;
-   
-   struct stat buf;
-   int status =  stat(full_path_helix_filename.c_str(), &buf);
-   if (status == 0) {
+
+   if (util::is_regular_file(full_path_helix_filename)) {
       m.read_file(full_path_helix_filename);
       if (m.fragments.size() > 0) {
 	 coot::minimol::fragment f;
