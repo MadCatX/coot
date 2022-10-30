@@ -19,10 +19,10 @@
  * 02110-1301, USA
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
+
+#include "compat/coot-sysdep.h"
 
 #ifdef MAKE_ENHANCED_LIGAND_TOOLS
 // no stand-alone functions need be added
@@ -31,20 +31,7 @@
 #include "some-coot-utils.hh"
 
 bool coot::is_directory_p(const std::string &filename) {
-
-   bool st = 0;
-   struct stat s; 
-   int fstat = stat(filename.c_str(), &s);
-   if ( fstat == -1 ) { // file not exist
-      return 0;
-   } else {
-      if (S_ISDIR(s.st_mode)) {
-	 return 1;
-      } else {
-	 return 0;
-      }
-   }
-   return st;
+   return coot::sysdep::is_dir(filename);
 }
 
 
