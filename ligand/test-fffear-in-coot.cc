@@ -36,10 +36,6 @@
 
 #include <iostream>
 
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "ligand.hh"
 #include "utils/coot-utils.hh"
 #include "coot-utils/coot-map-utils.hh"
@@ -221,9 +217,7 @@ main(int argc, char **argv) {
 	 clipper::Xmap<float> xmap;
 	 if (have_map) {
 
-	    struct stat buf;
-	    int status =  stat(map_file_name.c_str(), &buf);
-	    if (status == 0) { 
+	    if (coot::util::is_regular_file(map_file_name)) { 
 	       clipper::CCP4MAPfile file;
 	       file.open_read(map_file_name);
 	       file.import_xmap(xmap);
