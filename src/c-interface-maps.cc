@@ -23,11 +23,6 @@
 #include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
 #endif
 
-// for stat()
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "utils/coot-utils.hh"
 
 #include "coot-utils/coot-map-utils.hh" // for variance map
@@ -364,15 +359,9 @@ int make_and_draw_map(const char* mtz_file_name,
    if (use_weights)
       weight_col_str = std::string(weight_col);
 
-   int status = stat(mtz_file_name, &buf);
-   //
-   if (status != 0) {
-      std::cout << "WARNING:: Can't find file " << mtz_file_name << std::endl;
-      if (S_ISDIR(buf.st_mode)) {
-    std::cout << mtz_file_name << " is a directory! " << std::endl;
-      }
+   if (!coot::util::is_regular_file(mtz_file_name)) {
+      std::cout << "WARNING: " << mtz_file_name << " does not exist or it is not a file" << std::endl;
    } else {
-
       if (0)
     std::cout << "valid_labels(" << mtz_file_name << ","
       << f_col << ","
@@ -513,14 +502,8 @@ int make_and_draw_map_with_reso_with_refmac_params(const char *mtz_file_name,
    graphics_info_t g;
    int imol = -1;
 
-   struct stat buf;
-   int status = stat(mtz_file_name, &buf);
-
-   if (status != 0) {
-      std::cout << "Error finding MTZ file " << mtz_file_name << std::endl;
-      if (S_ISDIR(buf.st_mode)) {
-    std::cout << mtz_file_name << " is a directory! " << std::endl;
-      }
+   if (!coot::util::is_regular_file(mtz_file_name)) {
+      std::cout << "Error finding MTZ file " << mtz_file_name << " or the file is not a regular file" << std::endl;
    } else {
       std::string map_type;
       if (is_diff_map)
