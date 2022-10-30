@@ -1070,7 +1070,7 @@ public:
 
    static void on_sbase_search_result_button_clicked(GtkButton *button, gpointer user_data);
    static gboolean watch_for_mdl_from_coot(gpointer user_data);
-   time_t coot_mdl_ready_time;
+   uint_least64_t coot_mdl_ready_time;
    std::pair<lig_build::pos_t, lig_build::pos_t> flev_residues_extents() const; // for canvas sizing
    void read_draw_residues(const std::string &file_name);
    void draw_all_flev_annotations(); // which calls draw_all_residue_attribs();

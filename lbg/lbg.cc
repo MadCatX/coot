@@ -22,10 +22,6 @@
 
 #include <Python.h> // this is here get round header warnings
 
-#include <sys/types.h>  // for stating
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/time.h>
 #include <stdexcept>
 #include <fstream>
 #include <iomanip>
@@ -52,6 +48,8 @@
 #include "qed-interface.hh" // interface to silicos-it biscu-it python function
 
 #include <gdk/gdkkeysyms.h> // for keyboarding.
+
+#include "utils/coot-utils.hh"
 
 void draw_test_graphs_in_canvas(GtkWidget *canvas) {
 
@@ -118,13 +116,7 @@ lbg(lig_build::molfile_molecule_t mm,
    // testing
    // glade_file_full = "../../coot/lbg/lbg-ng.glade";
 
-   bool glade_file_exists = false;
-   struct stat buf;
-   int err = stat(glade_file_full.c_str(), &buf);
-   if (! err)
-      glade_file_exists = 1;
-
-   if (! glade_file_exists) {
+   if (!coot::util::is_regular_file(glade_file_full)) {
       std::cout << "ERROR:: glade file " << glade_file_full << " not found" << std::endl;
    } else {
 
@@ -3772,14 +3764,14 @@ lbg_info_t::watch_for_mdl_from_coot(gpointer user_data) {
 
    // std::cout << "watching reading file: " << ready_file << std::endl;
 
-   int err = stat(ready_file.c_str(), &buf);
-   if (! err) {
-      time_t m = buf.st_mtime;
+   auto file_times = coot::util::get_file_times(ready_file);
+   if (file_times.valid) {
+      auto m = file_times.lastModification;
       if (m > l->coot_mdl_ready_time) {
-	 if (l->coot_mdl_ready_time != 0) {
-	    l->read_files_from_coot();
-	 }
-	 l->coot_mdl_ready_time = m;
+         if (l->coot_mdl_ready_time != 0) {
+            l->read_files_from_coot();
+         }
+         l->coot_mdl_ready_time = m;
       }
    }
    return 1; // keep running
