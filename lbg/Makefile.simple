@@ -40,13 +40,14 @@ LIDIA_CORE_LDFLAGS = $(COOT_INSTALLED)/lib/libcoot-lidia-core.la
 LIDIA_CORE_CXXFLAGS = -I ../lidia-core
 LIDIA_CORE_LDFLAGS = $(COOT_INSTALLED)/lib/libcoot-lidia-core.la
 
+COOT_COMPAT_LDFLAGS=$(top_srcdir)/compat/libcoot-compat.la
 
 CXXFLAGS=-g -O2 $(EXTRA_FLAGS) $(MMDB_CXXFLAGS) $(CLIPPER_CXXFLAGS) $(LIDIA_CORE_CXXFLAGS) \
     -I$(top_srcdir)/compat
 
 lbg:  lbg.o wmolecule.o lbg-callbacks.o lbg-search.o some-coot-utils.o residue-circles.o
 	libtool --mode=link $(CXX)  -Wl,--export-dynamic -o $@ $^ \
-	$(CLIPPER_LDFLAGS) $(MMDB_LDFLAGS) $(LIDIA_CORE_LDFLAGS) $(GTK_LDFLAGS) $(GOO_LDFLAGS) $(GSL_LDFLAGS) 
+	$(COOT_COMPAT_LDFLAGS) $(CLIPPER_LDFLAGS) $(MMDB_LDFLAGS) $(LIDIA_CORE_LDFLAGS) $(GTK_LDFLAGS) $(GOO_LDFLAGS) $(GSL_LDFLAGS)
 
 #lig-build.o: lig-build.cc
 #	libtool --tag=CXX --mode=compile $(CXX) $(CXXFLAGS) $(GTK_CFLAGS) $(GOO_CFLAGS) -c $^
