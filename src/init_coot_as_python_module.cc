@@ -1,15 +1,13 @@
 
 #include <iostream>
-// for stat()
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <Python.h>
 #include <gtk/gtk.h>
 
 #include "c-interface.h" // setup_symm_lib()
 #include "graphics-info.h"
+
+#include "utils/coot-utils.hh"
 
 // put these functions in init_coot_as_python_module.cc
 
@@ -19,24 +17,15 @@ void check_reference_structures_dir() {
 
    char *coot_reference_structures = getenv("COOT_REF_STRUCTS");
    if (coot_reference_structures) {
-      struct stat buf;
-      int status = stat(coot_reference_structures, &buf);
-      if (status != 0) { // file was not found in default location either
+      if (!coot::util::is_dir(coot_reference_structures)) {
 	 std::cout << "WARNING:: The reference structures directory "
 		   << "(COOT_REF_STRUCTS): "
 		   << coot_reference_structures << " was not found." << std::endl;
 	 std::cout << "          Ca->Mainchain will not be possible." << std::endl;
       }
    } else {
-
-      // check in the default place: pkgdatadir = $prefix/share/coot
-      std::string pkgdatadir = coot::package_data_dir();
-      std::string ref_structs_dir = pkgdatadir;
-      ref_structs_dir += "/";
-      ref_structs_dir += "reference-structures";
-      struct stat buf;
-      int status = stat(ref_structs_dir.c_str(), &buf);
-      if (status != 0) { // file was not found in default location either
+      std::string ref_structs_dir = coot::util::append_dir_dir(coot::package_data_dir(), "reference-structures");
+      if (!coot::util::is_dir(ref_structs_dir)) {
 	 std::cout << "WARNING:: No reference-structures found (in default location)."
                    << "   " << ref_structs_dir
 		   << " and COOT_REF_STRUCTS was not defined." << std::endl;
@@ -65,14 +54,9 @@ void setup_symm_lib() {
 
       // using PKGDATADIR will work for those who compiler, not the
       // binary users:
-      std::string standard_file_name = coot::package_data_dir();
-      standard_file_name += "/";
-      standard_file_name += "syminfo.lib";
+      std::string standard_file_name = coot::util::append_dir_file(coot::package_data_dir(), "syminfo.lib");
 
-      struct stat buf;
-      int status = stat(standard_file_name.c_str(), &buf);
-      if (status != 0) { // standard-residues file was not found in default location
-
+      if (!coot::util::is_dir(standard_file_name)) {
 	 // This warning is only sensible for those who compile (or
 	 // fink).  So let's test if SYMINFO was set before we write it
 	 //
