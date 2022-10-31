@@ -38,9 +38,6 @@
 // is this a C++11 thing?
 #include <functional> // std::ref() for GCC C++11 (not clang)
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #include <string>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -4370,46 +4367,27 @@ molecule_class_info_t::update_map_from_mtz_if_changed(const updating_map_params_
       bool update_it = false;
 
       updating_map_params_t ump = ump_in;
-      struct stat s;
-      int status = stat(ump.mtz_file_name.c_str(), &s);
-      if (status != 0) {
+
+      if (!coot::util::file_exists(ump.mtz_file_name)) {
 	 std::cout << "WARNING:: update_map_from_mtz_if_changed() Error reading "
 		   << ump.mtz_file_name << std::endl;
       } else {
-	 if (!S_ISREG (s.st_mode)) {
+	 if (!coot::util::is_regular_file(ump.mtz_file_name)) {
 	    std::cout << "WARNING:: update_map_from_mtz_if_changed() not a reguular file: "
 		      << ump.mtz_file_name << std::endl;
 	    continue_watching_mtz = false;
 	 } else {
-	    // happy path
-#if defined(COOT_BUILD_WINDOWS)
-            ump.ctime.tv_sec = s.st_ctime;
-            ump.ctime.tv_nsec = 0.; // not available!? Lets hope not necessary
-#elif defined(COOT_BUILD_POSIX)
-	    ump.ctime = s.st_ctim;
-#else
-	    ump.ctime = s.st_ctimespec; // mac?
-#endif // COOT_BUILD_
+	    auto times = coot::util::get_file_times(ump.mtz_file_name);
+	    ump.ctime = times.creation;
 	 }
       }
 
       if (false)
 	 std::cout << "#### ctime comparision: was "
-		   << updating_map_previous.ctime.tv_sec << " " << updating_map_previous.ctime.tv_nsec
-		   << " now " << ump.ctime.tv_sec << " " << ump.ctime.tv_nsec
+		   << updating_map_previous.ctime << " now " << ump.ctime
 		   << std::endl;
 
-      if (ump.ctime.tv_sec > updating_map_previous.ctime.tv_sec) {
-	 update_it = true;
-      } else {
-	 if (ump.ctime.tv_sec == updating_map_previous.ctime.tv_sec) {
-	    if (ump.ctime.tv_nsec > updating_map_previous.ctime.tv_nsec) {
-	       update_it = true;
-	    }
-	 }
-      }
-
-      if (update_it) {
+      if (ump.ctime > updating_map_previous.ctime) {
 
 	 // map_fill_from_mtz(ump) ?
 
