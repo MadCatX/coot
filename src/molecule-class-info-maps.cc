@@ -2079,23 +2079,10 @@ molecule_class_info_t::read_ccp4_map(std::string filename, int is_diff_map_flag,
    // an extension of ".map" or ".ext".  If not, then complain and
    // return having done nothing.
 
-   // stat filename
-   struct stat s;
-   int status = stat(filename.c_str(), &s);
-   if (status != 0) {
-      std::cout << "WARNING:: Error reading " << filename << std::endl;
+   if (!coot::util::is_regular_file(filename)) {
+      std::cout << "WARNING:: " << filename << " not a regular file." << std::endl;
       return -1;
-   } else {
-      if (!S_ISREG (s.st_mode)) {
-	 if (S_ISDIR(s.st_mode)) {
-	    std::cout << "WARNING:: " << filename << " is a directory." << std::endl;
-	 } else {
-	    std::cout << "WARNING:: " << filename << " not a regular file." << std::endl;
-	 }
-	 return -1;
-      }
    }
-
 
    std::string tstring = coot::util::file_name_non_directory(filename);
 
