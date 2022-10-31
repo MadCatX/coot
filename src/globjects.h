@@ -82,7 +82,7 @@ void adjust_clipping(double d);
 gint reshape(GtkWidget *widget, GdkEventConfigure *event); 
 gint glarea_motion_notify (GtkWidget *widget, GdkEventMotion *event);
 gint glarea_button_press(GtkWidget *widget, GdkEventButton *event);
-#if (GTK_MAJOR_VERSION == 2) || defined(WINDOWS_MINGW) || defined(_MSC_VER)
+#if (GTK_MAJOR_VERSION == 2) || defined(COOT_BUILD_WINDOWS)
 gint glarea_scroll_event(GtkWidget *widget, GdkEventScroll *event);
 #endif
 gint glarea_button_release(GtkWidget *widget, GdkEventButton *event);

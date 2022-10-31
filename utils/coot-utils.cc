@@ -654,7 +654,8 @@ coot::util::begins_with(const std::string &s, const std::string &beginning) {
    return s.find(beginning) == 0;
 }
 
-bool coot::util::ends_with(const std::string &s, const std::string &ending) {
+bool
+coot::util::ends_with(const std::string &s, const std::string &ending) {
    if (ending.empty() || s.length() < ending.length()) {
       return false;
    }
@@ -681,16 +682,25 @@ coot::util::get_file_times(const std::string &path) {
    return coot::sysdep::get_file_times(path);
 }
 
-bool coot::util::is_dir(const std::string &path) {
+bool
+coot::util::is_dir(const std::string &path) {
    return coot::sysdep::is_dir(path);
 }
 
-bool coot::util::is_link(const std::string &path) {
+bool
+coot::util::is_link(const std::string &path) {
    return coot::sysdep::is_dir(path);
 }
 
-bool coot::util::is_regular_file(const std::string &path) {
+bool
+coot::util::is_regular_file(const std::string &path) {
    return coot::sysdep::is_regular_file(path);
+}
+
+int
+coot::util::rename_file(const std::string &old_path, const std::string &new_path) {
+   std::string error{}; // Dummy
+   return coot::sysdep::rename_file(old_path, new_path, error) ? 0 : -1;  // Emulate POSIX rename() return codes
 }
 
 // If cwd is a substring of f (starting at 0), then return the
@@ -743,7 +753,7 @@ coot::util::absolutise_file_name(const std::string &file_name) {
    if (file_name.substr(0,1) != "/" &&
        file_name.substr(1,1) != ":" ) {
      std::string s = current_working_dir();
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
      ret = intelligent_debackslash(s + "\\" + file_name);
 #else
      ret = s + "/" + file_name;
@@ -772,7 +782,7 @@ coot::util::file_name_non_directory(const std::string &file_name) {
    std::string rstring = "";
 
    for (int i=file_name.length()-1; i>=0; i--) {
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
       if (file_name[i] == '/' || file_name[i] == '\\') {
 	 slash_char = i;
 	 break;
@@ -782,7 +792,7 @@ coot::util::file_name_non_directory(const std::string &file_name) {
 	 slash_char = i;
 	 break;
       }
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
    }
 
    if (slash_char != -1)

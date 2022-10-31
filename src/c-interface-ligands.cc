@@ -1035,7 +1035,7 @@ execute_ligand_search_internal(coot::wligand *wlig_p) {
       if (n_new_ligand) {
 
    // We need some python code here to match post-ligand-fit-gui
-#if defined USE_GUILE && !defined WINDOWS_MINGW
+#if defined USE_GUILE && !defined COOT_BUILD_WINDOWS
 	 safe_scheme_command("(post-ligand-fit-gui)");
 #else
 

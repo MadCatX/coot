@@ -19,7 +19,7 @@ get_max_effective_screen_height() {
     max_height = -1;
 
 // no gdk_property get on windows (at the moment)
-#if !defined WINDOWS_MINGW && !defined _MSC_VER
+#ifndef COOT_BUILD_WINDOWS
     ok = gdk_property_get(gdk_get_default_root_window(),  // a gdk window
                           gdk_atom_intern("_NET_WORKAREA", FALSE),  // property
                           gdk_atom_intern("CARDINAL", FALSE),  // property type
@@ -44,7 +44,7 @@ get_max_effective_screen_height() {
         }
         g_free(raw_data);
     }
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
     if (max_height < 0) {
         GdkScreen *screen;
         screen = gdk_screen_get_default();
@@ -52,11 +52,11 @@ get_max_effective_screen_height() {
            // width = gdk_screen_get_width(screen);
            // height = gdk_screen_get_height(screen);
 
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
             max_height = int(height * 0.95);
 #else
             max_height = int(height * 0.9);
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
         } else {
             g_print ("BL ERROR:: couldnt get gdk screen; should never happen\n");
         }

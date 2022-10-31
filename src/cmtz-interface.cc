@@ -30,13 +30,6 @@
 #  include "config.h"
 #endif
 
-// We are not using NLS yet.
-// #ifndef WINDOWS_MINGW
-// #define ENABLE_NLS
-// #endif
-// #ifdef DATADIR
-// #endif // DATADIR
-
 #include <gtk/gtk.h>
 // #include <GL/glut.h> // for glutInit()
 

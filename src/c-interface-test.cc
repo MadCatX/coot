@@ -48,15 +48,6 @@
 #include "c-interface-python.hh"
 #endif // USE_PYTHON
 
-#if defined (WINDOWS_MINGW)
-#ifdef DATADIR
-#undef DATADIR
-#endif // DATADIR
-#endif /* MINGW */
-
-// Here we used to define GTK_ENABLE_BROKEN if defined(WINDOWS_MINGW)
-// Now we don't want to enable broken stuff.  That is not the way.
-
 #define HAVE_CIF  // will become unnessary at some stage.
 
 #include <sys/types.h> // for stating

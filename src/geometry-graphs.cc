@@ -971,14 +971,14 @@ coot::geometry_graphs::setup_canvas(int n_chains, int max_chain_length) {
    canvas = GOO_CANVAS(goo_canvas_new());
    g_object_set(G_OBJECT(canvas), "has-tooltip", TRUE, NULL);
 
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
    int canvas_usize_x = max_chain_length*10 + 325; // add a bit more to get (may be
                                                    // general for GNOME_CANVAS)
 #else
    int canvas_usize_x = max_chain_length*10 + 250; // add a bit to get
                                                    // the label at the
                                                   // right hand side
-#endif //MINGW
+#endif // COOT_BUILD_WINDOWS
 
    // If the canvas is 3500+ or so, then it can't be resized width-wise (Doug Kuntz)
    if (canvas_usize_x > 32100) {

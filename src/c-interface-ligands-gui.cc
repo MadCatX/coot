@@ -877,7 +877,7 @@ int execute_get_mols_ligand_search_old(GtkWidget *button) {
 			      wiggly_ligand_info);
 
       if (chief_ligand_many_atoms.size() == 0 ) {
-#if defined USE_GUILE && !defined WINDOWS_MINGW
+#if defined USE_GUILE && !defined COOT_BUILD_WINDOWS
 	 execute_ligand_search();
 #else
 #ifdef USE_PYTHON

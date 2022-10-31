@@ -21,11 +21,7 @@
 
 // Portability (getopt) gubbins
 #include <unistd.h> // for getopt(3)
-#if !defined WINDOWS_MINGW
-// conflicts in Windows and doesnt seem to be needed anyway
-// actually not sure if needed at all...
-#include <stdlib.h> // for atof
-#endif
+#include <cstdlib> // for atof
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -120,15 +116,15 @@ int main(int argc, char **argv) {
 	       }
 	       if (arg_str == "x") {
 		  have_x_flag = 1;
-		  x = atof(coot_optarg);
+		  x = std::atof(coot_optarg);
 	       }
 	       if (arg_str == "y") {
 		  have_y_flag = 1;
-		  y = atof(coot_optarg);
+		  y = std::atof(coot_optarg);
 	       }
 	       if (arg_str == "z") {
 		  have_z_flag = 1;
-		  z = atof(coot_optarg);
+		  z = std::atof(coot_optarg);
 	       }
 	       
 	    } else { 
@@ -161,7 +157,7 @@ int main(int argc, char **argv) {
 	    if (coot_optarg) { 
 	       //std::cout << "processing... x " << std::endl;
 	       have_x_flag = 1;
-	       x = atof(coot_optarg);
+	       x = std::atof(coot_optarg);
 	       //std::cout << "set value of x " <<  x << std::endl;
 	    } else {
 	       //std::cout << "no coot_optarg for x!" << std::endl;
@@ -171,7 +167,7 @@ int main(int argc, char **argv) {
 	    if (coot_optarg) { 
 	       //std::cout << "processing... y " << std::endl;
 	       have_y_flag = 1;
-	       y = atof(coot_optarg);
+	       y = std::atof(coot_optarg);
 	       // std::cout << "set value of y " <<  y << std::endl;
 	    } else { 
 	       //std::cout << "no coot_optarg for y!" << std::endl;
@@ -182,7 +178,7 @@ int main(int argc, char **argv) {
 	       //std::cout << "processing... z " << std::endl;
 	       have_z_flag = 1;
 	       //std::cout << "seting value of z from " <<  coot_optarg << std::endl;
-	       z = atof(coot_optarg);
+	       z = std::atof(coot_optarg);
 	       //std::cout << "set value of z " <<  z << std::endl;
 	    } else {
 	       //std::cout << "no coot_optarg for z!" << std::endl;

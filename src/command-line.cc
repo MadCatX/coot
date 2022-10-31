@@ -19,13 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-
-#if defined USE_PYTHON && !defined WINDOWS_MINGW
-#include "Python.h"  // before system includes to stop "POSIX_C_SOURCE" redefined problems
-// BL says:: need to exclude in Windows as conflicting getopt definitions.
-//           do we need python here at all?!
-#endif
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -38,10 +31,9 @@
 #undef __GNU_LIBRARY__
 #endif
 
-#ifdef WINDOWS_MINGW
-// for whatever reason (getopt) include python here for windows
+#ifdef USE_PYTHON
 #include "Python.h"  
-#endif //WINDOWS_MINGW
+#endif // USE_PYTHON
 
 #include <iostream>
 #include <string>

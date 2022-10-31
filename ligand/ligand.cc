@@ -35,11 +35,6 @@
 
 #include <algorithm>
 
-// #if !defined(WINDOWS_MINGW) && !defined(_MSC_VER)
-// #include <pwd.h>
-// #include <sys/types.h>
-// #endif
-
 #include "clipper/ccp4/ccp4_map_io.h"
 #include "clipper/ccp4/ccp4_mtz_io.h"
 #include "clipper/core/xmap.h"

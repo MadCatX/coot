@@ -49,9 +49,6 @@
 #include "c-interface-python.hh"
 #endif // USE_PYTHON
 
-// Here we used to define GTK_ENABLE_BROKEN if defined(WINDOWS_MINGW)
-// Now we don't want to enable broken stuff.  That is not the way.
-
 #define HAVE_CIF  // will become unnessary at some stage.
 
 // #include <GL/glut.h> // needed for glutGet(GLUT_ELAPSED_TIME);
@@ -405,7 +402,7 @@ void run_generic_script(const std::vector<std::string> &cmd_strings) {
 
    graphics_info_t g;
 
-#if defined(USE_GUILE) && !defined(WINDOWS_MINGW)
+#if defined(USE_GUILE) && !defined(COOT_BUILD_WINDOWS)
    std::string s = g.state_command(cmd_strings, coot::STATE_SCM);
    safe_scheme_command(s);
 #else
@@ -4320,14 +4317,14 @@ void screendump_image(const char *filename) {
 // BL says: we wanna be nice and convert ppm to bmp for windoze user!?
 // but not if we have png!!!
 // still use that function with png but only to open file
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
 #ifdef USE_PYTHON
       std::string cmd("ppm2bmp(");
       cmd += single_quote(coot::util::intelligent_debackslash(filename));
       cmd += ")";
       safe_python_command(cmd);
 #endif // USE_PYTHON
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
    }
 
    if (istatus == 0) {

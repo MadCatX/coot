@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <string>
 
-#ifndef WINDOWS_MINGW
+#ifndef COOT_BUILD_WINDOWS
 #define ENABLE_NLS // fixes dcgettext() header problems on including
 		   // libintl.h (via RDKitBase.h etc (including boost
 		   // stuff).

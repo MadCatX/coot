@@ -32,6 +32,7 @@
 #include "seq-view-interface.h"
 #include "graphics-info.h" // for the callback
 
+#include "utils/coot-utils.hh"
 
 
 #ifdef SEQ_VIEW_STANDALONE
@@ -76,11 +77,7 @@ coot::sequence_view::setup_internal(mmdb::Manager *mol_in) {
    res_scale = 6;
    row_offset = 10;
    row_scale = 14;
-   fixed_font = "fixed";
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-   fixed_font = "monospace";
-   res_scale = 8;
-#endif   
+   fixed_font = coot::util::get_fixed_font();
    GdkFont *font = gdk_font_load(fixed_font.c_str());
    gint res_width = gdk_string_width(font, "m");
    //std::cout <<"BL DEBUG:: font width calc "<<res_width <<" and set " << res_scale<< std::endl;
@@ -432,12 +429,12 @@ coot::sequence_view::tooltip_like_box(const coot::sequence_view_res_info_t &si) 
    float x1 = float (res_offset + res_scale*si.residue_serial_number) - 60;
    float y1 = float (row_offset + si.row*row_scale) + 10 ;
 
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
 // BL says: again we want to make it bigger to fit
   float tw = label.size() * 8.0 + 10.0;
 #else
   float tw = label.size() * 6.0 + 10.0;
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
 
    clear_tooltip_box();
 

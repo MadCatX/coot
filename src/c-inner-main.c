@@ -217,18 +217,18 @@ c_inner_main(void *closure, int argc, char** argv) {
 
 /* And now read the users own initialization code and preferences*/
 /* preferences only GTK2 */
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
+#if defined COOT_BUILD_WINDOWS
   directory = getenv("COOT_HOME");
   if (!directory) {
     // try to see if there is HOME, just in case
     directory = getenv("HOME");
   }
 #else
-  directory = getenv("HOME"); 
-#endif
+  directory = getenv("HOME");
+#endif // COOT_BUILD_WINDOWS
   if (directory) {
     /* first the preferences  (but only if not on windows)*/
-#if defined COOT_USE_GTK2_INTERFACE && !defined WINDOWS_MINGW
+#if defined COOT_USE_GTK2_INTERFACE && !defined COOT_BUILD_WINDOWS
     /* don't forget null termination (+1) */
     tmp_str = (char *) malloc (strlen(directory) + 18 + 1);
     strcpy (tmp_str, directory);
