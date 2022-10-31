@@ -7706,15 +7706,9 @@ molecule_class_info_t::make_backup() { // changes history details
          // we better debackslash the directory (for windows)
          std::string tmp_dir = env_var;
          tmp_dir = coot::util::intelligent_debackslash(tmp_dir);
-         int err = stat(tmp_dir.c_str(), &buf);
-
-         if (!err) {
-            if (! S_ISDIR(buf.st_mode)) {
-               env_var = NULL;
-            }
-         } else {
+         if (!coot::util::is_dir(tmp_dir)) {
             env_var = NULL;
-         }
+	 }
       }
 
       if (env_var)
@@ -10111,38 +10105,25 @@ molecule_class_info_t::update_coordinates_molecule_if_changed(const updating_coo
       bool update_it = false;
 
       updating_coordinates_molecule_parameters_t ucp = ucp_in;
-      struct stat s;
-      int status = stat(ucp.pdb_file_name.c_str(), &s);
-      if (status != 0) {
+
+      if (!coot::util::is_regular_file(ucp.pdb_file_name)) {
          std::cout << "WARNING:: update_map_from_mtz_if_changed() Error reading "
                    << ucp.pdb_file_name << std::endl;
+         continue_watching_coordinates_file = false;
       } else {
-         if (!S_ISREG (s.st_mode)) {
-            std::cout << "WARNING:: update_map_from_mtz_if_changed() not a reguular file: "
-                      << ucp.pdb_file_name << std::endl;
-            continue_watching_coordinates_file = false;
-         } else {
-            // happy path
-            ucp.update_from_stat_info(s);
+         auto time = coot::util::get_file_times(ucp.pdb_file_name);
+         if (time.valid) {
+            ucp.update_time(time.creation);
          }
       }
 
       if (false)
          std::cout << "#### ctime comparision: imol << " << imol_no << " was "
-            << updating_coordinates_molecule_previous.ctime.tv_sec << " " << updating_coordinates_molecule_previous.ctime.tv_nsec
-            << " now " << ucp.ctime.tv_sec << " " << ucp.ctime.tv_nsec
+            << updating_coordinates_molecule_previous.ctime
+            << " now " << ucp.ctime << " " << ucp.ctime
             << std::endl;
 
-      if (ucp.ctime.tv_sec > updating_coordinates_molecule_previous.ctime.tv_sec) {
-         update_it = true;
-      } else {
-         if (ucp.ctime.tv_sec == updating_coordinates_molecule_previous.ctime.tv_sec) {
-            if (ucp.ctime.tv_nsec > updating_coordinates_molecule_previous.ctime.tv_nsec) {
-               update_it = true;
-            }
-         }
-      }
-      if (update_it) {
+      if (ucp.ctime > updating_coordinates_molecule_previous.ctime) {
 
          std::string cwd = coot::util::current_working_dir();
          short int reset_rotation_centre = 0;

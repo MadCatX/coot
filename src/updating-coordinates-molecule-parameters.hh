@@ -2,9 +2,8 @@
 #ifndef UPDATING_COORDINATES_MOLECULE_PARAMETERS_T
 #define UPDATING_COORDINATES_MOLECULE_PARAMETERS_T
 
+#include <cstddef>
 #include<string>
-#include <sys/types.h>// stat
-#include <sys/stat.h>
 
 // This class is for reading the output of Refmac
 //
@@ -12,27 +11,18 @@ class updating_coordinates_molecule_parameters_t {
 public:
    int imol;
    std::string pdb_file_name;
-   timespec ctime;
+   uint_least64_t ctime;
+
    updating_coordinates_molecule_parameters_t() {
       imol = -1;
-      ctime.tv_sec = 0;
-      ctime.tv_nsec = 0;
+      ctime = 0;
    }
    explicit updating_coordinates_molecule_parameters_t(const std::string &file_name) : pdb_file_name(file_name) {
-      ctime.tv_sec = 0;
-      ctime.tv_nsec = 0;
+      ctime = 0;
       imol = -1; // is this used?
    }
-   void update_from_stat_info(const struct stat &s) {
-
-#if defined(COOT_BUILD_WINDOWS)
-      ctime.tv_sec = s.st_ctime;
-      ctime.tv_nsec = 0.; // not available!? Lets hope not necessary
-#elif defined(COOT_BUILD_POSIX)
-      ctime = s.st_ctim;
-#else
-      ctime = s.st_ctimespec; // Mac OS X?
-#endif
+   void update_time(uint_least64_t time) {
+      ctime = time;
    }
 };
 
