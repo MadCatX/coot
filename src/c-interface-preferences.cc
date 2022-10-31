@@ -41,11 +41,6 @@
 #include <algorithm>
 
 #include <string.h> // strlen, strcpy
-#include <sys/types.h> // for stating
-#include <sys/stat.h>
-
-#include <dirent.h>   // for extra scheme dir
-
 
 #include "guile-fixups.h"
 
@@ -57,6 +52,8 @@
 #include "c-interface-widgets.hh"
 #include "cc-interface.hh"
 #include "coot-preferences.h"
+
+#include "utils/coot-utils.hh"
 
 #include "widget-from-builder.hh"
 
@@ -1097,30 +1094,21 @@ parse_ccp4i_defs(const std::string &filename) {
    // ccp4 project dir
    // on Windows (without mingw or cygwin) there is no PWD,
    // so we set it to "", should work
-   char *pwd = getenv("PWD");
-   if (pwd) {
-      v.push_back(std::pair<std::string, std::string> (std::string(" - Current Dir - "),
-						       std::string(pwd) + "/"));
-   } else {
-#ifdef WINDOWS_MINGW
-      v.push_back(std::pair<std::string, std::string> (std::string(" - Current Dir - "),
-						       std::string("")));  
-#endif // MINGW
-   }
-   
-   struct stat buf;
-   int stat_status = stat(filename.c_str(), &buf);
-   if (stat_status != 0) {
-     // silently return nothing if we can't find the file.
-     return v;
-   } 
 
-   std::ifstream c_in(filename.c_str());
+   v.emplace_back(" - Current Dir - ", coot::util::current_working_dir());
+
+   if (!coot::util::is_regular_file(filename)) {
+      // silently return nothing if we can't find the file.
+      // NOTE: Vector "v" is not empty so we are not returning "nothing".
+      return v;
+   }
+
+   std::ifstream c_in(filename);
 
    // Let's also add ccp4_scratch to the list if the environment
    // variable is declared and if directory exists
-   char *scratch = getenv("CCP4_SCR");
-   if (scratch) {
+   char *scratch_env = getenv("CCP4_SCR");
+   if (scratch_env) {
       // struct stat buf; no shadow
       // in Windows stat needs to have a last / or \ removed, if existent
 #ifdef WINDOWS_MINGW
@@ -1131,12 +1119,8 @@ parse_ccp4i_defs(const std::string &filename) {
 	scratch[strlen(scratch) - 1] = '\0';
       }
 #endif // MINGW
-      int istat_scratch = stat(scratch, &buf);
-      if (istat_scratch == 0) {
-	 if (S_ISDIR(buf.st_mode)) {
-	    v.push_back(std::pair<std::string, std::string>(std::string("CCP4_SCR"),
-							    std::string(scratch) + "/"));
-	 }
+      if (coot::util::is_dir(scratch_env)) {
+	 v.emplace_back(std::string("CCP4_SCR"), coot::util::append_dir_dir(scratch_env, "")); // Just append the path delimiter to scratch_env
       }
    }
 
@@ -1242,28 +1226,14 @@ parse_ccp4i_defs(const std::string &filename) {
 		  // end so that went we set that filename in the fileselection
 		  // widget, we go into the directory, rather than being in the
 		  // directory above with the tail as the selected file.
-		  //
-		  struct stat buf_l;
-		  int status = stat(path_str.c_str(), &buf_l);
-	       
-		  // valgrind says that buf.st_mode is uninitialised here
-		  // strangely.  Perhaps we should first test for status?
-		  // Yes - that was it.  I was using S_ISDIR() on a file
-		  // that didn't exist.  Now we skip if the file does not
-		  // exist or is not a directory.
 
-		  // std::cout << "stating "<< path_str << std::endl;
-
-		  if (status == 0) { 
-		     if (S_ISDIR(buf_l.st_mode)) {
-			path_str += "/";
-
-			if (alias_str == "\"\"") {
-			   alias_str = "";
-			   path_str  = "";
-			}
-			v.push_back(std::pair<std::string, std::string> (alias_str, path_str));
-		     }
+                  if (coot::util::is_dir(path_str)) {
+                     if (alias_str == "\"\"") {
+                        v.emplace_back("", "");
+                     } else {
+                        v.emplace_back(alias_str, coot::util::append_dir_dir(path_str, ""));
+                     }
+                  } else {
 		     // } else { 
 		     // // This is too boring to see every time we open a file selection
 		     // std::cout << "INFO:: directory for a CCP4i project: " 
@@ -1325,131 +1295,48 @@ void set_make_movie_mode(int make_movie_flag) {
    graphics_info_t::make_movie_flag = make_movie_flag;
 }
 
+static
+void try_load_extras_from_dir(const std::string &env_var, const std::string &pattern, std::function<void(const char *)> loader) {
+   const char *env = getenv(env_var.c_str());
+   if (!env) {
+      return;
+   }
+
+#if defined(COOT_BUILD_WINDOWS)
+   const std::vector<std::string> dirs = coot::util::split_string(env, ";");
+#else
+   const std::vector<std::string> dirs = coot::util::split_string(env, ":");
+#endif
+
+   for (const auto &dir : dirs) {
+      if (!coot::util::is_dir(dir)) {
+         std::cout << "WARNING:: \"" << dir << "\" specified in " << env_var << " is not a directory" << std::endl;
+      } else {
+         auto files = coot::util::gather_files_by_patterns(dir, { pattern });
+         for (const auto &f : files) {
+            std::string path = coot::util::append_dir_file(dir, f);
+            if (coot::util::is_regular_file(path)) {
+               std::cout << "loading extra: " << path << std::endl;
+               loader(path.c_str());
+            }
+         }
+      }
+   }
+}
 
 #ifdef USE_GUILE
 void try_load_scheme_extras_dir() {
 
    // Function no longer used? Check and delete.
 
-   char *s = getenv("COOT_SCHEME_EXTRAS_DIR");
-   if (s) {
-
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-      std::vector<std::string> dirs = coot::util::split_string(s, ";");
-#else
-      std::vector<std::string> dirs = coot::util::split_string(s, ":");
-#endif
-      for (unsigned int i=0; i<dirs.size(); i++) { 
-	 struct stat buf;
-	 int status = stat(dirs[i].c_str(), &buf);
-	 if (status != 0) {
-	    std::cout << "WARNING:: no directory \"" << dirs[i] << "\""
-		      << " in COOT_SCHEME_EXTRAS_DIR " << s
-		      << std::endl;
-	 } else {
-	    if (S_ISDIR(buf.st_mode)) {
-
-	       DIR *lib_dir = opendir(dirs[i].c_str());
-	       if (lib_dir == NULL) {
-		  std::cout << "An ERROR occured on opening the directory "
-			    << dirs[i] << std::endl;
-	       } else {
-
-		  struct dirent *dir_ent;
-
-		  // loop until the end of the filelist (readdir returns NULL)
-		  // 
-		  while (1) {
-		     dir_ent = readdir(lib_dir);
-		     if (dir_ent == NULL) {
-			break;
-		     } else {
-			std::string sub_part(std::string(dir_ent->d_name));
-			struct stat buf2;
-			std::string fp = s;
-			fp += "/";
-			fp += sub_part;
-			int status2 = stat(fp.c_str(), &buf2);
-			if (status2 != 0) {
-			   // std::cout << "WARNING:: no file " << sub_part << " in directory "
-			   // << dirs[i] << std::endl;
-			} else {
-			   if (S_ISREG(buf2.st_mode)) {
-			      if (coot::util::file_name_extension(sub_part) == ".scm") {
-				 std::cout << "loading extra: " << fp << std::endl;
-				 scm_c_primitive_load(fp.c_str());
-			      }
-			   }
-			}
-		     }
-		  }
-	       }
-	    }
-	 }
-      }
-   }
+   try_load_extras_from_dir("COOT_SCHEME_EXTRAS_DIR", "*.scm", scm_c_primitive_load);
 }
 #endif // USE_GUILE
 
 
 #ifdef USE_PYTHON
 void try_load_python_extras_dir() {
-
-   char *s = getenv("COOT_PYTHON_EXTRAS_DIR");
-   if (s) {
-#if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-      std::vector<std::string> dirs = coot::util::split_string(s, ";");
-#else
-      std::vector<std::string> dirs = coot::util::split_string(s, ":");
-#endif
-      for (unsigned int i=0; i<dirs.size(); i++) {
-	 struct stat buf;
-	 int status = stat(dirs[i].c_str(), &buf);
-	 if (status != 0) {
-	    std::cout << "WARNING:: no directory \"" << dirs[i] << "\""
-		      << " in COOT_PYTHON_EXTRAS_DIR " << s
-		      << std::endl;
-	 } else {
-	    if (S_ISDIR(buf.st_mode)) {
-
-	       DIR *lib_dir = opendir(dirs[i].c_str());
-	       if (lib_dir == NULL) {
-		  std::cout << "An ERROR occured on opening the directory "
-			    << dirs[i] << std::endl;
-	       } else {
-
-		  struct dirent *dir_ent;
-
-		  // loop until the end of the filelist (readdir returns NULL)
-		  // 
-		  while (1) {
-		     dir_ent = readdir(lib_dir);
-		     if (dir_ent == NULL) {
-			break;
-		     } else {
-			std::string sub_part(std::string(dir_ent->d_name));
-			struct stat buf2;
-			std::string fp = s;
-			fp += "/";
-			fp += sub_part;
-			int status2 = stat(fp.c_str(), &buf2);
-			if (status2 != 0) {
-			   // std::cout << "WARNING:: no file " << sub_part << std::endl;
-			} else {
-			   if (S_ISREG(buf2.st_mode)) {
-			      if (coot::util::file_name_extension(sub_part) == ".py") {
-				 std::cout << "loading python extra: " << fp << std::endl;
-				 run_python_script(fp.c_str()); 
-			      }
-			   }
-			}
-		     }
-		  }
-	       }
-	    }
-	 }
-      }      
-   }
+   try_load_extras_from_dir("COOT_PYTHON_EXTRAS_DIR", "*.py", run_python_script);
 }
 #endif // USE_PYTHON
 

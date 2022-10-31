@@ -98,7 +98,7 @@ coot::util::append_dir_dir(const std::string &s1, const std::string &dir) {
    }
 
    if (s1.back() == PATH_DELIMITER) {
-      return s1.substr(0, s1.length() - 1) + std::string{PATH_DELIMITER} + dir;
+      return s1 + dir;
    } else {
       return s1 + std::string{PATH_DELIMITER} + dir;
    }
