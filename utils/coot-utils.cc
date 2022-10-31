@@ -96,6 +96,10 @@ coot::util::append_dir_dir(const std::string &s1, const std::string &dir) {
 
    if (s1.back() == PATH_DELIMITER) {
       return s1 + dir;
+#ifdef COOT_BUILD_WINDOWS
+   } else if (s1.back() == UNIX_PATH_DELIMITER) {
+      return s1.substr(0, s1.length() - 1) + std::string{PATH_DELIMITER} + dir;
+#endif // COOT_BUILD_WINDOWS
    } else {
       return s1 + std::string{PATH_DELIMITER} + dir;
    }
