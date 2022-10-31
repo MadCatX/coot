@@ -37,9 +37,6 @@
 
 #include "compat/coot-sysdep.h"
 
-#include <sys/stat.h>
-#include <sys/types.h>
-
 #include <ctype.h>  // for toupper
 
 #include "coot-utils.hh"
@@ -990,40 +987,27 @@ coot::rdkit_package_data_dir() {
 std::string
 coot::get_directory(const std::string &dir) {
 
-   struct stat s;
-   int fstat = stat(dir.c_str(), &s);
-   if (fstat == -1 ) { // file not exist
-      int status = util::create_directory(dir);
-      if (status == 0) { // success
-	 return dir;
-      } else {
-	 // try to create in $HOME
-	 const char *e = getenv("HOME");
-	 if (e) {
-	    std::string home(e);
-	    const std::string d = util::append_dir_dir(home, dir);
-	    fstat = stat(d.c_str(), &s);
-	    if (fstat == -1) {
-	       int status = util::create_directory(d);
-	       if (status == 0) { // fine
-		  return d;
-	       } else {
-		  // couldn't create in $HOME either
-		  std::string empty;
-		  return empty;
-	       }
-	    } else {
-	       return d;
-	    }
+   std::string path = util::append_dir_dir(util::current_working_dir(), dir); // Return as absolute path
+
+   // Is "dir" present in current working directory?
+   if (!util::is_dir(path)) {
+      if (util::create_directory(path) == -1) {
+         // Current working directory appears unusable, try HOME directory
+	 path = sysdep::get_home_dir();
+	 if (path.empty()) {
+	    path = "";
 	 } else {
-	    // no $HOME
-	    std::string empty;
-	    return empty;
+            path = util::append_dir_dir(path, dir);
+            if (!util::is_dir(path)) {
+               if (util::create_directory(path) == -1) {
+                  path = "";
+               }
+	    }
 	 }
       }
-   } else {
-      return dir;
    }
+
+   return path;
 }
 
 
@@ -1210,15 +1194,8 @@ coot::util::random_f() {
 
 bool
 coot::file_is_empty(const std::string &filename) {
-
-   struct stat s;
-   int fstat = stat(filename.c_str(), &s);
-   if ( fstat == -1 ) { // file not exist
-      return false;
-   } else {
-      off_t ss = s.st_size;
-      if (ss == 0)
-         return true;
+   if (util::file_exists(filename)) {
+      return util::get_file_size(filename) == 0LL;
    }
    return false;
 }
@@ -1226,7 +1203,7 @@ coot::file_is_empty(const std::string &filename) {
 bool
 coot::file_exists_and_non_empty(const std::string &file_name) {
    if (util::file_exists(file_name)) {
-      return util::get_file_size(file_name) > 0;
+      return util::get_file_size(file_name) > 0LL;
    }
    return false;
 }
