@@ -530,16 +530,6 @@ graphics_info_t::import_all_refmac_cifs() {
    }
 }
 
-// a static
-std::string
-graphics_info_t::add_dir_file(const std::string &dirname, const std::string &filename) {
-
-   std::string r = dirname;
-   r += "/";
-   r += filename;
-   return r;
-}
-
 // if dir is true, we want to go forward
 void
 graphics_info_t::reorienting_next_residue(bool dir) {
