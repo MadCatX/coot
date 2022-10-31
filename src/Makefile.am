@@ -731,7 +731,7 @@ if COOT_BUILD_WINDOWS
 # Python .pyd modules are simply DLLs, but they have to be called .pyd for
 # python to find them, and libtool only creates .dll.
 install-exec-hook:
-	mv $(pyexecdir)/_coot-0.dll $(pyexecdir)/_coot.pyd
+	cp $(pyexecdir)/_coot-0.dll $(pyexecdir)/_coot.pyd
 endif
 
 # testcartesian_SOURCES = testcartesian.cc
