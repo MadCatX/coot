@@ -155,8 +155,8 @@ if COOT_BUILD_WINDOWS
 # Python .pyd modules are simply DLLs, but they have to be called .pyd for
 # python to find them, and libtool only creates .dll.
 install-exec-hook:
-	mv $(pyexecdir)/_pyrogen_swig-0.dll $(pyexecdir)/_pyrogen_swig.pyd
-	mv $(pyexecdir)/pyrogen_boost-0.dll $(pyexecdir)/pyrogen_boost.pyd
+	cp $(pyexecdir)/_pyrogen_swig-0.dll $(pyexecdir)/_pyrogen_swig.pyd
+	cp $(pyexecdir)/pyrogen_boost-0.dll $(pyexecdir)/pyrogen_boost.pyd
 endif
 
 # clean needs to remove _pyrogen_swig.so
