@@ -1348,9 +1348,6 @@ public:
 
    void contour_level_scroll_scrollable_map(int direction);
 
-   // a static utility function (excised for portability)
-   static std::string add_dir_file(const std::string &dirname, const std::string &filename);
-
    /*! \brief is the given file name suitable to be read as coordinates? */
    short int file_type_coords(const std::string &file_name);
 

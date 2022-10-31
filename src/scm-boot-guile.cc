@@ -118,8 +118,8 @@ void try_load_dot_coot_and_preferences() {
 
       if (run_startup_scripts_flag) {
 
-	 std::string preferences_dir = graphics_info_t::add_dir_file(directory, ".coot");
-	 std::string full_path_coot_pref_scm = graphics_info_t::add_dir_file(preferences_dir,
+	 std::string preferences_dir = coot::util::append_dir_file(directory, ".coot");
+	 std::string full_path_coot_pref_scm = coot::util::append_dir_file(preferences_dir,
 									     "coot-preferences.scm");
 	 if (coot::util::is_dir(preferences_dir)) { 
 	    std::cout << "INFO:: preferences directory " << preferences_dir 
