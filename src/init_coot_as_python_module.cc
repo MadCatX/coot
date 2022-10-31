@@ -56,7 +56,7 @@ void setup_symm_lib() {
       // binary users:
       std::string standard_file_name = coot::util::append_dir_file(coot::package_data_dir(), "syminfo.lib");
 
-      if (!coot::util::is_dir(standard_file_name)) {
+      if (!coot::util::is_regular_file(standard_file_name)) {
 	 // This warning is only sensible for those who compile (or
 	 // fink).  So let's test if SYMINFO was set before we write it
 	 //
