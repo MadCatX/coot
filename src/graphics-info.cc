@@ -5696,20 +5696,24 @@ graphics_info_t::remove_all_atom_labels() {
 std::string
 graphics_info_t::ccp4_defs_file_name() {
 
+// NOTE: Behaviour of this function is probably wrong on Windows
+// and would benefit from some platform-specific utility functions
+// from coot::util.
+
 #if defined WIN32
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
 // BL says:: in my windows it's found in $USERPROFILE
 // would guess that's true for other win32 too....
     char *home = getenv("USERPROFILE");
 #else
     char *home = getenv("HOMEPATH");
-#endif // WINDOWS_MINGW
+#endif // COOT_BUILD_WINDOWS
 #else
     char *home = getenv("HOME");
 #endif // WIN32
 
-#if defined(WINDOWS_MINGW)|| defined(_MSC_VER)
-    std::string path = "/CCP4/windows/directories.def";
+#ifdef COOT_BUILD_WINDOWS
+    std::string path = "\\CCP4\\windows\\directories.def";
 #else
     std::string path = "/.CCP4/unix/directories.def";
 #endif
@@ -6092,7 +6096,7 @@ graphics_info_t::safe_scheme_command(const std::string &scheme_command) {
 
 void graphics_info_t::run_user_defined_click_func() {
 
-#if defined USE_GUILE && ! defined WINDOWS_MINGW
+#if defined USE_GUILE && ! defined COOT_BUILD_WINDOWS
 
    if (scm_is_true(scm_procedure_p(user_defined_click_scm_func))) {
       SCM arg_list = SCM_EOL;

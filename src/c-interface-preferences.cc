@@ -1111,14 +1111,14 @@ parse_ccp4i_defs(const std::string &filename) {
    if (scratch_env) {
       // struct stat buf; no shadow
       // in Windows stat needs to have a last / or \ removed, if existent
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
       if (scratch[strlen(scratch) - 1] == '/') {
 	scratch[strlen(scratch) - 1] = '\0';
       }
       if (scratch[strlen(scratch) - 1] == '\\') {
 	scratch[strlen(scratch) - 1] = '\0';
       }
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
       if (coot::util::is_dir(scratch_env)) {
 	 v.emplace_back(std::string("CCP4_SCR"), coot::util::append_dir_dir(scratch_env, "")); // Just append the path delimiter to scratch_env
       }

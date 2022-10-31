@@ -42,14 +42,6 @@
 #  include "config.h"
 #endif
 
-
-// We are not using NLS yet.
-// #ifndef WINDOWS_MINGW
-// #define ENABLE_NLS
-// #endif
-// #ifdef DATADIR
-// #endif // DATADIR
-
 // #include <GL/glut.h> // for glutInit()
 
 // #include "lbg/lbg.hh"
@@ -96,12 +88,6 @@
 // BL says:: and (2.3 - dewinter), i.e. is a Mac - Python issue
 // since the follwing two include python graphics-info.h is moved up
 //
-#if defined (WINDOWS_MINGW)
-#include <locale.h>
-#ifdef DATADIR
-#undef DATADIR
-#endif // DATADIR
-#endif
 
 #include "c-interface.h"
 #include "c-interface-gtk-widgets.h"
@@ -152,15 +138,6 @@ int setup_database();
 #include "dynamic-menus.hh"
 
 #include "widget-from-builder.hh"
-
-void
-windows_set_error_mode() {
-
-#ifdef WINDOWS_MINGW
-      // in Windows we don't want a crash dialog if no-graphics
-      SetErrorMode(SetErrorMode(SEM_NOGPFAULTERRORBOX) | SEM_NOGPFAULTERRORBOX);
-#endif // MINGW
-}
 
 GtkWidget*
 my_create_splash_screen_window (void) {
@@ -254,10 +231,6 @@ make_main_window_title() {
       main_title += coot::util::int_to_string(git_revision_count());
       main_title += ")";
    }
-#endif
-
-#ifdef WINDOWS_MINGW
-   main_title = "Win" + main_title;
 #endif
 
    return main_title;
@@ -461,7 +434,7 @@ main(int argc, char *argv[]) {
 
    } else {
 
-      windows_set_error_mode();
+      coot::sysdep::set_os_error_mode();
 
    }
 

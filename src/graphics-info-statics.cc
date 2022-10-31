@@ -8,7 +8,7 @@
 #include "rotate-translate-modes.hh"
 #include "rotamer-search-modes.hh"
 
-#if !defined WINDOWS_MINGW
+#if !defined COOT_BUILD_WINDOWS
 
 #ifdef USE_GUILE
 #ifdef USE_GUILE_GTK

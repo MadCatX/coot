@@ -91,7 +91,7 @@ graphics_info_t::load_freetype_font_textures() {
 void
 graphics_info_t::init() {
 
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
    prefer_python = 1;
 #endif
    // The cosine->sine lookup table, used in picking.

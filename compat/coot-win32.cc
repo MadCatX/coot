@@ -426,7 +426,7 @@ std::wstring local_to_wide_string(const std::string &str, bool *ok) {
     return std::wstring(w_bytes.data());
 }
 
-bool rename(const char *old_file_path, const char *new_file_path, std::string &error_message) {
+bool rename_file(const std::string &old_file_path, const std::string &new_file_path, std::string &error_message) {
     bool ok;
     std::wstring w_old_file_path = local_to_wide_string(old_file_path, &ok);
     if (!ok) {

@@ -47,7 +47,7 @@ namespace sysdep {
     bool is_file_writeable(const std::string &file_path);
     bool is_link(const std::string &file_path);
     bool is_regular_file(const std::string &file_path);
-    bool rename(const char *old_file_path, const char *new_file_path, std::string &error_message);
+    bool rename_file(const std::string &old_file_path, const std::string &new_file_path, std::string &error_message);
     bool set_current_directory(const std::string &path);
     void set_os_error_mode();
     void sleep(unsigned int secs);

@@ -2945,7 +2945,7 @@ void add_to_history(const std::vector<std::string> &command_strings) {
       // std::string esc = "esc";
       if (g.console_display_commands.hilight_flag) {
         // std::cout << esc << "[34m";
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
         // use the console cursor infot to distinguish between DOS and MSYS
         // shell
         CONSOLE_CURSOR_INFO ConCurInfo;
@@ -2962,14 +2962,14 @@ void add_to_history(const std::vector<std::string> &command_strings) {
         }
 #else
          std::cout << esc << "[1m";
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
       } else {
          std::cout << "INFO:: Command: ";
       }
 
       // Make it colourful?
       if (g.console_display_commands.hilight_colour_flag) {
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
         CONSOLE_CURSOR_INFO ConCurInfo;
         if (GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConCurInfo)) {
           // we have a DOS shell
@@ -3022,19 +3022,19 @@ void add_to_history(const std::vector<std::string> &command_strings) {
 #else
          std::cout << esc << "[3"
                    << g.console_display_commands.colour_prefix << "m";
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
       }
 
-#if defined USE_GUILE && !defined WINDOWS_MINGW
+#if defined USE_GUILE && !defined COOT_BUILD_WINDOWS
       std::cout << graphics_info_t::schemize_command_strings(command_strings);
 #else
 #ifdef USE_PYTHON
       std::cout << graphics_info_t::pythonize_command_strings(command_strings);
 #endif // USE_PYTHON
-#endif // USE_GUILE/MINGW
+#endif // USE_GUILE/COOT_BUILD_WINDOWS
 
       if (g.console_display_commands.hilight_flag) {// hilight off
-#ifdef WINDOWS_MINGW
+#ifdef COOT_BUILD_WINDOWS
         CONSOLE_CURSOR_INFO ConCurInfo;
         if (GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConCurInfo)) {
           // we have a DOS shell (reset to white)
@@ -3049,7 +3049,7 @@ void add_to_history(const std::vector<std::string> &command_strings) {
 #else
          std::cout << esc << "[0m"; // reset
          //std::cout << esc; // reset
-#endif // MINGW
+#endif // COOT_BUILD_WINDOWS
       }
       std::cout << std::endl;
    }

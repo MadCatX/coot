@@ -2023,11 +2023,7 @@ molecule_class_info_t::name_for_display_manager() const {
       s = name_;
    } else {
       if (has_model()) {
-#ifdef WINDOWS_MINGW
          std::string::size_type islash = coot::util::intelligent_debackslash(name_).find_last_of("/");
-#else
-         std::string::size_type islash = name_.find_last_of("/");
-#endif // MINGW
          if (islash == std::string::npos) {
             s = name_;
          } else {
@@ -3209,13 +3205,8 @@ molecule_class_info_t::make_import_datanames(const std::string &f_col_in,
    std::string phi_col = phi_col_in;
    std::string weight_col = weight_col_in;
 
-#ifdef WINDOWS_MINGW
    std::string::size_type islash_f   = coot::util::intelligent_debackslash(  f_col).find_last_of("/");
    std::string::size_type islash_phi = coot::util::intelligent_debackslash(phi_col).find_last_of("/");
-#else
-   std::string::size_type islash_f   =      f_col.find_last_of("/");
-   std::string::size_type islash_phi =    phi_col.find_last_of("/");
-#endif // MINGW
 
    short int label_error = 0;
 
@@ -3236,11 +3227,7 @@ molecule_class_info_t::make_import_datanames(const std::string &f_col_in,
    }
 
    if (use_weights) {
-#ifdef WINDOWS_MINGW
       std::string::size_type islash_fom = coot::util::intelligent_debackslash(weight_col).find_last_of("/");
-#else
-      std::string::size_type islash_fom = weight_col.find_last_of("/");
-#endif
       if (islash_fom != std::string::npos) {
          // weight_col is of form e.g. xxx/yyy/WT
          if (weight_col.length() > islash_fom)
@@ -8704,11 +8691,7 @@ molecule_class_info_t::Refmac_name_stub() const {
    // First strip off the path of name_:
    std::string stripped_name;
    // /a/b.mtz -> b.mtz
-#ifdef WINDOWS_MINGW
    std::string::size_type islash = coot::util::intelligent_debackslash(name_).find_last_of("/");
-#else
-   std::string::size_type islash = name_.find_last_of("/");
-#endif // MINGW
    if (islash == std::string::npos) {
       // std::cout << "DEBUG:: slash not found in " << name_ << std::endl;
       stripped_name = name_;
@@ -8774,9 +8757,7 @@ molecule_class_info_t::name_sans_extension(short int include_path_flag) const {
    if (ipdb != std::string::npos)
       outstring = name_.substr(0, ipdb);
    if (include_path_flag != 1) {
-#ifdef WINDOWS_MINGW
      outstring = coot::util::intelligent_debackslash(outstring);
-#endif // MINGW
 
      std::string::size_type islash = outstring.rfind("/");
      if (islash != std::string::npos)
@@ -9327,11 +9308,7 @@ molecule_class_info_t::stripped_save_name_suggestion() {
    std::string s;
 
    std::string stripped_name1;
-#ifdef WINDOWS_MINGW
    std::string::size_type islash = coot::util::intelligent_debackslash(name_).find_last_of("/");
-#else
-   std::string::size_type islash = name_.find_last_of("/");
-#endif // MINGW
    if (islash == std::string::npos) {
       stripped_name1 = name_;
    } else {

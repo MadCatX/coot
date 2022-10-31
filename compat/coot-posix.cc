@@ -185,10 +185,11 @@ bool is_regular_file(const std::string &file_path) {
     return S_ISREG(buf.st_mode);
 }
 
-bool rename(const char *old_file_path, const char *new_file_path, std::string &error_message) {
-    int ret = ::rename(old_file_path, new_file_path);
-    if (ret == 0)
+bool rename_file(const std::string &old_file_path, const std::string &new_file_path, std::string &error_message) {
+    int ret = rename(old_file_path.c_str(), new_file_path.c_str());
+    if (ret == 0) {
         return true;
+    }
 
     error_message = std::string{std::strerror(ret)};
 

@@ -1883,7 +1883,7 @@ gint key_press_event(GtkWidget *widget, GdkEventKey *event)
 #endif
 	    }
 
-#if defined USE_GUILE && !defined WINDOWS_MINGW
+#if defined USE_GUILE && !defined COOT_BUILD_WINDOWS
 	    std::string scheme_command("(graphics-general-key-press-hook ");
 	    // scheme_command += "\"";
 	    scheme_command += graphics_info_t::int_to_string(ikey);
@@ -2725,21 +2725,6 @@ gint glarea_button_release(GtkWidget *widget, GdkEventButton *event) {
    graphics_info_t::in_moving_atoms_drag_atom_mode_flag = 0;
    return TRUE;
 }
-
-// Francois says to remove this:
-//
-// #if defined(WINDOWS_MINGW) || defined(_MSC_VER)
-
-// gint glarea_scroll_event(GtkWidget *widget, GdkEventScroll *event) {
-
-//    if (event->direction == SCROLL_UP)
-//       handle_scroll_event(1);
-//    if (event->direction == SCROLL_DOWN)
-//       handle_scroll_event(0);
-//    return TRUE;
-// }
-// #endif
-
 
 gint glarea_scroll_event(GtkWidget *widget, GdkEventScroll *event) {
 

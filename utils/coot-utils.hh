@@ -101,6 +101,7 @@ namespace coot {
       bool is_dir(const std::string &path);
       bool is_link(const std::string &path);
       bool is_regular_file(const std::string &path);
+      int rename_file(const std::string &old_path, const std::string &new_path);
       std::string uri_to_file_name(const std::string &uri);
 
       // If cwd is a substring of f, then return the basename of f (i.e. cwd
