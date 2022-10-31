@@ -371,7 +371,7 @@ void try_load_dot_coot_py_and_python_scripts(const std::string &home_directory) 
       // now coot startup scripts will be read from and written to the ~/.coot directory
       // (if it is not a file already)
       //
-      std::string startup_scripts_dir = graphics_info_t::add_dir_file(home_directory, ".coot");
+      std::string startup_scripts_dir = coot::util::append_dir_file(home_directory, ".coot");
       bool have_startup_scripts_dir = coot::util::is_dir(startup_scripts_dir);
 
       if (!have_startup_scripts_dir) {
