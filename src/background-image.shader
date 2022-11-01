@@ -1,6 +1,5 @@
 
 #shader vertex
-# --- background-image.shader
 
 #version 330 core
 
@@ -16,7 +15,6 @@ void main() {
 
 
 #shader fragment
-# --- background-image.shader
 
 #version 330 core
 
