@@ -3810,7 +3810,7 @@ molecule_class_info_t::recent_backup_file_info() const {
 
       backup_dir += t_name_glob;
 
-      std::vector<std::string> v = coot::util::gather_files_by_patterns(backup_dir, { "*.pdb", ".pdb.gz" });
+      std::vector<std::string> v = coot::util::gather_files_by_patterns(backup_dir, { "*.pdb", "*.pdb.gz" });
 
       if (!v.empty()) {
          coot::FileTimes times = coot::util::get_file_times(name_);
