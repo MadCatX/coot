@@ -54,7 +54,7 @@ def register_coot_icons():
         # only load image files when our stock_id is not present
         if ((stock_id not in stock_ids) and not ('phenixed' in filename)):
             if os.path.isfile(filename):
-                pixbuf = Gtk.gdk.pixbuf_new_from_file(filename)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
                 iconset = Gtk.IconSet(pixbuf)
                 iconfactory.add(stock_id, iconset)
     iconfactory.add_default()
