@@ -291,7 +291,7 @@ coot::db_main::get_reference_pdb_list() const {
    } else { 
       std::string ref_str_dir_str(dir); 
 
-      std::vector<std::string> files = util::gather_files_by_patterns(ref_str_dir_str, { ".pdb", ".pdb.gz", ".gz" });
+      std::vector<std::string> files = util::gather_files_by_patterns(ref_str_dir_str, { "*.pdb", "*.pdb.gz", "*.gz" });
       for (const auto &f : files) {
          // If file has a plain ".gz" suffix but does not begin with "pdb" do not consider it a valid file
          auto lowercased = util::downcase(f);
