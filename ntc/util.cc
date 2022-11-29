@@ -35,34 +35,34 @@ void CopyCharArray(CharArray dst, const CharArray src) {
     _CopyCharArray<sizeof(CharArray)>(dst, src);
 }
 
-// @nocheckin Shit code
 static
-mmdb::Residue *
-get_standard_residue_instance(const std::string &residue_name, mmdb::Manager *standard_residues) {
-   mmdb::Residue *std_residue = 0;
-   int selHnd = standard_residues->NewSelection();
-   standard_residues->Select (selHnd, mmdb::STYPE_RESIDUE, 1, // .. TYPE, iModel
-			      "*",
-			      mmdb::ANY_RES, "*",  // starting res
-			      mmdb::ANY_RES, "*",  // ending res
-			      residue_name.c_str(),  // residue name
-			      "*",  // Residue must contain this atom name?
-			      "*",  // Residue must contain this Element?
-			      "*",  // altLocs
-			      mmdb::SKEY_NEW // selection key
-			      );
-   mmdb::PPResidue SelResidue;
-   int nSelResidues;
-   standard_residues->GetSelIndex(selHnd, SelResidue, nSelResidues);
+mmdb::Residue * get_standard_residue_instance(const std::string &residueName, mmdb::Manager *standardResidues) {
+    int selHnd = standardResidues->NewSelection();
+    standardResidues->Select(
+        selHnd,
+        mmdb::STYPE_RESIDUE,
+        1,           //iModel
+        "*",
+        mmdb::ANY_RES, "*",  // starting res
+        mmdb::ANY_RES, "*",  // ending res
+        residueName == "Ud" ? "Ur" : residueName.c_str(), // Replace deoxyuridine with uridine because we do not have Ud as a std. template
+	    "*",  // Residue must contain this atom name?
+        "*",  // Residue must contain this Element?
+        "*",  // altLocs
+        mmdb::SKEY_NEW // selection key
+    );
 
-   assert(nSelResidues == 1);
+    mmdb::PPResidue SelResidue;
+    int nSelResidues;
+    standardResidues->GetSelIndex(selHnd, SelResidue, nSelResidues);
 
-    std_residue = coot::util::deep_copy_this_residue(SelResidue[0]);
-   
-    standard_residues->DeleteSelection(selHnd);
-   return std_residue;
+    assert(nSelResidues == 1);
+
+    mmdb::Residue *stdResidue = coot::util::deep_copy_this_residue(SelResidue[0]);
+    standardResidues->DeleteSelection(selHnd);
+
+    return stdResidue;
 }
-
 
 static
 void fix_up_atom_names(mmdb::Residue *relabelee, mmdb::Residue *relabeler) {
@@ -126,9 +126,10 @@ std::string refmac_residue_name(std::string residueName) {
     if (residueName == "DA") return "Ad";
     if (residueName == "DG") return "Gd";
     if (residueName == "DT") return "Td";
+    if (residueName == "DU") return "Ud";
     if (residueName == "DC") return "Cd";
 
-    return residueName;
+    std::abort();
 }
 
 static
