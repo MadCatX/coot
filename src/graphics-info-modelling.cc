@@ -113,6 +113,9 @@
 #include "ntc/ui/notifications.hh"
 #include "ntc/ui/ntc_dialog.hh"
 #include "molecule-class-info.h"
+
+static_assert(sizeof(LLKA_NtC) <= sizeof(int), "int is not large enough to contain LLKA_NtC");
+
 #endif // COOT_ENABLE_NTC
 
 void
@@ -4630,10 +4633,27 @@ graphics_info_t::modify_ntc_display_reference(NtCDialog *dlg, int ntc) {
 }
 
 void
-graphics_info_t::modify_ntc_update_connectivity(NtCDialog *dlg) {
+graphics_info_t::modify_ntc_update_connectivity(NtCDialog *dlg, int ntc, int imol) {
+  if (!is_valid_model_molecule(imol)) {
+    ntc_dialog_update_connectivities(dlg, {});
+  }
+
+  LLKA_NtC _ntc = LLKA_NtC(ntc);
+  NtCConnectivityResult conns = ntc_calculate_connectivity(_ntc, *modify_ntc_selected_structure, molecules[imol].atom_sel.mol);
+  if (conns.succeeded) {
+    ntc_dialog_update_connectivities(dlg, std::move(conns.success));
+  } else {
+    std::string errMsg = std::string{"Unable to calculate connectivities: "} + LLKA_errorToString(conns.failure);
+    ntc_notify_warning(errMsg);
+    ntc_dialog_update_connectivities(dlg, {});
+  }
+}
+
+void
+graphics_info_t::modify_ntc_update_similarity(NtCDialog *dlg) {
   NtCSimilarityResult similarities = ntc_calculate_similarities(*modify_ntc_selected_structure);
   if (similarities.succeeded) {
-    ntc_dialog_update_similarities(dlg, similarities.success);
+    ntc_dialog_update_similarities(dlg, std::move(similarities.success));
   } else {
     std::string errMsg = std::string{"Unable to calculate similarities: "} + LLKA_errorToString(similarities.failure);
     ntc_notify_warning(errMsg);
@@ -4671,9 +4691,8 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
   mmdb::Atom *atom = molecule.atom_sel.atom_selection[atom_index];
   mmdb::Residue *residue = atom->residue;
   const std::string &altconf = atom->altLoc;
-  mmdb::Residue *residue2 = molecule.get_following_residue(coot::residue_spec_t(residue));
 
-  *modify_ntc_selected_structure = ntc_dinucleotide(residue, residue2, altconf);
+  *modify_ntc_selected_structure = ntc_dinucleotide(molecule.atom_sel.mol, residue, altconf);
   if (!modify_ntc_selected_structure->isValid) {
     ntc_notify_info("Selected structure is not a step");
 
@@ -4697,7 +4716,10 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
     if (dlg) {
       opts = ntc_dialog_get_options(dlg);
     } else {
-      opts.onDisplayedNtCChanged = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_display_reference(dlg, ntc); };
+      opts.onDisplayedNtCChanged = [this, imol](NtCDialog *dlg, LLKA_NtC ntc) {
+	modify_ntc_display_reference(dlg, ntc);
+	modify_ntc_update_connectivity(dlg, ntc, imol);
+      };
       opts.onAccepted = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_accepted(); };
       opts.onRejected = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_rejected(); };
     }
@@ -4707,7 +4729,8 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
   }
 
   modify_ntc_display_reference(dlg, evaluatedDinu.success.closestNtC);
-  modify_ntc_update_connectivity(dlg);
+  modify_ntc_update_connectivity(dlg, evaluatedDinu.success.closestNtC, imol);
+  modify_ntc_update_similarity(dlg);
   ntc_dialog_display_classification(dlg, evaluatedDinu.success);
   ntc_dialog_show(dlg);
 }

@@ -2795,7 +2795,8 @@ public:
    void modify_ntc_accepted();
    void modify_ntc_display_reference(NtCDialog *dlg, int ntc);
    void modify_ntc_rejected();
-   void modify_ntc_update_connectivity(NtCDialog *dlg);
+   void modify_ntc_update_connectivity(NtCDialog *dlg, int ntc, int imol);
+   void modify_ntc_update_similarity(NtCDialog *dlg);
 #endif // COOT_ENABLE_NTC
 
    // Mutation stuff

@@ -52,6 +52,7 @@ struct NtCDialog {
 
     GtkButton *toggle_conn_simil_plots;
     NtCConnSimilPlotsDialog *conn_simil_plots_dialog;
+    NtCConnectivities connectivities;
     std::vector<NtCSimilarity> similarities;
 
     NtCDialogOptions options;
@@ -155,12 +156,16 @@ void on_toggle_conn_simil_plots_clicked(GtkButton *self, gpointer data) {
     } else {
         ntc_csp_dialog_destroy(cspDlg);
 
+        LLKA_NtC ntc = get_selected_ntc(dlg);
+        assert(ntc != LLKA_INVALID_NTC);
+
         dlg->conn_simil_plots_dialog = ntc_csp_dialog_make(
             [dlg](NtCSimilarity similarity) { on_similarity_selected(dlg, similarity); },
             [dlg](int width, int height) { dlg->options.connSimilDlgWidth = width; dlg->options.connSimilDlgHeight = height; }
         );
         assert(dlg->conn_simil_plots_dialog);
 
+        ntc_csp_dialog_update_connectivities(dlg->conn_simil_plots_dialog, dlg->connectivities, ntc);
         ntc_csp_dialog_update_similarities(dlg->conn_simil_plots_dialog, dlg->similarities);
         ntc_csp_dialog_show(dlg->conn_simil_plots_dialog, dlg->options.connSimilDlgWidth, dlg->options.connSimilDlgHeight);
     }
@@ -194,9 +199,9 @@ std::string format_decimal_number(double value, unsigned int numDigits, unsigned
 
 static
 LLKA_NtC get_selected_ntc(NtCDialog *dlg) {
+    LLKA_NtC ntc = LLKA_INVALID_NTC;
     GtkTreeModel *store = gtk_combo_box_get_model(dlg->list_of_ntcs);
     GtkTreeIter iter;
-    LLKA_NtC ntc;
 
     gtk_combo_box_get_active_iter(dlg->list_of_ntcs, &iter);
     gtk_tree_model_get(store, &iter, 0, &ntc, -1);
@@ -435,6 +440,19 @@ void ntc_dialog_show(NtCDialog *dlg) {
     assert(!dlg->destroyed);
 
     gtk_widget_show(dlg->root);
+}
+
+void ntc_dialog_update_connectivities(NtCDialog *dlg, NtCConnectivities connectivities) {
+    assert(!dlg->destroyed);
+
+    dlg->connectivities = std::move(connectivities);
+
+    if (dlg->conn_simil_plots_dialog) {
+        LLKA_NtC ntc = get_selected_ntc(dlg);
+        assert(ntc != LLKA_INVALID_NTC);
+
+        ntc_csp_dialog_update_connectivities(dlg->conn_simil_plots_dialog, dlg->connectivities, ntc);
+    }
 }
 
 void ntc_dialog_update_similarities(NtCDialog *dlg, std::vector<NtCSimilarity> similarities) {

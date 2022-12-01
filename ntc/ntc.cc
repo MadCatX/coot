@@ -17,6 +17,11 @@
 #include <cmath>
 #include <mutex>
 
+enum class RelatedStep {
+    Previous,
+    Next
+};
+
 static const std::string CLUSTERS_FILE{"clusters.csv"};
 static const std::string CONFALS_FILE{"confals.csv"};
 static const std::string GOLDEN_STEPS_FILE{"golden_steps.csv"};
@@ -24,6 +29,12 @@ static const std::string NU_ANGLES_FILE{"nu_angles.csv"};
 
 static LLKA_ClassificationContext *classificationContext{nullptr};
 static std::mutex initializationLock;
+
+static const std::vector<LLKA_NtC> AllNtCs = []() {
+    auto r = make_ntc_range(LLKA_AA00, LLKA_LAST_NTC);
+    r.push_back(LLKA_INVALID_NTC);
+    return r;
+}();
 
 static
 bool is_nucleotide(const char *compId) {
@@ -72,6 +83,122 @@ NtCStructure & NtCStructure::operator=(NtCStructure &&other) noexcept {
 
 void NtCStructure::release() {
     m_released = true;
+}
+
+static
+void destroy_connectivities(LLKA_Connectivities &conns) {
+    delete [] conns.conns;
+}
+
+static
+void destroy_similarities(LLKA_Similarities &simils) {
+    delete [] simils.similars;
+}
+
+static
+mmdb::Manager * expand_residue_to_step(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue, const std::string &altconf) {
+    if (!is_nucleotide(residue->GetLabelCompID())) {
+        return nullptr;
+    }
+
+    mmdb::Residue *residue2 = coot::util::get_following_residue(coot::residue_spec_t(residue), srcMmdbStru);
+    if (!residue2 || !is_nucleotide(residue2->GetLabelCompID())) {
+        return nullptr;
+    }
+
+    mmdb::Residue *filteredResidue = clone_mmdb_residue(residue, altconf);
+    mmdb::Residue *filteredResidue2 = clone_mmdb_residue(residue2, altconf);
+
+    mmdb::Manager *mmdbStru = new mmdb::Manager;
+    mmdb::Model *model = new mmdb::Model;
+    mmdb::Chain *chain = new mmdb::Chain;
+
+    chain->AddResidue(filteredResidue);
+    chain->AddResidue(filteredResidue2);
+    chain->SetChainID(residue->GetChainID());
+    model->AddChain(chain);
+    mmdbStru->AddModel(model);
+    mmdbStru->PDBCleanup(mmdb::PDBCLEAN_SERIAL | mmdb::PDBCLEAN_INDEX);
+    mmdbStru->FinishStructEdit();
+
+    // WARNING: We create a bunch of raw pointers here, freeing just the "mol" object
+    // hopefully should be enough to reclaim the resources
+
+    return mmdbStru;
+}
+
+static
+NtCStructure get_related_step(RelatedStep which, const NtCStructure &stru, mmdb::Manager *srcMmdbStru) {
+    assert(stru.isValid);
+
+    mmdb::Residue **mmdbRes = nullptr;
+    int numResidues = 0;
+    stru.mmdbStru->GetResidueTable(mmdbRes, numResidues);
+    if (numResidues != 2 || !mmdbRes) {
+        return {};
+    }
+
+    const mmdb::Residue *res = mmdbRes[0];
+    coot::residue_spec_t rs(stru.mmdbStru->GetFirstModelNum(), res->chain->GetChainID(), res->seqNum, res->insCode);
+
+    mmdb::Residue *related = nullptr;
+    switch (which) {
+    case RelatedStep::Next:
+        related = coot::util::get_following_residue(rs, srcMmdbStru);
+        break;
+    case RelatedStep::Previous:
+        related = coot::util::get_previous_residue(rs, srcMmdbStru);
+        break;
+    default:
+        return {};
+    }
+
+    if (!related) {
+        return {};
+    }
+
+    // TODO: Handle altconfs
+    mmdb::Manager *mmdbStru = expand_residue_to_step(srcMmdbStru, related, "");
+    if (!mmdbStru) {
+        return {};
+    }
+
+    LLKA_Structure llkaStru = mmdb_structure_to_LLKA_structure(mmdbStru);
+    if (llkaStru.nAtoms == 0) {
+        delete mmdbStru;
+        return {};
+    }
+
+    return { mmdbStru, llkaStru };
+}
+
+static
+LLKA_Connectivities init_connectivities(size_t count) {
+    return {
+        new LLKA_Connectivity[count],
+        count
+    };
+}
+
+static
+LLKA_Similarities init_similarities(size_t count) {
+    return {
+        new LLKA_Similarity[count],
+        count
+    };
+}
+
+static
+std::vector<NtCConnectivity> map_connectivities(const LLKA_Connectivities &llkaConns, const std::vector<LLKA_NtC> &NtCs) {
+    assert(llkaConns.nConns == NtCs.size() - 1); // -1 because AllNtCs are terminated by LLKA_INVALID_NTC
+
+    std::vector<NtCConnectivity> conns(llkaConns.nConns);
+    for (size_t idx = 0; idx < llkaConns.nConns; idx++) {
+        conns[idx].connectivity = llkaConns.conns[idx];
+        conns[idx].NtC = LLKA_NtCToName(NtCs[idx]);
+    }
+
+    return conns;
 }
 
 NtCResult<LLKA_ClassifiedStep, LLKA_RetCode> ntc_classify(const NtCStructure &stru) {
@@ -188,48 +315,57 @@ bool ntc_initialize_classification_context_if_needed(std::string path, std::stri
     return ntc_initialize_classification_context(path, error);
 }
 
-NtCStructure ntc_dinucleotide(mmdb::Residue *residue, mmdb::Residue *residue2, const std::string &altconf) {
-    if (!residue || ! residue2)
+NtCStructure ntc_dinucleotide(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue, const std::string &altconf) {
+    if (!residue) {
         return {};
+    }
 
-    if (!is_nucleotide(residue->GetLabelCompID()) || !is_nucleotide(residue2->GetLabelCompID()))
+    mmdb::Manager *mmdbStru = expand_residue_to_step(srcMmdbStru, residue, altconf);
+    if (!mmdbStru) {
         return {};
-
-    mmdb::Residue *filteredResidue = clone_mmdb_residue(residue, altconf);
-    mmdb::Residue *filteredResidue2 = clone_mmdb_residue(residue2, altconf);
-
-    mmdb::Manager *mmdbStru = new mmdb::Manager;
-    mmdb::Model *model = new mmdb::Model;
-    mmdb::Chain *chain = new mmdb::Chain;
-
-    chain->AddResidue(filteredResidue);
-    chain->AddResidue(filteredResidue2);
-    chain->SetChainID(residue->GetChainID());
-    model->AddChain(chain);
-    mmdbStru->AddModel(model);
-    mmdbStru->PDBCleanup(mmdb::PDBCLEAN_SERIAL | mmdb::PDBCLEAN_INDEX);
-    mmdbStru->FinishStructEdit();
-
-    // WARNING: We create a bunch of raw pointers here, freeing just the "mol" object
-    // hopefully should be enough to reclaim the resources
+    }
 
     LLKA_Structure llkaStru = mmdb_structure_to_LLKA_structure(mmdbStru);
-    if (llkaStru.nAtoms == 0)
+    if (llkaStru.nAtoms == 0) {
+        delete mmdbStru;
         return {};
+    }
 
     return { mmdbStru, llkaStru };
 }
 
-NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
-    static std::vector<LLKA_NtC> AllNtCs = []() {
-        auto r = make_ntc_range(LLKA_AA00, LLKA_LAST_NTC);
-        r.push_back(LLKA_INVALID_NTC);
-        return r;
-    }();
+NtCConnectivityResult ntc_calculate_connectivity(LLKA_NtC ntc, const NtCStructure &stru, mmdb::Manager *srcMmdbStru) {
+    LLKA_Connectivities cPrevConns = init_connectivities(AllNtCs.size() - 1);
+    NtCStructure prevStep = get_related_step(RelatedStep::Previous, stru, srcMmdbStru);
+    if (prevStep.isValid) {
+        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleFirst(&prevStep.llkaStru, AllNtCs.data(), &stru.llkaStru, ntc, &cPrevConns);
+        if (tRet != LLKA_OK) {
+            NtCConnectivityResult::fail(tRet);
+        }
+    }
 
-    LLKA_Similarities cSimils{};
-    cSimils.similars = new LLKA_Similarity[AllNtCs.size() - 1];
-    cSimils.nSimilars = AllNtCs.size() - 1;
+    LLKA_Connectivities cNextConns = init_connectivities(AllNtCs.size() - 1);
+    NtCStructure nextStep = get_related_step(RelatedStep::Next, stru, srcMmdbStru);
+    if (nextStep.isValid) {
+        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleSecond(&stru.llkaStru, ntc, &nextStep.llkaStru, AllNtCs.data(), &cNextConns);
+        if (tRet != LLKA_OK) {
+            NtCConnectivityResult::fail(tRet);
+        }
+    }
+
+    NtCConnectivityResult ret = NtCConnectivityResult::succeed(
+        prevStep.isValid ? map_connectivities(cPrevConns, AllNtCs) : std::vector<NtCConnectivity>(),
+        nextStep.isValid ? map_connectivities(cNextConns, AllNtCs) : std::vector<NtCConnectivity>()
+    );
+
+    destroy_connectivities(cPrevConns);
+    destroy_connectivities(cNextConns);;
+
+    return ret;
+}
+
+NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
+    LLKA_Similarities cSimils = init_similarities(AllNtCs.size() - 1);
 
     LLKA_RetCode tRet = LLKA_measureStepSimilarityNtCMultiple(&stru.llkaStru, AllNtCs.data(), &cSimils);
     if (tRet != LLKA_OK) {
@@ -240,8 +376,7 @@ NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
     for (size_t idx = 0; idx < cSimils.nSimilars; idx++) {
         simils.emplace_back(cSimils.similars[idx], LLKA_NtCToName(AllNtCs[idx]));
     }
-
-    // WTF? Is there no deleter for cSimils???
+    destroy_similarities(cSimils);
 
     return NtCSimilarityResult::succeed(std::move(simils));
 }

@@ -39,6 +39,7 @@ NtCDialogOptions ntc_dialog_get_options(NtCDialog *dlg);
 bool ntc_dialog_is_valid(NtCDialog *dlg);
 NtCDialog * ntc_dialog_make(const NtCDialogOptions &options);
 void ntc_dialog_show(NtCDialog *dlg);
+void ntc_dialog_update_connectivities(NtCDialog *dlg, NtCConnectivities connectivities);
 void ntc_dialog_update_similarities(NtCDialog *dlg, std::vector<NtCSimilarity> similarities);
 
 #endif //_NTC_UI_NTC_DIALOG_HH

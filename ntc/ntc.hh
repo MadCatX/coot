@@ -20,8 +20,6 @@ namespace mmdb {
     class Residue;
 }
 
-class molecule_class_info_t;
-
 template <typename Success, typename Failure>
 class NtCResult {
 public:
@@ -39,8 +37,13 @@ public:
         return NtCResult(std::move(s), {}, true);
     }
 
+    template <typename ...Args>
+    static NtCResult succeed(Args&& ...args) noexcept {
+        return NtCResult(Success{std::forward<Args>(args)...}, {}, true);
+    }
+
 private:
-    NtCResult(Success s, Failure f, bool succeeded) :
+    NtCResult(Success s, Failure f, bool succeeded) noexcept :
         success{std::move(s)},
         failure{std::move(f)},
         succeeded{succeeded}
@@ -74,10 +77,12 @@ public:
     double rmsd;
 };
 
+using NtCConnectivityResult = NtCResult<NtCConnectivities, LLKA_RetCode>;
 using NtCSimilarityResult = NtCResult<std::vector<NtCSimilarity>, LLKA_RetCode>;
 
 NtCResult<LLKA_ClassifiedStep, LLKA_RetCode> ntc_classify(const NtCStructure &stru);
-NtCStructure ntc_dinucleotide(mmdb::Residue *residue, mmdb::Residue *residue2, const std::string &altconf);
+NtCStructure ntc_dinucleotide(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue, const std::string &altconf);
+NtCConnectivityResult ntc_calculate_connectivity(LLKA_NtC ntc, const NtCStructure &stru, mmdb::Manager *srcMmdbStru);
 NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru);
 NtCStructure ntc_get_reference_structure(LLKA_NtC ntc);
 bool ntc_initialize_classification_context(const std::string &path, std::string &error);
