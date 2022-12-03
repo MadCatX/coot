@@ -4,7 +4,9 @@
 
 #include "common.hh"
 #include "plot_widget.hh"
+#include "util.hh"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <limits>
@@ -19,14 +21,127 @@ struct NtCConnSimilPlotsDialog {
     PlotWidget *connectivity_next_plot;
     PlotWidget *similarity_plot;
 
+    GtkComboBox *previous_altconfs;
+    GtkComboBox *next_altconfs;
+    GtkSignalConnection previous_altconf_changed_sgc;
+    GtkSignalConnection next_altconf_changed_sgc;
+
     OnSimilaritySelected on_similarity_point_selected;
     OnWidgetResized on_widget_resized;
+
+    std::shared_ptr<NtCConnectivities> connectivities;
 
     bool destroyed;
 };
 
 static
 double calculate_axis_maximum(const std::vector<DotPlotPoint> &points, double DotPlotPoint::* coord, double scaleFactor);
+
+static
+std::string get_current_altconf(GtkComboBox *combo);
+
+static
+void display_connectivities(NtCConnSimilPlotsDialog *dlg) {
+    auto previousAltconf = get_current_altconf(dlg->previous_altconfs);
+    auto prevIt = std::find_if(
+        dlg->connectivities->previous.cbegin(),
+        dlg->connectivities->previous.cend(),
+        [&previousAltconf](const AltConfNtCConnectivities &conn) { return previousAltconf == conn.altconf; }
+    );
+
+    auto nextAltconf = get_current_altconf(dlg->next_altconfs);
+    auto nextIt = std::find_if(
+        dlg->connectivities->next.cbegin(),
+        dlg->connectivities->next.cend(),
+        [&nextAltconf](const AltConfNtCConnectivities &conn) { return nextAltconf == conn.altconf; }
+    );
+
+    std::vector<DotPlotPoint> prevPoints;
+    std::vector<DotPlotPoint> nextPoints;
+
+    if (prevIt != dlg->connectivities->previous.cend()) {
+        for (const auto &prev : prevIt->conns) {
+            prevPoints.emplace_back(prev.connectivity.C5PrimeDistance, prev.connectivity.O3PrimeDistance, 1.0, 1.0, 0.0, prev.NtC);
+        }
+    }
+
+    if (nextIt != dlg->connectivities->next.cend()) {
+        for (const auto &next : nextIt->conns) {
+            nextPoints.emplace_back(next.connectivity.C5PrimeDistance, next.connectivity.O3PrimeDistance, 0.0, 1.0, 1.0, next.NtC);
+        }
+    }
+
+    ntc_plot_widget_set_points(dlg->connectivity_previous_plot, std::move(prevPoints));
+    ntc_plot_widget_set_points(dlg->connectivity_next_plot, std::move(nextPoints));
+
+    ntc_plot_widget_reset_zoom(dlg->connectivity_previous_plot);
+    ntc_plot_widget_reset_zoom(dlg->connectivity_next_plot);
+}
+
+static
+void fill_altconfs_list(GtkListStore *store, const std::vector<std::string> &altconfs, GtkSignalConnection sgc) {
+    assert(store);
+    assert(!altconfs.empty());
+
+    // Block the "changed" signal so that we never see an empty box
+    sgc.block();
+
+    gtk_list_store_clear(store);
+
+    GtkTreeIter iter;
+    for (size_t idx = 0; idx < altconfs.size(); idx++) {
+        const auto &ac = altconfs[idx];
+        std::string text = ac.empty() ? "(no altconfs) " : ac;
+
+        gtk_list_store_append(store, &iter);
+        gtk_list_store_set(
+            store, &iter,
+            0, int(idx),
+            1, text.c_str(),
+            2, ac.c_str(),
+            -1
+        );
+    }
+
+    sgc.unblock();
+}
+
+static
+std::vector<std::string> gather_altconfs(const std::vector<AltConfNtCConnectivities> &conns) {
+    if (conns.empty()) {
+        return { "" };
+    } else {
+        std::vector<std::string> altconfs;
+        std::transform(conns.cbegin(), conns.cend(), std::back_inserter(altconfs), [](const AltConfNtCConnectivities &ac) { return ac.altconf; });
+
+        return altconfs;
+    }
+}
+
+static
+std::string get_current_altconf(GtkComboBox *combo) {
+    GtkTreeModel *store = GTK_TREE_MODEL(gtk_combo_box_get_model(combo));
+    assert(store);
+
+    GtkTreeIter iter;
+    if (gtk_combo_box_get_active_iter(combo, &iter) == FALSE) {
+        assert(false);
+    }
+
+    gchar *str;
+    gtk_tree_model_get(store, &iter, 2, &str, -1);
+    std::string altconf{str};
+    g_free(str);
+
+    return altconf;
+}
+
+static
+void on_altconf_changed(GtkComboBox *, gpointer data) {
+    NtCConnSimilPlotsDialog *dlg = static_cast<NtCConnSimilPlotsDialog *>(data);
+
+    display_connectivities(dlg);
+}
 
 static
 void on_dialog_closed(GtkWidget *self, gpointer data) {
@@ -62,6 +177,22 @@ void on_similarity_point_selected(NtCConnSimilPlotsDialog *dlg, const DotPlotPoi
     if (dlg->on_similarity_point_selected) {
         dlg->on_similarity_point_selected(NtCSimilarity{{ pt.x, pt.y }, pt.caption});
     }
+}
+
+static
+void prepare_altconfs_list(GtkComboBox *combo, const std::vector<std::string> &altconfs) {
+    assert(combo);
+
+    GtkListStore *store = gtk_list_store_new(3, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
+    gtk_combo_box_set_model(combo, GTK_TREE_MODEL(store));
+
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer, "text", 1, NULL);
+
+    fill_altconfs_list(store, altconfs, GtkSignalConnection{});
+
+    gtk_combo_box_set_active(combo, 0);
 }
 
 static
@@ -156,7 +287,15 @@ NtCConnSimilPlotsDialog * ntc_csp_dialog_make(OnSimilaritySelected onSimilarityS
     dlg->connectivity_next_plot = make_plot_widget(connectivity_next_area, "C5 [\xE2\x84\xAB]", "O3 [\xE2\x84\xAB]", [dlg](const DotPlotPoint &p) {});
     assert(dlg->connectivity_next_plot);
 
-    g_signal_connect(dlg->root, "configure-event", G_CALLBACK(on_configure_event), dlg);
+    dlg->previous_altconfs = GTK_COMBO_BOX(get_widget(b, "previous_step_altconfs"));
+    assert(dlg->previous_altconfs);
+    prepare_altconfs_list(dlg->previous_altconfs, { "" });
+    dlg->previous_altconf_changed_sgc = GtkSignalConnection{dlg->previous_altconfs, "changed", G_CALLBACK(on_altconf_changed), dlg};
+
+    dlg->next_altconfs = GTK_COMBO_BOX(get_widget(b, "next_step_altconfs"));
+    assert(dlg->next_altconfs);
+    prepare_altconfs_list(dlg->next_altconfs, { "" });
+    dlg->next_altconf_changed_sgc = GtkSignalConnection{dlg->next_altconfs, "changed", G_CALLBACK(on_altconf_changed), dlg};
 
     GtkButton *close = GTK_BUTTON(get_widget(b, "close_button"));
     assert(close);
@@ -178,26 +317,19 @@ void ntc_csp_dialog_show(NtCConnSimilPlotsDialog *dlg, int width, int height) {
     gtk_widget_show(GTK_WIDGET(dlg->root));
 }
 
-void ntc_csp_dialog_update_connectivities(NtCConnSimilPlotsDialog *dlg, const NtCConnectivities &connectivities, LLKA_NtC ntc) {
-    std::vector<DotPlotPoint> prevPoints;
-    std::vector<DotPlotPoint> nextPoints;
-
-    for (const auto &prev : connectivities.previous) {
-        prevPoints.emplace_back(prev.connectivity.C5PrimeDistance, prev.connectivity.O3PrimeDistance, 1.0, 1.0, 0.0, prev.NtC);
-    }
-
-    for (const auto &next: connectivities.next) {
-        nextPoints.emplace_back(next.connectivity.C5PrimeDistance, next.connectivity.O3PrimeDistance, 0.0, 1.0, 1.0, next.NtC);
-    }
+void ntc_csp_dialog_update_connectivities(NtCConnSimilPlotsDialog *dlg, const std::shared_ptr<NtCConnectivities> &connectivities, LLKA_NtC ntc) {
+    dlg->connectivities = connectivities;
 
     update_connectivity_previous_caption(dlg, ntc);
     update_connectivity_next_caption(dlg, ntc);
 
-    ntc_plot_widget_set_points(dlg->connectivity_previous_plot, std::move(prevPoints));
-    ntc_plot_widget_set_points(dlg->connectivity_next_plot, std::move(nextPoints));
+    fill_altconfs_list(GTK_LIST_STORE(gtk_combo_box_get_model(dlg->previous_altconfs)), gather_altconfs(dlg->connectivities->previous), dlg->previous_altconf_changed_sgc);
+    gtk_combo_box_set_active(dlg->previous_altconfs, 0);
 
-    ntc_plot_widget_reset_zoom(dlg->connectivity_previous_plot);
-    ntc_plot_widget_reset_zoom(dlg->connectivity_next_plot);
+    fill_altconfs_list(GTK_LIST_STORE(gtk_combo_box_get_model(dlg->next_altconfs)), gather_altconfs(dlg->connectivities->next), dlg->next_altconf_changed_sgc);
+    gtk_combo_box_set_active(dlg->next_altconfs, 0);
+
+    display_connectivities(dlg);
 }
 
 void ntc_csp_dialog_update_similarities(NtCConnSimilPlotsDialog *dlg, const std::vector<NtCSimilarity> &similarities) {
@@ -210,4 +342,12 @@ void ntc_csp_dialog_update_similarities(NtCConnSimilPlotsDialog *dlg, const std:
 
     ntc_plot_widget_set_points(dlg->similarity_plot, std::move(points));
     ntc_plot_widget_reset_zoom(dlg->similarity_plot);
+}
+
+void * ntc_csp_dialog_widget(NtCConnSimilPlotsDialog *dlg) {
+    if (!dlg || dlg->destroyed) {
+        return nullptr;
+    }
+
+    return dlg->root;
 }

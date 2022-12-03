@@ -116,6 +116,39 @@
 
 static_assert(sizeof(LLKA_NtC) <= sizeof(int), "int is not large enough to contain LLKA_NtC");
 
+struct NtCClassifiedStep {
+  NtCClassifiedStep() :
+    classification{NtCMaybe<LLKA_ClassifiedStep>::empty()}
+  {}
+
+  NtCClassifiedStep(AltConfNtCStep &&step, NtCMaybe<LLKA_ClassifiedStep> &&classification) noexcept :
+    step{std::move(step)},
+    classification{std::move(classification)}
+  {}
+
+  AltConfNtCStep step;
+  NtCMaybe<LLKA_ClassifiedStep> classification;
+};
+
+struct NtCData {
+  NtCData(int imol, std::vector<NtCClassifiedStep> &&classifiedSteps) :
+    imol{imol},
+    classifiedSteps{std::move(classifiedSteps)}
+  {}
+
+  const int imol;
+  const std::vector<NtCClassifiedStep> classifiedSteps;
+
+  NtCMaybe<const NtCClassifiedStep &> get(const NtCStepAltConf &altconf) const {
+    using RT = NtCMaybe<const NtCClassifiedStep&>;
+    auto it = std::find_if(classifiedSteps.cbegin(), classifiedSteps.cend(), [altconf](const NtCClassifiedStep &s) {
+      return NtCStepAltConf{s.step.altconf1, s.step.altconf2} == altconf;
+    });
+
+    return it == classifiedSteps.cend() ? RT::empty() : RT::filled(*it);
+  }
+};
+
 #endif // COOT_ENABLE_NTC
 
 void
@@ -4600,46 +4633,78 @@ graphics_info_t::do_rotamers(int atom_index, int imol) {
    }
 }
 
+#ifdef COOT_ENABLE_NTC
+
 // --------------------------
 //         NtC stuff
 // --------------------------
 
-#ifdef COOT_ENABLE_NTC
-void
-graphics_info_t::modify_ntc_accepted() {
-  accept_moving_atoms();
-  clear_moving_atoms_object();
-
-  delete modify_ntc_selected_structure;
-  modify_ntc_selected_structure = nullptr;
-}
-
-void
-graphics_info_t::modify_ntc_display_reference(NtCDialog *dlg, int ntc) {
-  LLKA_NtC _ntc = LLKA_NtC(ntc);
+struct NtCReference {
+  NtCReference(LLKA_StepMetrics differences, NtCSuperposition &&superposition) noexcept :
+    differences{std::move(differences)},
+    superposition{std::move(superposition)}
+  {}
 
   LLKA_StepMetrics differences;
-  auto tRet = LLKA_calculateStepMetricsDifferenceAgainstReference(&modify_ntc_selected_structure->llkaStru, _ntc, &differences);
-  if (tRet != LLKA_OK) {
-    return;
-  }
+  NtCSuperposition superposition;
+};
 
-  NtCSuperposition superpos = ntc_superpose_reference(*modify_ntc_selected_structure, _ntc);
-  ntc_dialog_display_differences(dlg, differences);
-  ntc_dialog_display_rmsd(dlg, superpos.rmsd);
+static
+NtCMaybe<const NtCClassifiedStep &> ntc_step_from_current_altconf(NtCDialog *dlg, const NtCData *data) {
+  using RT = NtCMaybe<const NtCClassifiedStep &>;
 
-  set_moving_atoms(make_asc(superpos.mmdbStru), modify_ntc_imol, coot::NEW_COORDS_REPLACE_CHANGE_ALTCONF);
-  graphics_draw();
+  auto altconf = ntc_dialog_get_current_step_altconf(dlg);
+  auto maybeStep = data->get(altconf);
+  return maybeStep ? RT::filled(maybeStep.value()) : RT::empty();
 }
 
-void
-graphics_info_t::modify_ntc_update_connectivity(NtCDialog *dlg, int ntc, int imol) {
-  if (!is_valid_model_molecule(imol)) {
-    ntc_dialog_update_connectivities(dlg, {});
+static
+NtCMaybe<NtCReference> ntc_calculate_reference(const NtCStructure &stru, LLKA_NtC ntc) {
+  using RT = NtCMaybe<NtCReference>;
+
+  LLKA_StepMetrics differences;
+  auto tRet = LLKA_calculateStepMetricsDifferenceAgainstReference(&stru.llkaStru, ntc, &differences);
+  if (tRet != LLKA_OK) {
+    return RT::empty();
   }
 
-  LLKA_NtC _ntc = LLKA_NtC(ntc);
-  NtCConnectivityResult conns = ntc_calculate_connectivity(_ntc, *modify_ntc_selected_structure, molecules[imol].atom_sel.mol);
+  NtCSuperposition superposition = ntc_superpose_reference(stru, ntc);
+
+  return RT::filled(differences, std::move(superposition));
+}
+
+static
+void ntc_display_initial(NtCDialog *dlg, const NtCClassifiedStep &cs) {
+  // This function will set new NtC in the list and trigger full update
+  ntc_dialog_display_classification(dlg, cs.classification);
+}
+
+static
+void ntc_display_reference_data(NtCDialog *dlg, const NtCMaybe<NtCReference> &reference) {
+  if (reference) {
+    const auto &v = reference.value();
+    ntc_dialog_display_differences(dlg, NtCMaybe<LLKA_StepMetrics>::filled(v.differences));
+    ntc_dialog_display_rmsd(dlg, NtCMaybe<double>::filled(v.superposition.rmsd));
+  } else {
+    ntc_dialog_display_differences(dlg, NtCMaybe<LLKA_StepMetrics>::empty());
+    ntc_dialog_display_rmsd(dlg, NtCMaybe<double>::empty());
+  }
+}
+
+static
+void ntc_set_altconfs(NtCDialog *dlg, NtCData *data) {
+  NtCStepAltConfs altconfs;
+
+  for (const auto &step : data->classifiedSteps) {
+    altconfs.emplace_back(step.step.altconf1, step.step.altconf2);
+  }
+
+  ntc_dialog_update_step_altconfs(dlg, altconfs);
+}
+
+static
+void ntc_update_connectivities(NtCDialog *dlg, const AltConfNtCStep &step, LLKA_NtC ntc, mmdb::Manager *molecule) {
+  auto conns = ntc_calculate_connectivities(ntc, step, molecule);
   if (conns.succeeded) {
     ntc_dialog_update_connectivities(dlg, std::move(conns.success));
   } else {
@@ -4649,9 +4714,9 @@ graphics_info_t::modify_ntc_update_connectivity(NtCDialog *dlg, int ntc, int imo
   }
 }
 
-void
-graphics_info_t::modify_ntc_update_similarity(NtCDialog *dlg) {
-  NtCSimilarityResult similarities = ntc_calculate_similarities(*modify_ntc_selected_structure);
+static
+void ntc_update_similarities(NtCDialog *dlg, const NtCStructure &stru) {
+  NtCSimilaritiesResult similarities = ntc_calculate_similarities(stru);
   if (similarities.succeeded) {
     ntc_dialog_update_similarities(dlg, std::move(similarities.success));
   } else {
@@ -4662,12 +4727,72 @@ graphics_info_t::modify_ntc_update_similarity(NtCDialog *dlg) {
 }
 
 void
+graphics_info_t::modify_ntc_accepted() {
+  accept_moving_atoms();
+  clear_moving_atoms_object();
+
+  delete modify_ntc_data;
+  modify_ntc_data = nullptr;
+}
+
+void
 graphics_info_t::modify_ntc_rejected() {
   clear_up_moving_atoms();
   clear_moving_atoms_object();
 
-  delete modify_ntc_selected_structure;
-  modify_ntc_selected_structure = nullptr;
+  delete modify_ntc_data;
+  modify_ntc_data = nullptr;
+}
+
+void
+graphics_info_t::modify_ntc_display_reference_structure(atom_selection_container_t &&asc, int imol) {
+  set_moving_atoms(asc, imol, coot::NEW_COORDS_REPLACE_CHANGE_ALTCONF);
+  graphics_draw();
+}
+
+void
+graphics_info_t::modify_ntc_update_display(NtCDialog *dlg) {
+  const auto clear_everything = [&]() {
+    clear_up_moving_atoms();
+    clear_moving_atoms_object();
+
+    ntc_display_reference_data(dlg, NtCMaybe<NtCReference>::empty());
+
+    ntc_dialog_update_connectivities(dlg, {});
+    ntc_dialog_update_similarities(dlg, {});
+    ntc_dialog_display_classification(dlg, NtCMaybe<LLKA_ClassifiedStep>::empty());
+  };
+  const int imol = modify_ntc_data->imol;
+
+  if (!is_valid_model_molecule(imol)) {
+    clear_everything();
+    return;
+  }
+
+  auto altconf = ntc_dialog_get_current_step_altconf(dlg);
+  auto ntc = ntc_dialog_get_current_ntc(dlg);
+
+  auto maybeCs = modify_ntc_data->get(altconf);
+  if (!maybeCs) {
+    clear_everything();
+  } else {
+    const auto &cs = maybeCs.value();
+    auto reference = ntc_calculate_reference(cs.step.stru, ntc);
+    ntc_display_reference_data(dlg, reference);
+    if (reference) {
+      auto asc = make_asc(reference.value().superposition.mmdbStru);
+      modify_ntc_display_reference_structure(std::move(asc), imol);
+    }
+
+    if (cs.classification) {
+      const auto &classification = cs.classification.value();
+      ntc_update_connectivities(dlg, cs.step, ntc, molecules[imol].atom_sel.mol);
+      ntc_update_similarities(dlg, cs.step.stru);
+    } else {
+      ntc_dialog_update_connectivities(dlg, {});
+      ntc_dialog_update_similarities(dlg, {});
+    }
+  }
 }
 
 void
@@ -4682,33 +4807,35 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
     return;
   }
 
-  if (!modify_ntc_selected_structure) {
-    modify_ntc_selected_structure = new NtCStructure{};
-  }
-
   const molecule_class_info_t &molecule = molecules[imol];
 
   mmdb::Atom *atom = molecule.atom_sel.atom_selection[atom_index];
   mmdb::Residue *residue = atom->residue;
-  const std::string &altconf = atom->altLoc;
 
-  *modify_ntc_selected_structure = ntc_dinucleotide(molecule.atom_sel.mol, residue, altconf);
-  if (!modify_ntc_selected_structure->isValid) {
-    ntc_notify_info("Selected structure is not a step");
-
-    delete modify_ntc_selected_structure;
-    modify_ntc_selected_structure = nullptr;
+  auto dinus = ntc_dinucleotides(molecule.atom_sel.mol, residue);
+  if (dinus.empty()) {
+    ntc_notify_info("Cannot make NtC step from the selected part of the structure");
     return;
   }
 
-  auto evaluatedDinu = ntc_classify(*modify_ntc_selected_structure);
-  if (!evaluatedDinu.succeeded) {
-    std::string	errMsg = std::string{"Selected structure looks like a step but we could not classify it: "} + LLKA_errorToString(evaluatedDinu.failure);
+  std::vector<NtCClassifiedStep> classfiedSteps;
+  for (auto &&dinu : dinus) {
+    auto classified = ntc_classify(dinu.stru);
+    if (!classified.succeeded) {
+      auto errMsg = std::string{"Selected structure looks like a step but we could not classify it: "} + LLKA_errorToString(classified.failure);
+      ntc_notify_info(errMsg);
 
-    delete modify_ntc_selected_structure;
-    modify_ntc_selected_structure = nullptr;
-    return;
+      classfiedSteps.emplace_back(std::move(dinu), NtCMaybe<LLKA_ClassifiedStep>::empty());
+    } else {
+      classfiedSteps.emplace_back(std::move(dinu), NtCMaybe<LLKA_ClassifiedStep>::filled(std::move(classified.success)));
+    }
   }
+
+  if (modify_ntc_data) {
+    delete modify_ntc_data;
+  }
+
+  modify_ntc_data = new NtCData{imol, std::move(classfiedSteps)};
 
   static NtCDialog *dlg = nullptr;
   static NtCDialogOptions opts{};
@@ -4716,9 +4843,11 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
     if (dlg) {
       opts = ntc_dialog_get_options(dlg);
     } else {
-      opts.onDisplayedNtCChanged = [this, imol](NtCDialog *dlg, LLKA_NtC ntc) {
-	modify_ntc_display_reference(dlg, ntc);
-	modify_ntc_update_connectivity(dlg, ntc, imol);
+      opts.onAltconfChanged = [this](NtCDialog *dlg, const NtCStepAltConf &) {
+        modify_ntc_update_display(dlg);
+      };
+      opts.onDisplayedNtCChanged = [this](NtCDialog *dlg, LLKA_NtC ntc) {
+        modify_ntc_update_display(dlg);
       };
       opts.onAccepted = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_accepted(); };
       opts.onRejected = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_rejected(); };
@@ -4728,11 +4857,18 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
     dlg = ntc_dialog_make(opts);
   }
 
-  modify_ntc_display_reference(dlg, evaluatedDinu.success.closestNtC);
-  modify_ntc_update_connectivity(dlg, evaluatedDinu.success.closestNtC, imol);
-  modify_ntc_update_similarity(dlg);
-  ntc_dialog_display_classification(dlg, evaluatedDinu.success);
-  ntc_dialog_show(dlg);
+  // Altconfs must be set before we do anything else!
+  ntc_set_altconfs(dlg, modify_ntc_data);
+  auto altconf = ntc_dialog_get_current_step_altconf(dlg);
+  auto maybeCs = modify_ntc_data->get(altconf);
+  if (maybeCs) {
+    ntc_display_initial(dlg, maybeCs.value());
+    ntc_dialog_show(dlg);
+  } else {
+    ntc_notify_warning(
+      "Classification seems to have gone correctly but there is no step to display. This indicates a bug in the NtC user interface logic."
+    );
+  }
 }
 #endif // COOT_ENABLE_NTC
 

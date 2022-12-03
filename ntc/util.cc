@@ -8,6 +8,7 @@
 
 #include <mmdb2/mmdb_manager.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cstring>
@@ -23,16 +24,10 @@
 static
 std::string trim(const char *str);
 
-template <size_t N>
+template <size_t Size>
 static
-void _CopyCharArray(char dst[N], const char src[N]) {
-    std::strncpy(dst, src, N);
-}
-
-template <typename CharArray>
-static
-void CopyCharArray(CharArray dst, const CharArray src) {
-    _CopyCharArray<sizeof(CharArray)>(dst, src);
+void CopyCharArray(char (&dst)[Size], const char (&src)[Size]) {
+    std::memcpy(dst, src, Size);
 }
 
 static
@@ -105,7 +100,7 @@ LLKA_Atom mmdb_atom_to_LLKA_atom(mmdb::Atom *mmdbAtom, mmdb::Residue *mmdbResidu
         nullptr,
         nullptr,
         nullptr,
-        mmdbAtom->GetLabelSeqID(),
+        mmdbResidue->GetLabelSeqID(),
         mmdb_altloc_to_altloc(mmdbAtom->altLoc),
         mmdbResidue->GetLabelSeqID(),
         mmdbResidue->GetInsCode(),
@@ -155,8 +150,25 @@ std::string trim(const char *str) {
     return std::string(first, last - first + 1);
 }
 
+std::vector<std::string> all_altconfs(mmdb::Residue *res) {
+    mmdb::Atom **atoms;
+    int numAtoms;
+    res->GetAtomTable(atoms, numAtoms);
+
+    std::vector<std::string> altconfs;
+    for (int idx = 0; idx < numAtoms; idx++) {
+        std::string altLoc = atoms[idx]->altLoc;
+        if (!altLoc.empty() && std::find(altconfs.cbegin(), altconfs.cend(), altLoc) == altconfs.cend()) {
+            altconfs.push_back(altLoc);
+        }
+    }
+
+    return altconfs;
+}
+
 mmdb::Residue * clone_mmdb_residue(mmdb::Residue *original, const std::string &onlyAltConf) {
     mmdb::Residue *clone = coot::util::deep_copy_this_residue(original, { !onlyAltConf.empty(), onlyAltConf });
+    CopyCharArray(clone->name, original->name);
     CopyCharArray(clone->label_asym_id, original->label_asym_id);
     CopyCharArray(clone->label_comp_id, original->label_comp_id);
     CopyCharArray(clone->insCode, original->insCode);
@@ -252,24 +264,28 @@ LLKA_Structure mmdb_structure_to_LLKA_structure(mmdb::Manager *mmdbStru) {
         return {};
     }
 
-    const int NChains = model->GetNumberOfChains();
+    mmdb::Chain **chains;
+    int NChains;
+    model->GetChainTable(chains, NChains);
     for (int chainIdx = 0; chainIdx < NChains; chainIdx++) {
-        mmdb::Chain *chain = model->GetChain(chainIdx);
-        assert(chain);
+        mmdb::Chain *chain = chains[chainIdx];
 
-        const int NResidues = chain->GetNumberOfResidues();
+        mmdb::Residue **residues;
+        int NResidues;
+        chain->GetResidueTable(residues, NResidues);
         for (int residueIdx = 0; residueIdx < NResidues; residueIdx++) {
-            mmdb::Residue *residue = chain->GetResidue(residueIdx);
-            assert(residue);
+            mmdb::Residue *residue = residues[residueIdx];
 
-            const int NAtoms = residue->GetNumberOfAtoms();
+            mmdb::Atom **atoms;
+            int NAtoms;
+            residue->GetAtomTable(atoms, NAtoms);
             for (int atomIdx = 0; atomIdx < NAtoms; atomIdx++) {
-                mmdb::Atom *atom = residue->GetAtom(atomIdx);
+                mmdb::Atom *atom = atoms[atomIdx];
 
                 LLKA_Atom llkaAtom = mmdb_atom_to_LLKA_atom(atom, residue, model->GetEntryID());
                 LLKA_appendAtom(&llkaAtom, &llkaStru);
 
-                std::cout << llkaAtom.label_atom_id << ", " << llkaAtom.type_symbol << ", " << llkaAtom.label_comp_id << ", " << llkaAtom.label_seq_id << "\n";
+                std::cout << llkaAtom.label_atom_id << ", " << llkaAtom.type_symbol << ", " << llkaAtom.label_comp_id << ", " << llkaAtom.label_seq_id << ", " << (llkaAtom.label_alt_id == LLKA_NO_ALTID ? '-' : llkaAtom.label_alt_id) << "\n";
             }
         }
     }

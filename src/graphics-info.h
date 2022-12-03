@@ -175,8 +175,8 @@ enum { N_ATOMS_MEANS_BIG_MOLECULE = 400 };
 #include "extra-distance-restraint-markup.hh"
 
 #ifdef COOT_ENABLE_NTC
+struct NtCData;
 struct NtCDialog;
-struct NtCStructure;
 #endif // COOT_ENABLE_NTC
 
 namespace coot {
@@ -2789,14 +2789,12 @@ public:
 
 #ifdef COOT_ENABLE_NTC
    static short int in_modify_ntc_define;
-   static int modify_ntc_imol;
-   static NtCStructure *modify_ntc_selected_structure;
+   static NtCData *modify_ntc_data;
    void modify_ntc(int atom_index, int imol);
    void modify_ntc_accepted();
-   void modify_ntc_display_reference(NtCDialog *dlg, int ntc);
+   void modify_ntc_display_reference_structure(atom_selection_container_t &&asc, int imol);
    void modify_ntc_rejected();
-   void modify_ntc_update_connectivity(NtCDialog *dlg, int ntc, int imol);
-   void modify_ntc_update_similarity(NtCDialog *dlg);
+   void modify_ntc_update_display(NtCDialog *dlg);
 #endif // COOT_ENABLE_NTC
 
    // Mutation stuff

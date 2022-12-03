@@ -13,11 +13,12 @@
 #include <LLKA/llka_superposition.h>
 #include <LLKA/llka_util.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <mutex>
 
-enum class RelatedStep {
+enum class RelatedSteps {
     Previous,
     Next
 };
@@ -96,80 +97,86 @@ void destroy_similarities(LLKA_Similarities &simils) {
 }
 
 static
-mmdb::Manager * expand_residue_to_step(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue, const std::string &altconf) {
+AltConfNtCSteps expand_residue_to_steps(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue, const std::string &firstAltconf = "", const std::string &secondAltconf = "") {
     if (!is_nucleotide(residue->GetLabelCompID())) {
-        return nullptr;
+        return {};
     }
 
     mmdb::Residue *residue2 = coot::util::get_following_residue(coot::residue_spec_t(residue), srcMmdbStru);
     if (!residue2 || !is_nucleotide(residue2->GetLabelCompID())) {
-        return nullptr;
+        return {};
     }
 
-    mmdb::Residue *filteredResidue = clone_mmdb_residue(residue, altconf);
-    mmdb::Residue *filteredResidue2 = clone_mmdb_residue(residue2, altconf);
+    std::vector<std::string> altconfs1 = firstAltconf.empty() ? all_altconfs(residue) : std::vector<std::string>{ firstAltconf };
+    std::vector<std::string> altconfs2 = secondAltconf.empty() ? all_altconfs(residue2) : std::vector<std::string>{ secondAltconf };
 
-    mmdb::Manager *mmdbStru = new mmdb::Manager;
-    mmdb::Model *model = new mmdb::Model;
-    mmdb::Chain *chain = new mmdb::Chain;
+    if (altconfs1.empty()) {
+        altconfs1.push_back("");
+    }
+    if (altconfs2.empty()) {
+        altconfs2.push_back("");
+    }
 
-    chain->AddResidue(filteredResidue);
-    chain->AddResidue(filteredResidue2);
-    chain->SetChainID(residue->GetChainID());
-    model->AddChain(chain);
-    mmdbStru->AddModel(model);
-    mmdbStru->PDBCleanup(mmdb::PDBCLEAN_SERIAL | mmdb::PDBCLEAN_INDEX);
-    mmdbStru->FinishStructEdit();
+    AltConfNtCSteps steps;
+    for (const auto &ac1 : altconfs1) {
+        mmdb::Residue *filteredResidue1 = clone_mmdb_residue(residue, ac1);
+
+        for (const auto &ac2 : altconfs2) {
+            mmdb::Residue *filteredResidue2 = clone_mmdb_residue(residue2, ac2);
+
+            mmdb::Manager *mmdbStru = new mmdb::Manager;
+            mmdb::Model *model = new mmdb::Model;
+            mmdb::Chain *chain = new mmdb::Chain;
+
+            chain->AddResidue(clone_mmdb_residue(filteredResidue1)); // We need a new residue for each variant
+            chain->AddResidue(filteredResidue2);
+            chain->SetChainID(residue->GetChainID());
+            model->AddChain(chain);
+            mmdbStru->AddModel(model);
+            mmdbStru->PDBCleanup(mmdb::PDBCLEAN_SERIAL | mmdb::PDBCLEAN_INDEX);
+            mmdbStru->FinishStructEdit();
+
+            LLKA_Structure llkaStru = mmdb_structure_to_LLKA_structure(mmdbStru);
+            assert(llkaStru.nAtoms == mmdbStru->GetNumberOfAtoms());
+
+            steps.emplace_back(ac1, ac2, NtCStructure{mmdbStru, llkaStru});
+        }
+
+        delete filteredResidue1;
+    }
 
     // WARNING: We create a bunch of raw pointers here, freeing just the "mol" object
-    // hopefully should be enough to reclaim the resources
+    // hopefully should be enough to reclaim the resources.
 
-    return mmdbStru;
+    return steps;
 }
 
 static
-NtCStructure get_related_step(RelatedStep which, const NtCStructure &stru, mmdb::Manager *srcMmdbStru) {
-    assert(stru.isValid);
+AltConfNtCSteps get_related_steps(RelatedSteps which, const AltConfNtCStep &step, mmdb::Manager *srcMmdbStru) {
+    assert(step.isValid());
 
     mmdb::Residue **mmdbRes = nullptr;
     int numResidues = 0;
-    stru.mmdbStru->GetResidueTable(mmdbRes, numResidues);
+    step.stru.mmdbStru->GetResidueTable(mmdbRes, numResidues);
     if (numResidues != 2 || !mmdbRes) {
         return {};
     }
 
-    const mmdb::Residue *res = mmdbRes[0];
-    coot::residue_spec_t rs(stru.mmdbStru->GetFirstModelNum(), res->chain->GetChainID(), res->seqNum, res->insCode);
-
-    mmdb::Residue *related = nullptr;
-    switch (which) {
-    case RelatedStep::Next:
-        related = coot::util::get_following_residue(rs, srcMmdbStru);
-        break;
-    case RelatedStep::Previous:
-        related = coot::util::get_previous_residue(rs, srcMmdbStru);
-        break;
-    default:
-        return {};
+    AltConfNtCSteps steps;
+    if (which == RelatedSteps::Next) {
+        steps = expand_residue_to_steps(srcMmdbStru, mmdbRes[1], step.altconf2);
+    } else if (which == RelatedSteps::Previous) {
+        mmdb::Residue *prevRes = coot::util::get_previous_residue(coot::residue_spec_t(mmdbRes[0]), srcMmdbStru);
+        if (!prevRes) {
+            return {};
+        } else {
+            steps = expand_residue_to_steps(srcMmdbStru, prevRes, "", step.altconf1);
+        }
+    } else {
+        assert(false); // Should never happen
     }
 
-    if (!related) {
-        return {};
-    }
-
-    // TODO: Handle altconfs
-    mmdb::Manager *mmdbStru = expand_residue_to_step(srcMmdbStru, related, "");
-    if (!mmdbStru) {
-        return {};
-    }
-
-    LLKA_Structure llkaStru = mmdb_structure_to_LLKA_structure(mmdbStru);
-    if (llkaStru.nAtoms == 0) {
-        delete mmdbStru;
-        return {};
-    }
-
-    return { mmdbStru, llkaStru };
+    return steps;
 }
 
 static
@@ -315,61 +322,43 @@ bool ntc_initialize_classification_context_if_needed(std::string path, std::stri
     return ntc_initialize_classification_context(path, error);
 }
 
-NtCStructure ntc_dinucleotide(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue, const std::string &altconf) {
-    if (!residue) {
-        return {};
+NtCConnectivitiesResult ntc_calculate_connectivities(LLKA_NtC ntc, const AltConfNtCStep &step, mmdb::Manager *srcMmdbStru) {
+    std::vector<AltConfNtCConnectivities> prevConns;
+    AltConfNtCSteps prevSteps = get_related_steps(RelatedSteps::Previous, step, srcMmdbStru);
+    LLKA_Connectivities cConns = init_connectivities(AllNtCs.size() - 1);
+    for (auto &prevStep : prevSteps) {
+        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleFirst(&prevStep.stru.llkaStru, AllNtCs.data(), &prevStep.stru.llkaStru, ntc, &cConns);
+        if (tRet != LLKA_OK) {
+            destroy_connectivities(cConns);
+            return NtCConnectivitiesResult::fail(tRet);
+        }
+
+        prevConns.emplace_back(prevStep.altconf1, map_connectivities(cConns, AllNtCs));
     }
 
-    mmdb::Manager *mmdbStru = expand_residue_to_step(srcMmdbStru, residue, altconf);
-    if (!mmdbStru) {
-        return {};
+    std::vector<AltConfNtCConnectivities> nextConns;
+    AltConfNtCSteps nextSteps = get_related_steps(RelatedSteps::Next, step, srcMmdbStru);
+    for (auto &nextStep : nextSteps) {
+        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleSecond(&step.stru.llkaStru, ntc, &nextStep.stru.llkaStru, AllNtCs.data(), &cConns);
+        if (tRet != LLKA_OK) {
+            destroy_connectivities(cConns);
+            return NtCConnectivitiesResult::fail(tRet);
+        }
+
+        nextConns.emplace_back(nextStep.altconf2, map_connectivities(cConns, AllNtCs));
     }
 
-    LLKA_Structure llkaStru = mmdb_structure_to_LLKA_structure(mmdbStru);
-    if (llkaStru.nAtoms == 0) {
-        delete mmdbStru;
-        return {};
-    }
+    destroy_connectivities(cConns);
 
-    return { mmdbStru, llkaStru };
+    return NtCConnectivitiesResult::succeed(prevConns, nextConns);
 }
 
-NtCConnectivityResult ntc_calculate_connectivity(LLKA_NtC ntc, const NtCStructure &stru, mmdb::Manager *srcMmdbStru) {
-    LLKA_Connectivities cPrevConns = init_connectivities(AllNtCs.size() - 1);
-    NtCStructure prevStep = get_related_step(RelatedStep::Previous, stru, srcMmdbStru);
-    if (prevStep.isValid) {
-        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleFirst(&prevStep.llkaStru, AllNtCs.data(), &stru.llkaStru, ntc, &cPrevConns);
-        if (tRet != LLKA_OK) {
-            NtCConnectivityResult::fail(tRet);
-        }
-    }
-
-    LLKA_Connectivities cNextConns = init_connectivities(AllNtCs.size() - 1);
-    NtCStructure nextStep = get_related_step(RelatedStep::Next, stru, srcMmdbStru);
-    if (nextStep.isValid) {
-        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleSecond(&stru.llkaStru, ntc, &nextStep.llkaStru, AllNtCs.data(), &cNextConns);
-        if (tRet != LLKA_OK) {
-            NtCConnectivityResult::fail(tRet);
-        }
-    }
-
-    NtCConnectivityResult ret = NtCConnectivityResult::succeed(
-        prevStep.isValid ? map_connectivities(cPrevConns, AllNtCs) : std::vector<NtCConnectivity>(),
-        nextStep.isValid ? map_connectivities(cNextConns, AllNtCs) : std::vector<NtCConnectivity>()
-    );
-
-    destroy_connectivities(cPrevConns);
-    destroy_connectivities(cNextConns);;
-
-    return ret;
-}
-
-NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
+NtCSimilaritiesResult ntc_calculate_similarities(const NtCStructure &stru) {
     LLKA_Similarities cSimils = init_similarities(AllNtCs.size() - 1);
 
     LLKA_RetCode tRet = LLKA_measureStepSimilarityNtCMultiple(&stru.llkaStru, AllNtCs.data(), &cSimils);
     if (tRet != LLKA_OK) {
-        return NtCSimilarityResult::fail(tRet);
+        return NtCSimilaritiesResult::fail(tRet);
     }
 
     std::vector<NtCSimilarity> simils{};
@@ -378,7 +367,15 @@ NtCSimilarityResult ntc_calculate_similarities(const NtCStructure &stru) {
     }
     destroy_similarities(cSimils);
 
-    return NtCSimilarityResult::succeed(std::move(simils));
+    return NtCSimilaritiesResult::succeed(std::move(simils));
+}
+
+AltConfNtCSteps ntc_dinucleotides(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue) {
+    if (!residue) {
+        return {};
+    }
+
+    return expand_residue_to_steps(srcMmdbStru, residue);
 }
 
 NtCSuperposition ntc_superpose_reference(const NtCStructure &stru, LLKA_NtC ntc) {

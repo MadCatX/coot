@@ -14,6 +14,7 @@ namespace mmdb {
     class Residue;
 }
 
+std::vector<std::string> all_altconfs(mmdb::Residue *res);
 mmdb::Residue * clone_mmdb_residue(mmdb::Residue *original, const std::string &onlyAltConf = {});
 mmdb::Manager * clone_mmdb_structure(mmdb::Manager *original);
 mmdb::Manager * LLKA_structure_to_mmdb_structure(const LLKA_Structure &llkaStru);

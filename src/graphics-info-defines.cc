@@ -1527,7 +1527,6 @@ graphics_info_t::check_if_in_modify_ntc_define(GdkEventButton *event) {
    if (g.in_modify_ntc_define) {
       pick_info naii = atom_pick(event);
       if (naii.success == GL_TRUE) {
-         g.modify_ntc_imol = naii.imol;
          g.modify_ntc(naii.atom_index, naii.imol);
          g.in_modify_ntc_define = 0;
          pick_pending_flag = 0;
