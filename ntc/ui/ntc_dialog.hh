@@ -34,6 +34,7 @@ struct NtCDialogOptions {
 };
 
 void ntc_dialog_destroy(NtCDialog *dlg);
+void ntc_dialog_change_ntc(NtCDialog *dlg, LLKA_NtC ntc);
 void ntc_dialog_display_classification(NtCDialog *dlg, const NtCMaybe<LLKA_ClassifiedStep> &classified);
 void ntc_dialog_display_differences(NtCDialog *dlg, const NtCMaybe<LLKA_StepMetrics> &differences);
 void ntc_dialog_display_rmsd(NtCDialog *dlg, const NtCMaybe<double> &rmsd);
@@ -43,7 +44,7 @@ LLKA_NtC ntc_dialog_get_current_ntc(NtCDialog *dlg);
 bool ntc_dialog_is_valid(NtCDialog *dlg);
 NtCDialog * ntc_dialog_make(const NtCDialogOptions &options);
 void ntc_dialog_show(NtCDialog *dlg);
-void ntc_dialog_update_connectivities(NtCDialog *dlg, NtCConnectivities connectivities);
+void ntc_dialog_update_connectivities(NtCDialog *dlg, LLKA_NtC ntc, NtCConnectivities connectivities);
 void ntc_dialog_update_similarities(NtCDialog *dlg, std::vector<NtCSimilarity> similarities);
 void ntc_dialog_update_step_altconfs(NtCDialog *dlg, const NtCStepAltConfs &altconfs);
 

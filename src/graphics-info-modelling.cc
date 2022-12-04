@@ -121,12 +121,12 @@ struct NtCClassifiedStep {
     classification{NtCMaybe<LLKA_ClassifiedStep>::empty()}
   {}
 
-  NtCClassifiedStep(AltConfNtCStep &&step, NtCMaybe<LLKA_ClassifiedStep> &&classification) noexcept :
+  NtCClassifiedStep(NtCStep &&step, NtCMaybe<LLKA_ClassifiedStep> &&classification) noexcept :
     step{std::move(step)},
     classification{std::move(classification)}
   {}
 
-  AltConfNtCStep step;
+  NtCStep step;
   NtCMaybe<LLKA_ClassifiedStep> classification;
 };
 
@@ -142,7 +142,7 @@ struct NtCData {
   NtCMaybe<const NtCClassifiedStep &> get(const NtCStepAltConf &altconf) const {
     using RT = NtCMaybe<const NtCClassifiedStep&>;
     auto it = std::find_if(classifiedSteps.cbegin(), classifiedSteps.cend(), [altconf](const NtCClassifiedStep &s) {
-      return NtCStepAltConf{s.step.altconf1, s.step.altconf2} == altconf;
+      return s.step.altconf == altconf;
     });
 
     return it == classifiedSteps.cend() ? RT::empty() : RT::filled(*it);
@@ -4696,21 +4696,21 @@ void ntc_set_altconfs(NtCDialog *dlg, NtCData *data) {
   NtCStepAltConfs altconfs;
 
   for (const auto &step : data->classifiedSteps) {
-    altconfs.emplace_back(step.step.altconf1, step.step.altconf2);
+    altconfs.emplace_back(step.step.altconf);
   }
 
   ntc_dialog_update_step_altconfs(dlg, altconfs);
 }
 
 static
-void ntc_update_connectivities(NtCDialog *dlg, const AltConfNtCStep &step, LLKA_NtC ntc, mmdb::Manager *molecule) {
+void ntc_update_connectivities(NtCDialog *dlg, const NtCStep &step, LLKA_NtC ntc, mmdb::Manager *molecule) {
   auto conns = ntc_calculate_connectivities(ntc, step, molecule);
   if (conns.succeeded) {
-    ntc_dialog_update_connectivities(dlg, std::move(conns.success));
+    ntc_dialog_update_connectivities(dlg, ntc, std::move(conns.success));
   } else {
     std::string errMsg = std::string{"Unable to calculate connectivities: "} + LLKA_errorToString(conns.failure);
     ntc_notify_warning(errMsg);
-    ntc_dialog_update_connectivities(dlg, {});
+    ntc_dialog_update_connectivities(dlg, ntc, {});
   }
 }
 
@@ -4724,6 +4724,34 @@ void ntc_update_similarities(NtCDialog *dlg, const NtCStructure &stru) {
     ntc_notify_warning(errMsg);
     ntc_dialog_update_similarities(dlg, {});
   }
+}
+
+static
+void ntc_update_everything(graphics_info_t *gfx, NtCDialog *dlg, int imol, const NtCClassifiedStep &cs, LLKA_NtC ntc) {
+  auto reference = ntc_calculate_reference(cs.step.stru, ntc);
+  ntc_display_reference_data(dlg, reference);
+  if (reference) {
+    auto asc = make_asc(reference.value().superposition.mmdbStru);
+    gfx->modify_ntc_display_reference_structure(std::move(asc), imol);
+  }
+
+  if (cs.classification) {
+    const auto &classification = cs.classification.value();
+    ntc_update_connectivities(dlg, cs.step, ntc, gfx->molecules[imol].atom_sel.mol);
+    ntc_update_similarities(dlg, cs.step.stru);
+  } else {
+    ntc_dialog_update_connectivities(dlg, ntc, {});
+    ntc_dialog_update_similarities(dlg, {});
+  }
+}
+
+static
+void ntc_clear_display(NtCDialog *dlg) {
+  ntc_display_reference_data(dlg, NtCMaybe<NtCReference>::empty());
+
+  ntc_dialog_update_connectivities(dlg, LLKA_AA00, {});
+  ntc_dialog_update_similarities(dlg, {});
+  ntc_dialog_display_classification(dlg, NtCMaybe<LLKA_ClassifiedStep>::empty());
 }
 
 void
@@ -4748,51 +4776,6 @@ void
 graphics_info_t::modify_ntc_display_reference_structure(atom_selection_container_t &&asc, int imol) {
   set_moving_atoms(asc, imol, coot::NEW_COORDS_REPLACE_CHANGE_ALTCONF);
   graphics_draw();
-}
-
-void
-graphics_info_t::modify_ntc_update_display(NtCDialog *dlg) {
-  const auto clear_everything = [&]() {
-    clear_up_moving_atoms();
-    clear_moving_atoms_object();
-
-    ntc_display_reference_data(dlg, NtCMaybe<NtCReference>::empty());
-
-    ntc_dialog_update_connectivities(dlg, {});
-    ntc_dialog_update_similarities(dlg, {});
-    ntc_dialog_display_classification(dlg, NtCMaybe<LLKA_ClassifiedStep>::empty());
-  };
-  const int imol = modify_ntc_data->imol;
-
-  if (!is_valid_model_molecule(imol)) {
-    clear_everything();
-    return;
-  }
-
-  auto altconf = ntc_dialog_get_current_step_altconf(dlg);
-  auto ntc = ntc_dialog_get_current_ntc(dlg);
-
-  auto maybeCs = modify_ntc_data->get(altconf);
-  if (!maybeCs) {
-    clear_everything();
-  } else {
-    const auto &cs = maybeCs.value();
-    auto reference = ntc_calculate_reference(cs.step.stru, ntc);
-    ntc_display_reference_data(dlg, reference);
-    if (reference) {
-      auto asc = make_asc(reference.value().superposition.mmdbStru);
-      modify_ntc_display_reference_structure(std::move(asc), imol);
-    }
-
-    if (cs.classification) {
-      const auto &classification = cs.classification.value();
-      ntc_update_connectivities(dlg, cs.step, ntc, molecules[imol].atom_sel.mol);
-      ntc_update_similarities(dlg, cs.step.stru);
-    } else {
-      ntc_dialog_update_connectivities(dlg, {});
-      ntc_dialog_update_similarities(dlg, {});
-    }
-  }
 }
 
 void
@@ -4843,11 +4826,37 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
     if (dlg) {
       opts = ntc_dialog_get_options(dlg);
     } else {
-      opts.onAltconfChanged = [this](NtCDialog *dlg, const NtCStepAltConf &) {
-        modify_ntc_update_display(dlg);
+      opts.onAltconfChanged = [this](NtCDialog *dlg, const NtCStepAltConf &altconf) {
+        const int imol = modify_ntc_data->imol;
+        auto maybeCs = modify_ntc_data->get(altconf);
+	if (is_valid_model_molecule(imol) && maybeCs && maybeCs.value().classification) {
+          const auto &cs = maybeCs.value();
+	  auto ntc = cs.classification.value().closestNtC;
+
+	  ntc_dialog_change_ntc(dlg, ntc);
+
+          ntc_update_everything(this, dlg, imol, cs, ntc);
+	} else {
+          clear_up_moving_atoms();
+          clear_moving_atoms_object();
+
+          ntc_clear_display(dlg);
+	}
       };
       opts.onDisplayedNtCChanged = [this](NtCDialog *dlg, LLKA_NtC ntc) {
-        modify_ntc_update_display(dlg);
+        const int imol = modify_ntc_data->imol;
+	const auto &altconf = ntc_dialog_get_current_step_altconf(dlg);
+
+        auto maybeCs = modify_ntc_data->get(altconf);
+
+	if (is_valid_model_molecule(imol) && maybeCs && maybeCs.value().classification) {
+          ntc_update_everything(this, dlg, imol, maybeCs.value(), ntc);
+	} else {
+          clear_up_moving_atoms();
+          clear_moving_atoms_object();
+
+          ntc_clear_display(dlg);
+	}
       };
       opts.onAccepted = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_accepted(); };
       opts.onRejected = [this](NtCDialog *dlg, LLKA_NtC ntc){ modify_ntc_rejected(); };

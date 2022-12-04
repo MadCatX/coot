@@ -69,6 +69,8 @@ struct NtCDialog {
     std::shared_ptr<NtCConnectivities> connectivities;
     NtCSimilarities similarities;
 
+    GtkSignalConnection list_of_ntcs_changed_sgc;
+
     NtCDialogOptions options;
 
     bool destroyed;
@@ -94,9 +96,7 @@ static
 void switch_list_to_ntc(GtkComboBox *list_of_ntcs, LLKA_NtC targetNtC);
 
 static
-void display_connectivities(NtCDialog *dlg) {
-    LLKA_NtC ntc = get_selected_ntc(dlg);
-
+void display_connectivities(NtCDialog *dlg, LLKA_NtC ntc) {
     ntc_csp_dialog_update_connectivities(
         dlg->conn_simil_plots_dialog,
         dlg->connectivities,
@@ -364,6 +364,14 @@ void switch_list_to_ntc(GtkComboBox *list_of_ntcs, LLKA_NtC targetNtC) {
     gtk_combo_box_set_active_iter(list_of_ntcs, &iter);
 }
 
+void ntc_dialog_change_ntc(NtCDialog *dlg, LLKA_NtC ntc) {
+    assert(!dlg->destroyed);
+
+    dlg->list_of_ntcs_changed_sgc.block();
+    switch_list_to_ntc(dlg->list_of_ntcs, ntc);
+    dlg->list_of_ntcs_changed_sgc.unblock();
+}
+
 void ntc_dialog_destroy(NtCDialog *dlg) {
     if (!dlg)
         return;
@@ -605,7 +613,7 @@ NtCDialog * ntc_dialog_make(const NtCDialogOptions &options) {
     dialog->list_of_ntcs = GTK_COMBO_BOX(get_widget(b, "list_of_ntcs"));
     assert(dialog->list_of_ntcs);
     prepare_list_of_ntcs(dialog->list_of_ntcs);
-    g_signal_connect(dialog->list_of_ntcs, "changed", G_CALLBACK(on_list_of_ntcs_changed), dialog);
+    dialog->list_of_ntcs_changed_sgc = GtkSignalConnection{dialog->list_of_ntcs, "changed", G_CALLBACK(on_list_of_ntcs_changed), dialog};
 
     dialog->toggle_conn_simil_plots = GTK_BUTTON(get_widget(b, "toggle_conn_simil_plots"));
     assert(dialog->toggle_conn_simil_plots);
@@ -644,12 +652,12 @@ void ntc_dialog_show(NtCDialog *dlg) {
     gtk_widget_show(dlg->root);
 }
 
-void ntc_dialog_update_connectivities(NtCDialog *dlg, NtCConnectivities connectivities) {
+void ntc_dialog_update_connectivities(NtCDialog *dlg, LLKA_NtC ntc, NtCConnectivities connectivities) {
     assert(!dlg->destroyed);
 
     *dlg->connectivities = std::move(connectivities);
     if (dlg->conn_simil_plots_dialog) {
-        display_connectivities(dlg);
+        display_connectivities(dlg, ntc);
     }
 }
 

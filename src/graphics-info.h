@@ -2794,7 +2794,6 @@ public:
    void modify_ntc_accepted();
    void modify_ntc_display_reference_structure(atom_selection_container_t &&asc, int imol);
    void modify_ntc_rejected();
-   void modify_ntc_update_display(NtCDialog *dlg);
 #endif // COOT_ENABLE_NTC
 
    // Mutation stuff

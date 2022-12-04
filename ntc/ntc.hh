@@ -15,28 +15,25 @@
 #include <utility>
 #include <vector>
 
-class AltConfNtCStep {
+class NtCStep {
 public:
-    AltConfNtCStep() = default;
-    AltConfNtCStep(std::string altconf1, std::string altconf2, NtCStructure stru) noexcept :
-        altconf1{std::move(altconf1)},
-        altconf2{std::move(altconf2)},
+    NtCStep() = default;
+    NtCStep(NtCStepAltConf altconf, NtCStructure stru) noexcept :
+        altconf{std::move(altconf)},
         stru{std::move(stru)}
     {}
-    AltConfNtCStep(const AltConfNtCStep &) = delete;
-    AltConfNtCStep(AltConfNtCStep &&other) noexcept :
-        altconf1{std::move(other.altconf1)},
-        altconf2{std::move(other.altconf2)},
+    NtCStep(const NtCStep &) = delete;
+    NtCStep(NtCStep &&other) noexcept :
+        altconf{std::move(other.altconf)},
         stru{std::move(other.stru)}
     {}
 
-    std::string altconf1;
-    std::string altconf2;
+    NtCStepAltConf altconf;
     NtCStructure stru;
 
     bool isValid() const { return stru.isValid; }
 };
-using AltConfNtCSteps = std::vector<AltConfNtCStep>;
+using NtCSteps = std::vector<NtCStep>;
 
 class NtCSuperposition {
 public:
@@ -45,8 +42,8 @@ public:
 };
 
 NtCResult<LLKA_ClassifiedStep, LLKA_RetCode> ntc_classify(const NtCStructure &stru);
-AltConfNtCSteps ntc_dinucleotides(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue);
-NtCConnectivitiesResult ntc_calculate_connectivities(LLKA_NtC ntc, const AltConfNtCStep &step, mmdb::Manager *srcMmdbStru);
+NtCSteps ntc_dinucleotides(mmdb::Manager *srcMmdbStru, mmdb::Residue *residue);
+NtCConnectivitiesResult ntc_calculate_connectivities(LLKA_NtC ntc, const NtCStep &step, mmdb::Manager *srcMmdbStru);
 NtCSimilaritiesResult ntc_calculate_similarities(const NtCStructure &stru);
 NtCStructure ntc_get_reference_structure(LLKA_NtC ntc);
 bool ntc_initialize_classification_context(const std::string &path, std::string &error);
