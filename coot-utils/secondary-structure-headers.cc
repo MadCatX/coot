@@ -1,4 +1,5 @@
 
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -172,7 +173,10 @@ coot::secondary_structure_header_records::make_helices(mmdb::Manager *mol,
       std::size_t size_of_ChainID = 10;
       std::size_t size_of_ResName = 20;
 
-      h->serNum = i+1;
+      std::string id = std::to_string(i+1);
+      std::strncpy(h->id, id.c_str(), sizeof(h->id));
+      h->id[sizeof(h->id)-1] = '\0';
+
       strcpy(h->helixID, helix_id.c_str());
       int ll = helix_id.size();
       if (ll < 20)

@@ -8618,7 +8618,7 @@ coot::util::print_secondary_structure_info(mmdb::Model *model_p) {
    for (int ih=1; ih<=nhelix; ih++) {
       helix_p = model_p->GetHelix(ih);
       if (helix_p) {
-         std::cout << helix_p->serNum << " " << helix_p->helixID << " "
+         std::cout << helix_p->id << " " << helix_p->helixID << " "
                    << helix_p->initChainID << " " << helix_p->initSeqNum
                    << " " << helix_p->endChainID << " " << helix_p->endSeqNum << " "
                    << helix_p->length << " " << helix_p->comment << std::endl;
