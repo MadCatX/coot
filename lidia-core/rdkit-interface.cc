@@ -2097,7 +2097,6 @@ coot::make_residue(const RDKit::ROMol &rdkm, int iconf, const std::string &res_n
 
 lig_build::bond_t::bond_type_t
 coot::convert_bond_type(const RDKit::Bond::BondType &type) {
-
    lig_build::bond_t::bond_type_t t = lig_build::bond_t::SINGLE_BOND; // Hmmm..
    
    if (type == RDKit::Bond::SINGLE)
