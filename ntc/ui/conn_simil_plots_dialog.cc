@@ -34,6 +34,11 @@ struct NtCConnSimilPlotsDialog {
     bool destroyed;
 };
 
+static const gchar *PrevAltconfTooltipText = "Alternate configuration of the previous step if the previous step has any atoms in alternate positions. "
+                                             "Alternate configuration of the current step is set in the main NtC window.";
+static const gchar *NextAltconfTooltipText = "Alternate configuration of the next step if the next step has any atoms in alternate positions. "
+                                             "Alternate configuration of the current step is set in the main NtC window.";
+
 static
 double calculate_axis_maximum(const std::vector<DotPlotPoint> &points, double DotPlotPoint::* coord, double scaleFactor);
 
@@ -300,6 +305,14 @@ NtCConnSimilPlotsDialog * ntc_csp_dialog_make(OnSimilaritySelected onSimilarityS
     GtkButton *close = GTK_BUTTON(get_widget(b, "close_button"));
     assert(close);
     g_signal_connect(close, "clicked", G_CALLBACK(on_close_button_clicked), dlg);
+
+    GtkWidget *prev_altconf_cap = GTK_WIDGET(get_widget(b, "connectivity_previous_altconf_caption"));
+    assert(prev_altconf_cap);
+    gtk_widget_set_tooltip_text(prev_altconf_cap, PrevAltconfTooltipText);
+
+    GtkWidget *next_altconf_cap = GTK_WIDGET(get_widget(b, "connectivity_next_altconf_caption"));
+    assert(next_altconf_cap);
+    gtk_widget_set_tooltip_text(next_altconf_cap, NextAltconfTooltipText);
 
     g_signal_connect(dlg->root, "destroy", G_CALLBACK(on_dialog_closed), dlg);
 
