@@ -36,14 +36,14 @@ if COND_LIDIA_ONLY
 else
    SUBDIRS = auxil scheme python pdb-templates macros compat utils protein_db mini-mol geometry  \
         lidia-core coot-utils angles ccp4mg-utils db-main analysis cootaneer ideal ligand coords \
-	density-contour skeleton  high-res build MoleculesToTriangles greg-tests \
-	python-tests lbg cootilus goograph pli fonts pyrogen src data \
-	man rama-data doc rcrane glTF pixmaps textures
+	density-contour skeleton  high-res build MoleculesToTriangles greg-tests
 
 if COND_ENABLE_NTC
     SUBDIRS += ntc
 endif
 
+    SUBDIRS += 	python-tests lbg cootilus goograph pli fonts pyrogen src data \
+	man rama-data doc rcrane glTF pixmaps textures
 endif
 
 # po, no po today.
