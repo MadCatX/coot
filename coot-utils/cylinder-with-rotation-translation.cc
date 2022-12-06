@@ -180,8 +180,12 @@ cylinder_with_rotation_translation::add_spiral() {
       unsigned int idx_2 = n_slices * i + istep * i + 1;
       if (idx_1 >= (n_stacks * (i+1))) idx_1 -= n_slices;
       if (idx_2 >= (n_stacks * (i+1))) idx_2 -= n_slices;
-      vertices[idx_1].colour = white;
-      vertices[idx_2].colour = white;
+      // The intent of the code is not clear but the index calculation above is wrong
+      // Add a crutch to avoid out-of-bounds access
+      if (idx_1 < vertices.size())
+         vertices[idx_1].colour = white;
+      if (idx_2 < vertices.size())
+         vertices[idx_2].colour = white;
    }
    
 }
