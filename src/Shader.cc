@@ -11,7 +11,9 @@
 
 #include "Shader.hh"
 
-Shader::Shader() {
+Shader::Shader() :
+   success_status(false)
+{
    program_id = 0; // unset
    name = "---Unset---";
 }
@@ -20,24 +22,48 @@ Shader::Shader(const std::string &file_name, Shader::Entity_t e) {
    init(file_name, e);
 }
 
-Shader::Shader(const std::string &vs_file_name, const std::string &fs_file_name) {
+Shader::Shader(const std::string &vs_file_name, const std::string &fs_file_name) :
+   success_status(false)
+{
 
    entity_type = Entity_t::HUD_TEXT; // hackety-hack
    program_id = glCreateProgram();
 
    parse(vs_file_name);
-   if (! VertexSource.empty()) {
-      unsigned int vs = compile_shader(VertexSource, ShaderType::VERTEX);
-      parse(fs_file_name);
-      if (! FragmentSource.empty()) {
-         unsigned int fs = compile_shader(FragmentSource, ShaderType::FRAGMENT);
+   parse(fs_file_name);
+
+   bool ok = true;
+   if (VertexSource.empty()) {
+      ok = false;
+      std::cout << "Oops - empty Vertex shader " << vs_file_name << std::endl;
+   }
+   if (FragmentSource.empty()) {
+      ok = false;
+      std::cout << "Oops - empty Fragment shader " << fs_file_name << std::endl;
+   }
+
+   if (ok) {
+      GLuint vs = 0;
+      GLuint fs = 0;
+      try {
+         vs = compile_shader(VertexSource, ShaderType::VERTEX);
+         fs = compile_shader(FragmentSource, ShaderType::FRAGMENT);
 
          glAttachShader(program_id, vs);
          glAttachShader(program_id, fs);
          glLinkProgram(program_id);
          glValidateProgram(program_id);
-      } else {
-         std::cout << "Oops - empty Fragment shader" << fs_file_name << std::endl;
+
+         success_status = true;
+      } catch (const std::runtime_error &ex) {
+         if (vs > 0)
+            glDeleteShader(vs);
+	 if (fs > 0)
+            glDeleteShader(fs);
+
+	 glDeleteProgram(program_id);
+	 program_id = 0;
+         std::cout << "Oops - cannot compile shader: " << ex.what() << std::endl;
       }
    }
 }
@@ -405,18 +431,15 @@ void Shader::parse(const std::string &file_name_in) {
 }
 
 unsigned int Shader::compile_shader(const std::string &source, ShaderType type) const {
+   unsigned int shader_type = type == ShaderType::FRAGMENT
+      ? GL_FRAGMENT_SHADER
+      : type == ShaderType::VERTEX
+         ? GL_VERTEX_SHADER
+	 : -1U;
 
-   unsigned int i_type = 0;
-   std::string type_s = "-";
-   if (type == ShaderType::FRAGMENT) {
-      i_type = GL_FRAGMENT_SHADER;
-      type_s = "Fragment";
-   }
-   if (type == ShaderType::VERTEX) {
-      i_type = GL_VERTEX_SHADER;
-      type_s = "Vertex";
-   }
-   unsigned int id = glCreateShader(i_type);
+   assert(shader_type != -1U);
+
+   unsigned int id = glCreateShader(shader_type);
    const char *s = source.c_str();
    int l = source.size() + 1;
    glShaderSource(id,  1,  &s, &l);
@@ -429,7 +452,8 @@ unsigned int Shader::compile_shader(const std::string &source, ShaderType type) 
       glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
       char message[length+1];
       glGetShaderInfoLog(id, length, &length, message);
-      std::cout << "error:: Failed to compile " << type_s << " shader: " << message << std::endl;
+      std::cout << "error:: Failed to compile " << (shader_type == GL_FRAGMENT_SHADER ? "fragment" : "vertex") << " shader: " << message << std::endl;
+      throw std::runtime_error{"Failed to compile shader"};
    } else {
       // std::cout << "   glCompileShader() result was good for " << type_s << " shader " << std::endl;
    }
@@ -440,39 +464,51 @@ std::pair<unsigned int, std::string>
 Shader::create() const {
 
    unsigned int program = glCreateProgram();
-   unsigned int vs = compile_shader(  VertexSource, ShaderType::VERTEX);
-   unsigned int fs = compile_shader(FragmentSource, ShaderType::FRAGMENT);
-
    std::string message;
+   GLuint vs = 0;
+   GLuint fs = 0;
 
-   glAttachShader(program, vs);
-   GLenum err = glGetError();
-   if (err) std::cout << "GL ERROR:: Shader::create() " << name << " A " << err << std::endl;
-   glAttachShader(program, fs);
-   err = glGetError();
-   if (err) std::cout << "GL ERROR:: Shader::create() " << name << " B " << err << std::endl;
-   glLinkProgram(program);
-   err = glGetError();
-   if (err) std::cout << "GL ERROR:: Shader::create() " << name << " C " << err << std::endl;
-   glValidateProgram(program);
-   err = glGetError();
-   if (err) std::cout << "GL ERROR:: Shader::create() " << name << " D " << err << std::endl;
-   GLint status;
-   glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
-   err = glGetError();
-   if (err) {
-      std::cout << "GL ERROR:: Shader::create() post glGetProgram() err " << err << std::endl;
-      message = "error"; // this value is tested in init().
+   try {
+      vs = compile_shader(  VertexSource, ShaderType::VERTEX);
+      fs = compile_shader(FragmentSource, ShaderType::FRAGMENT);
+
+      glAttachShader(program, vs);
+      GLenum err = glGetError();
+      if (err) std::cout << "GL ERROR:: Shader::create() " << name << " A " << err << std::endl;
+      glAttachShader(program, fs);
+      err = glGetError();
+      if (err) std::cout << "GL ERROR:: Shader::create() " << name << " B " << err << std::endl;
+      glLinkProgram(program);
+      err = glGetError();
+      if (err) std::cout << "GL ERROR:: Shader::create() " << name << " C " << err << std::endl;
+      glValidateProgram(program);
+      err = glGetError();
+      if (err) std::cout << "GL ERROR:: Shader::create() " << name << " D " << err << std::endl;
+      GLint status;
+      glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
+      err = glGetError();
+      if (err) {
+         std::cout << "GL ERROR:: Shader::create() post glGetProgram() err " << err << std::endl;
+         message = "error"; // this value is tested in init().
+      }
+      if (status == GL_TRUE) {
+         // good
+         message = "success";
+      } else {
+         std::cout << "WARNING:: validation failed: " << name << " validation status " << status << std::endl;
+         message = "validation-failed";
+      }
+      glDeleteShader(vs);
+      glDeleteShader(fs);
+   } catch (const std::runtime_error &ex) {
+      if (vs > 0)
+         glDeleteShader(vs);
+      if (fs > 0)
+         glDeleteShader(fs);
+
+      glDeleteProgram(program);
+      message = ex.what();
    }
-   if (status == GL_TRUE) {
-      // good
-      message = "success";
-   } else {
-      std::cout << "WARNING:: validation failed: " << name << " validation status " << status << std::endl;
-      message = "validation-failed";
-   }
-   glDeleteShader(vs);
-   glDeleteShader(fs);
 
    // std::cout << "create() for " << name << " returns message " << message << std::endl;
    return std::pair<unsigned int, std::string> (program, message);
