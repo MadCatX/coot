@@ -28,6 +28,14 @@ public:
         stru{std::move(other.stru)}
     {}
 
+    NtCStep & operator=(const NtCStep &) = delete;
+    NtCStep & operator=(NtCStep &&other) noexcept {
+        altconf = std::move(other.altconf);
+        stru = std::move(other.stru);
+
+        return *this;
+    }
+
     NtCStepAltConf altconf;
     NtCStructure stru;
 
@@ -37,6 +45,19 @@ using NtCSteps = std::vector<NtCStep>;
 
 class NtCSuperposition {
 public:
+    explicit NtCSuperposition();
+    NtCSuperposition(mmdb::Manager *mmdbStru, double rmsd) noexcept;
+    NtCSuperposition(const NtCSuperposition &) = delete;
+    NtCSuperposition(NtCSuperposition &&other) noexcept;
+    ~NtCSuperposition();
+
+    bool isValid() const {
+        return mmdbStru != nullptr;
+    }
+
+    NtCSuperposition & operator=(const NtCSuperposition &) = delete;
+    NtCSuperposition & operator=(NtCSuperposition &&other) noexcept;
+
     mmdb::Manager *mmdbStru;
     double rmsd;
 };

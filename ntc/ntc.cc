@@ -31,6 +31,38 @@ static const std::string NU_ANGLES_FILE{"nu_angles.csv"};
 static LLKA_ClassificationContext *classificationContext{nullptr};
 static std::mutex initializationLock;
 
+NtCSuperposition::NtCSuperposition() :
+    mmdbStru{nullptr},
+    rmsd{-1}
+{
+}
+
+NtCSuperposition::NtCSuperposition(mmdb::Manager *mmdbStru, double rmsd) noexcept :
+    mmdbStru{mmdbStru},
+    rmsd{rmsd}
+{
+}
+
+NtCSuperposition::NtCSuperposition(NtCSuperposition &&other) noexcept :
+    mmdbStru{other.mmdbStru},
+    rmsd{other.rmsd}
+{
+    other.mmdbStru = nullptr;
+}
+
+NtCSuperposition::~NtCSuperposition() {
+    delete mmdbStru;
+}
+
+NtCSuperposition & NtCSuperposition::operator=(NtCSuperposition &&other) noexcept {
+    mmdbStru = other.mmdbStru;
+    rmsd = other.rmsd;
+
+    other.mmdbStru = nullptr;
+
+    return *this;
+}
+
 static const std::vector<LLKA_NtC> AllNtCs = []() {
     auto r = make_ntc_range(LLKA_AA00, LLKA_LAST_NTC);
     r.push_back(LLKA_INVALID_NTC);
@@ -344,21 +376,21 @@ NtCSuperposition ntc_superpose_reference(const NtCStructure &stru, LLKA_NtC ntc)
     LLKA_Structure refBkbn{};
     auto tRet = LLKA_extractBackbone(&stru.llkaStru, &bkbn);
     if (tRet != LLKA_OK) {
-        return {};
+        return NtCSuperposition{};
     }
 
     tRet = LLKA_extractBackbone(&llkaRefStru, &refBkbn);
     if (tRet != LLKA_OK) {
         LLKA_destroyStructure(&bkbn);
 
-        return {};
+        return NtCSuperposition{};
     }
 
     // Construct transformation matrix
     LLKA_Matrix transformation{};
     tRet = LLKA_superpositionMatrixStructures(&refBkbn, &bkbn, &transformation);
     if (tRet != LLKA_OK) {
-        return {};
+        return NtCSuperposition{};
     }
 
     tRet = LLKA_applyTransformationStructure(&llkaRefStru, &transformation);

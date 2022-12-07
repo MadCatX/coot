@@ -4731,7 +4731,11 @@ void ntc_update_everything(graphics_info_t *gfx, NtCDialog *dlg, int imol, const
   auto reference = ntc_calculate_reference(cs.step.stru, ntc);
   ntc_display_reference_data(dlg, reference);
   if (reference) {
-    auto asc = make_asc(reference.value().superposition.mmdbStru);
+    // Copy the structure so we can safely free the NtC data
+    auto mgr = new mmdb::Manager();
+    mgr->Copy(reference.value().superposition.mmdbStru, mmdb::MMDBFCM_All);
+
+    auto asc = make_asc(mgr);
     gfx->modify_ntc_display_reference_structure(std::move(asc), imol);
   }
 

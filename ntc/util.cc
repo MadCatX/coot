@@ -284,8 +284,7 @@ LLKA_Structure mmdb_structure_to_LLKA_structure(mmdb::Manager *mmdbStru) {
 
                 LLKA_Atom llkaAtom = mmdb_atom_to_LLKA_atom(atom, residue, model->GetEntryID());
                 LLKA_appendAtom(&llkaAtom, &llkaStru);
-
-                std::cout << llkaAtom.label_atom_id << ", " << llkaAtom.type_symbol << ", " << llkaAtom.label_comp_id << ", " << llkaAtom.label_seq_id << ", " << (llkaAtom.label_alt_id == LLKA_NO_ALTID ? '-' : llkaAtom.label_alt_id) << "\n";
+                LLKA_destroyAtom(&llkaAtom);
             }
         }
     }
@@ -312,6 +311,8 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
         if (reference) {
             fix_up_atom_names(residueE, reference);
         }
+
+        delete reference;
     }
 
     // Relabel second residue
@@ -324,6 +325,8 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
         if (reference) {
             fix_up_atom_names(residueE, reference);
         }
+
+        delete reference;
     }
 }
 
@@ -355,6 +358,8 @@ void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer) {
                 }
 
                 coot::util::mutate_base(residueE, standardBase, false);
+
+                delete standardBase;
             }
         }
     }
