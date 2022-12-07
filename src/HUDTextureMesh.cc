@@ -151,6 +151,10 @@ HUDTextureMesh::setup_buffers() {
 void
 HUDTextureMesh::update_instancing_buffer_data(const std::vector<glm::vec2> &new_positions) {
 
+   if (new_positions.empty()) {
+      return;
+   }
+
    GLenum err = glGetError();
    if (err)
       std::cout << "GL ERROR:: HUDTextureMesh::update_instancing_buffer_data() --start-- err "

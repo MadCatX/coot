@@ -274,6 +274,9 @@ HUDMesh::setup_instancing_buffer(unsigned int n_boxes, unsigned int size_of_bar)
 
 void
 HUDMesh::update_instancing_buffer_data(const std::vector<HUD_bar_attribs_t> &new_bars) {
+   if (new_bars.empty()) {
+      return;
+   }
 
    unsigned int s = new_bars.size();
    n_instances = s;
@@ -286,6 +289,9 @@ HUDMesh::update_instancing_buffer_data(const std::vector<HUD_bar_attribs_t> &new
 
 void
 HUDMesh::update_instancing_buffer_data(const std::vector<HUD_button_info_t> &buttons_info) {
+   if (buttons_info.empty()) {
+      return;
+   }
 
    unsigned int s = buttons_info.size();
    n_instances = s;
