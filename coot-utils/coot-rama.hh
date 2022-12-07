@@ -52,28 +52,13 @@ namespace coot {
       
       public:
 	 // torsion angles in degrees
-	 phi_psi_t(double phi_in, double psi_in,
-		   const std::string &res_name,
-		   const std::string &residue_label,
-		   int resno,
-		   const std::string ins_code_in,
-		   std::string chainid) {
-	    phi_ = phi_in;
-	    psi_ = psi_in;
-	    lab = residue_label;
-	    residue_name_ = res_name;
-	    residue_number = resno;
-	    ins_code = ins_code_in;
-	    chain_id = chainid;
-	    is_filled_ = 1;
-	 }
 	 phi_psi_t(double a, double b,
 		   const std::string &res_name,
 		   const std::string &residue_label,
 		   int resno,
 		   const std::string ins_code_in,
 		   std::string chainid,
-		   bool is_pre_pro) {
+		   bool is_pre_pro = false) {
 	    phi_ = a;
 	    psi_ = b;
 	    lab = residue_label;
