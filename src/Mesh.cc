@@ -1116,58 +1116,61 @@ Mesh::setup_matrix_and_colour_instancing_buffers_standard(const std::vector<glm:
    // 20210827-PE Here I should clean out the old buffer data before overriding it.
    // glDeleteBuffers() if this is not the first time that this function has been called.
 
-   glGenBuffers(1, &inst_rts_buffer_id);
-   glBindBuffer(GL_ARRAY_BUFFER, inst_rts_buffer_id);
-   if (false)
-      std::cout << "setup_matrix_and_colour_instancing_buffers_standard() allocating matrix buffer data "
-                << n_instances * 4 * sizeof(glm::mat4) << std::endl;
-   glBufferData(GL_ARRAY_BUFFER, n_instances * 4 * sizeof (glm::vec4), &(inst_rts_matrices[0]), GL_DYNAMIC_DRAW); // dynamic
+   if (inst_rts_matrices.size() > 0) {
+      glGenBuffers(1, &inst_rts_buffer_id);
+      glBindBuffer(GL_ARRAY_BUFFER, inst_rts_buffer_id);
+      if (false)
+         std::cout << "setup_matrix_and_colour_instancing_buffers_standard() allocating matrix buffer data "
+                   << n_instances * 4 * sizeof(glm::mat4) << std::endl;
+      glBufferData(GL_ARRAY_BUFFER, n_instances * 4 * sizeof (glm::vec4), &(inst_rts_matrices[0]), GL_DYNAMIC_DRAW); // dynamic
 
-   err = glGetError(); if (err) std::cout << "GL ERROR:: setup_instancing_buffers() C1 " << err << std::endl;
-   glEnableVertexAttribArray(3);
-   glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 0);
-   glVertexAttribDivisor(3, 1);
-   err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() C2 " << err << std::endl;
-   glEnableVertexAttribArray(4);
-   glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void *>(sizeof(glm::vec4)));
-   glVertexAttribDivisor(4, 1);
-   err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() C2 " << err << std::endl;
-   glEnableVertexAttribArray(5);
-   glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void *>(2 * sizeof(glm::vec4)));
-   glVertexAttribDivisor(5, 1);
-   err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() C3 " << err << std::endl;
-   glEnableVertexAttribArray(6);
-   glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void *>(3 * sizeof(glm::vec4)));
-   glVertexAttribDivisor(6, 1);
+      err = glGetError(); if (err) std::cout << "GL ERROR:: setup_instancing_buffers() C1 " << err << std::endl;
+      glEnableVertexAttribArray(3);
+      glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 0);
+      glVertexAttribDivisor(3, 1);
+      err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() C2 " << err << std::endl;
+      glEnableVertexAttribArray(4);
+      glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void *>(sizeof(glm::vec4)));
+      glVertexAttribDivisor(4, 1);
+      err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() C2 " << err << std::endl;
+      glEnableVertexAttribArray(5);
+      glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void *>(2 * sizeof(glm::vec4)));
+      glVertexAttribDivisor(5, 1);
+      err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() C3 " << err << std::endl;
+      glEnableVertexAttribArray(6);
+      glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void *>(3 * sizeof(glm::vec4)));
+      glVertexAttribDivisor(6, 1);
 
-   err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() E " << err << std::endl;
+      err = glGetError(); if (err) std::cout << "   error setup_instancing_buffers() E " << err << std::endl;
+   }
 
    // rama balls we want to have instanced colours but hydrogen bond rotating cylinders we do not.
 
    // -------- colours -----------
 
-   glGenBuffers(1, &inst_colour_buffer_id);
-   glBindBuffer(GL_ARRAY_BUFFER, inst_colour_buffer_id);
-   err = glGetError();
-   if (err) std::cout << "GL ERROR:: setup_matrix_and_colour_instancing_buffers_standard() B0 "
-                      << err << std::endl;
-   if (false)
-      std::cout << "setup_matrix_and_colour_instancing_buffers_old() allocating colour buffer data "
-                << n_instances * sizeof(glm::vec4) << std::endl;
-   glBufferData(GL_ARRAY_BUFFER, n_instances * sizeof(glm::vec4), &(inst_col_matrices[0]), GL_DYNAMIC_DRAW); // dynamic
-   glEnableVertexAttribArray(7);
-   err = glGetError();
-   if (err) std::cout << "error setup_matrix_and_colour_instancing_buffers_standard() B1 "
-                      << err << std::endl;
-   glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), 0);
-   err = glGetError();
-   if (err) std::cout << "error setup_matrix_and_colour_instancing_buffers_standard() B2 "
-                      << err << std::endl;
-   glVertexAttribDivisor(7, 1);
-   err = glGetError();
-   if (err) std::cout << "error setup_matrix_and_colour_instancing_buffers_standard() B3 "
-                      << err << std::endl;
-
+   if (inst_col_matrices.size() > 0) {
+      glGenBuffers(1, &inst_colour_buffer_id);
+      glBindBuffer(GL_ARRAY_BUFFER, inst_colour_buffer_id);
+      err = glGetError();
+      if (err) std::cout << "GL ERROR:: setup_matrix_and_colour_instancing_buffers_standard() B0 "
+                         << err << std::endl;
+      if (false)
+         std::cout << "setup_matrix_and_colour_instancing_buffers_old() allocating colour buffer data "
+                   << n_instances * sizeof(glm::vec4) << std::endl;
+      glBufferData(GL_ARRAY_BUFFER, n_instances * sizeof(glm::vec4), &(inst_col_matrices[0]), GL_DYNAMIC_DRAW); // dynamic
+      glEnableVertexAttribArray(7);
+      err = glGetError();
+      if (err) std::cout << "error setup_matrix_and_colour_instancing_buffers_standard() B1 "
+                         << err << std::endl;
+      glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), 0);
+      err = glGetError();
+      if (err) std::cout << "error setup_matrix_and_colour_instancing_buffers_standard() B2 "
+                         << err << std::endl;
+      glVertexAttribDivisor(7, 1);
+      err = glGetError();
+      if (err) std::cout << "error setup_matrix_and_colour_instancing_buffers_standard() B3 "
+                         << err << std::endl;
+   }
    
 }
 
