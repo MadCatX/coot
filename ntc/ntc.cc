@@ -316,7 +316,7 @@ NtCConnectivitiesResult ntc_calculate_connectivities(LLKA_NtC ntc, const NtCStep
     NtCSteps prevSteps = get_related_steps(RelatedSteps::Previous, step, srcMmdbStru);
     LLKA_Connectivities cConns = init_connectivities(AllNtCs.size() - 1);
     for (auto &prevStep : prevSteps) {
-        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleFirst(&prevStep.stru.llkaStru, AllNtCs.data(), &prevStep.stru.llkaStru, ntc, &cConns);
+        LLKA_RetCode tRet = LLKA_measureStepConnectivityNtCsMultipleFirst(&prevStep.stru.llkaStru, AllNtCs.data(), &step.stru.llkaStru, ntc, &cConns);
         if (tRet != LLKA_OK) {
             destroy_connectivities(cConns);
             return NtCConnectivitiesResult::fail(tRet);
