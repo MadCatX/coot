@@ -262,8 +262,7 @@ cod::bond_record_container_t::read_acedrg_table(const std::string &file_name) {
 void
 cod::bond_record_container_t::read_acedrg_table_dir(const std::string &dir_name) {
 
-   std::string glob_pattern = "*.table";
-   std::vector<std::string> tables = coot::util::glob_files(dir_name, glob_pattern);
+   std::vector<std::string> tables = coot::util::gather_files_by_patterns(dir_name, { "*.table" });
 
    for (unsigned int i=0; i<tables.size(); i++) {
       const std::string &table = tables[i];
@@ -1058,7 +1057,7 @@ sqlite3 *
 cod::bond_record_container_t::make_sqlite_db(const std::string &db_file_name) {
 
    sqlite3 *db = NULL;
-   if (! coot::file_exists(db_file_name)) {
+   if (! coot::util::file_exists(db_file_name)) {
       int rc = sqlite3_open(db_file_name.c_str(), &db);
       char *zErrMsg = 0;
       std::string command;
@@ -1108,7 +1107,7 @@ cod::bond_record_container_t::make_db(const std::string &db_file_name) {
 
 #ifdef USE_SQLITE3
    sqlite3 *db = NULL;
-   if (! coot::file_exists(db_file_name))
+   if (! coot::util::file_exists(db_file_name))
       db = make_sqlite_db(db_file_name); // database empty but with ligands table
 
    if (db) {

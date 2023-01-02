@@ -183,6 +183,9 @@ bin_PROGRAMS = mmrrcc test-coot-utils
 
 # Why do I need to add lidia-core here? It's already added to libcoot-coord-utils.
 mmrrcc_SOURCES = mmrrcc.cc
+if HAVE_RDKIT_PREFIX_PATH
+mmrrcc_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 mmrrcc_LDADD = ./libcoot-map-utils.la \
 	./libcoot-coord-utils.la  \
         $(top_builddir)/lidia-core/libcoot-lidia-core.la \
@@ -226,6 +229,9 @@ testshelxreader_LDADD =  ./libcoot-coord-utils.la    \
 
 # # other test binaries may need to be linked like this too
 test_coot_utils_SOURCES = test-coot-utils.cc
+if HAVE_RDKIT_PREFIX_PATH
+test_coot_utils_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 test_coot_utils_LDADD = \
 	./libcoot-map-heavy.la    \
 	./libcoot-map-utils.la    \

@@ -78,6 +78,9 @@ pkgincludedir = $(includedir)/coot/lbg
 # Anyway, thankyou Gary Vaughan.
 wl=-Wl,
 lidia_bin_LDFLAGS = $(EXPORT_DYNAMIC_FLAG_SPEC)
+if HAVE_RDKIT_PREFIX_PATH
+lidia_bin_LDFLAGS += -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 
 # res spec output operator means we include libcoot-coord-utils
 # (if that is annoying, then remove it and expand it by hand)

@@ -158,7 +158,7 @@ chemical_features::get_feature_factory() {
    const char *e = getenv("COOT_CHEMICAL_FEATURES_DEF");
    if (e) full_name = e;
    
-   if (coot::file_exists(full_name)) {
+   if (coot::util::file_exists(full_name)) {
       std::ifstream inStream(full_name.c_str());
       std::istream &instrm = static_cast<std::istream &>(inStream);
       factory = RDKit::buildFeatureFactory(instrm);

@@ -107,6 +107,9 @@ crankshaft_test_LDADD = ./libcoot-ideal.la \
 # with_geometry_SOURCES = with-geometry.cc
 
 mini_rsr_bin_SOURCES = mini-rsr.cc
+if HAVE_RDKIT_PREFIX_PATH
+mini_rsr_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 
 test_rama_plot_SOURCES = test-rama-plot.cc
 
@@ -115,7 +118,9 @@ test_rama_plot_LDADD = ./libcoot-ideal.la \
 	$(top_builddir)/geometry/libcoot-geometry.la 
 
 coot_ligand_validation_bin_SOURCES = lv.cc
-
+if HAVE_RDKIT_PREFIX_PATH
+coot_ligand_validation_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 coot_ligand_validation_bin_LDADD = ./libcoot-ideal.la      \
 	$(top_builddir)/coot-utils/libcoot-map-heavy.la    \
 	$(top_builddir)/coot-utils/libcoot-map-utils.la    \

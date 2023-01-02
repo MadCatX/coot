@@ -70,7 +70,7 @@ coot::extract_ligands_from_coords_file(const std::string &file_name,
    protein_geometry geom;
    geom.set_verbose(false);
 
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
       mmdb::Manager *mol = new mmdb::Manager;
       mol->ReadCoorFile(file_name.c_str());
       std::vector<mmdb::Residue *> v = util::get_hetgroups(mol); // no waters
@@ -292,9 +292,9 @@ coot::get_ligand_interactions_read_cifs(const std::string &residue_name,
 					const std::string &ccd_dir_or_cif_file_name,
 					protein_geometry *geom_p) {
 
-   if (file_exists(ccd_dir_or_cif_file_name)) {
+   if (coot::util::file_exists(ccd_dir_or_cif_file_name)) {
       std::string cif_file_name = ccd_dir_or_cif_file_name;
-      if (is_directory_p(ccd_dir_or_cif_file_name)) {
+      if (coot::util::is_dir(ccd_dir_or_cif_file_name)) {
 	 std::string dir_name = ccd_dir_or_cif_file_name;
 	 //
 	 // all files in this directory of just the one...?
@@ -302,7 +302,7 @@ coot::get_ligand_interactions_read_cifs(const std::string &residue_name,
 	 //
 	 cif_file_name = util::append_dir_file(dir_name, residue_name + ".cif");
       }
-      if (file_exists(cif_file_name)) {
+      if (coot::util::file_exists(cif_file_name)) {
 	 int rn = 42;
 	 geom_p->init_refmac_mon_lib(cif_file_name, rn++);
       }
@@ -320,13 +320,13 @@ coot::extract_ligands_from_coords_file_try_read_cif(const std::string &ccd_dir_o
    if (geom_p->have_dictionary_for_residue_type_no_dynamic_add(residue_name)) {
       // nothing
    } else {
-      if (file_exists(ccd_dir_or_cif_file_name)) {
+      if (coot::util::file_exists(ccd_dir_or_cif_file_name)) {
 	 std::string cif_file_name = ccd_dir_or_cif_file_name;
-	 if (is_directory_p(ccd_dir_or_cif_file_name)) {
+	 if (coot::util::is_dir(ccd_dir_or_cif_file_name)) {
 	    std::string dir_name = ccd_dir_or_cif_file_name;
 
 	    std::string cif_file_name = util::append_dir_file(dir_name, residue_name + ".cif");
-	    if (file_exists(cif_file_name)) {
+	    if (coot::util::file_exists(cif_file_name)) {
 	       geom_p->init_refmac_mon_lib(cif_file_name, *cif_read_number_p);
 	       *cif_read_number_p++;
 	    }
@@ -350,7 +350,7 @@ coot::contact_dots_from_coordinates_file(const std::string &file_name, bool add_
    geom.set_verbose(false);
    geom.init_standard();
 
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
       mmdb::Manager *mol = new mmdb::Manager;
       mmdb::ERROR_CODE err = mol->ReadCoorFile(file_name.c_str());
       if (err) {
@@ -440,7 +440,7 @@ coot::atom_overlaps_from_coordinates_file(const std::string &file_name,
    geom.set_verbose(false);
    geom.init_standard();
 
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
       mmdb::Manager *mol = new mmdb::Manager;
       mmdb::ERROR_CODE err = mol->ReadCoorFile(file_name.c_str());
       if (err) {

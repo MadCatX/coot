@@ -329,7 +329,6 @@ check_PROGRAMS = test-coot-align test-cholesky
 #	coot-nomenclature.cc
 
 coot_bin_SOURCES = main.cc glade-callbacks.cc glade-callbacks-main-window.cc glade-callbacks-preferences.cc glade-callbacks-shader-settings.cc
-
 coot_bin_LDADD =  \
 	libcootsumo.la \
 	$(top_builddir)/utils/libcoot-utils.la \
@@ -775,7 +774,10 @@ endif
 # coot_bin_LDFLAGS = -static -lstdc++
 #
 coot_bin_LDFLAGS = $(EXPORT_DYNAMIC_FLAG_SPEC)
-
+if HAVE_RDKIT_PREFIX_PATH
+coot_bin_LDFLAGS += -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
+#
 # coot_bin_CXXFLAGS=-Wl,--export-dynamic -dynamiclib
 #  -Wl,-undefined -Wl,dynamic_lookup
 
@@ -860,6 +862,9 @@ test_coot_align_LDADD =	\
 
 
 coot_density_score_by_residue_bin_SOURCES = density-score-by-residue-src.cc
+if HAVE_RDKIT_PREFIX_PATH
+coot_density_score_by_residue_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 coot_density_score_by_residue_bin_LDADD  =	\
         libcootsumo.la                                          \
 	$(top_builddir)/geometry/libcoot-geometry.la    	\
@@ -883,6 +888,9 @@ coot_density_score_by_residue_bin_LDADD  =	\
 	$(GSL_LIBS)
 
 dynarama_bin_SOURCES = dynarama-main.cc
+if HAVE_RDKIT_PREFIX_PATH
+dynarama_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 dynarama_bin_LDADD = \
         libcootsumo.la                                          \
         $(top_builddir)/coords/libcoot-coords.la                \

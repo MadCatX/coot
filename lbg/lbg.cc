@@ -4637,7 +4637,7 @@ lbg_info_t::import_mol_from_smiles_file(const std::string &file_name) {
 
 #ifdef MAKE_ENHANCED_LIGAND_TOOLS
 
-   if (coot::file_exists(file_name)) {
+   if (coot::util::file_exists(file_name)) {
 
       std::string file_contents = file_to_string(file_name);
       std::string::size_type isplit = file_contents.find_first_of(' ');
