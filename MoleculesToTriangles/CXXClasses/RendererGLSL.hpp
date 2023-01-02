@@ -34,7 +34,7 @@ public:
     static std::string PointLightVertexShaderText;
     static std::shared_ptr<Renderer> create();
     std::pair<bool, std::string> readShaderFile(std::string strFilename) const;
-    bool loadShaderFile(std::string strFilename, uint iHandle);
+    bool loadShaderFile(std::string strFilename, unsigned int iHandle);
     void loadShaders();
 };
 

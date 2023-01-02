@@ -1,7 +1,7 @@
 
 ACLOCAL_AMFLAGS="-Im4"
 AM_CPPFLAGS = -I$(top_srcdir) $(BOOST_CPPFLAGS) $(MMDB_CFLAGS)
-AM_LDFLAGS = $(BOOST_LDFLAGS)
+AM_LDFLAGS = $(SHARED_LDFLAGS) $(BOOST_LDFLAGS)
 
 lib_LTLIBRARIES=libMoleculesToTrianglesCXXClasses.la
 
@@ -37,8 +37,11 @@ libMoleculesToTrianglesCXXClasses_la_CPPFLAGS=$(AM_CPPFLAGS) \
 # -lclipper-ccp4 -lclipper-core  -lrfftw -lfftw -lccp4c -lmmdb2 \
 # $(GL_LIBS) $(GLU_LIBS)
 
-libMoleculesToTrianglesCXXClasses_la_LIBADD=$(MoleculesToTrianglesCXXSurface_LIBS) \
+libMoleculesToTrianglesCXXClasses_la_LIBADD=$(top_builddir)/MoleculesToTriangles/CXXSurface/libMoleculesToTrianglesCXXSurface.la \
    $(CLIPPER_LIBS) $(MMDB_LIBS) $(GL_LIBS)
+if COOT_BUILD_WINDOWS
+libMoleculesToTrianglesCXXClasses_la_LIBADD+= -lepoxy
+endif
 
 # otherincludedir = $(includedir)/MoleculesToTriangles/CXXClasses
 # otherincludedir = $(top_srcdir)/MoleculesToTriangles/CXXClasses

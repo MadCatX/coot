@@ -422,6 +422,8 @@ std::pair<bool, std::string> RendererGLSL::readShaderFile(std::string strFilenam
 	 return std::pair<bool, std::string>(status, s);
 }
 
+static_assert(sizeof(unsigned int) == sizeof(GLuint), "Mismatching type sizes");
+
 bool RendererGLSL::loadShaderFile(std::string strFilename, GLuint iHandle)
 {
     std::ifstream shaderSource(strFilename);
