@@ -130,7 +130,14 @@ check_PROGRAMS = test-fffear-in-coot test-trace ligand-percentiles  \
 # removed for now wrong build order: test-side-chain-densities
 
 findligand_bin_SOURCES = find-ligand.cc
+if HAVE_RDKIT_PREFIX_PATH
+findligand_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
+
 findwaters_bin_SOURCES = find-waters.cc
+if HAVE_RDKIT_PREFIX_PATH
+findwaters_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 
 test_tube_finder_SOURCES = test-tube-finder.cc
 test_tube_finder_LDADD = ./libcoot-ligand.la          \
@@ -168,6 +175,9 @@ test_trace_LDADD = ./libcoot-ligand.la                \
    $(CLIPPER_LIBS) $(MMDB_LIBS)
 
 coot_make_ligands_db_SOURCES = make-ligands-db.cc
+if HAVE_RDKIT_PREFIX_PATH
+coot_make_ligands_db_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 coot_make_ligands_db_LDADD = ./libcoot-ligand.la \
 	$(top_builddir)/ideal/libcoot-ideal.la             \
         $(top_builddir)/coot-utils/libcoot-map-heavy.la    \
@@ -185,7 +195,9 @@ coot_make_ligands_db_LDADD = ./libcoot-ligand.la \
 	$(top_builddir)/compat/libcoot-compat.la
 
 identify_protein_bin_SOURCES = identify-protein.cc
-
+if HAVE_RDKIT_PREFIX_PATH
+identify_protein_bin_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 
 # Why do I need to add lidia-core here? It's already added to libcoot-coord-utils.
 identify_protein_bin_LDADD = ./libcoot-ligand.la           \

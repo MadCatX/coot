@@ -91,7 +91,9 @@ peptide_projection_LDADD = libcoot-analysis.la \
 
 test_align_LDADD = libcoot-analysis.la \
 	$(top_builddir)/utils/libcoot-utils.la
-
+if HAVE_RDKIT_PREFIX_PATH
+coot_bfactan_LDFLAGS = -Wl,-rpath-link $(RDKIT_PREFIX_PATH)/lib
+endif
 coot_bfactan_LDADD = \
 	libcoot-analysis.la					\
 	$(top_builddir)/coot-utils/libcoot-coord-utils.la 	\
