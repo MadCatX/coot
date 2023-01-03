@@ -4727,7 +4727,7 @@ void ntc_update_similarities(NtCDialog *dlg, const NtCStructure &stru) {
 }
 
 static
-void ntc_update_everything(graphics_info_t *gfx, NtCDialog *dlg, int imol, const NtCClassifiedStep &cs, LLKA_NtC ntc) {
+void ntc_update_everything(graphics_info_t *gfx, NtCDialog *dlg, int imol, const NtCClassifiedStep &cs, LLKA_NtC ntc, bool keep_similarities) {
   auto reference = ntc_calculate_reference(cs.step.stru, ntc);
   ntc_display_reference_data(dlg, reference);
   if (reference) {
@@ -4742,7 +4742,8 @@ void ntc_update_everything(graphics_info_t *gfx, NtCDialog *dlg, int imol, const
   if (cs.classification) {
     const auto &classification = cs.classification.value();
     ntc_update_connectivities(dlg, cs.step, ntc, gfx->molecules[imol].atom_sel.mol);
-    ntc_update_similarities(dlg, cs.step.stru);
+    if (!keep_similarities)
+        ntc_update_similarities(dlg, cs.step.stru);
   } else {
     ntc_dialog_update_connectivities(dlg, ntc, {});
     ntc_dialog_update_similarities(dlg, {});
@@ -4839,7 +4840,7 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
 
 	  ntc_dialog_change_ntc(dlg, ntc);
 
-          ntc_update_everything(this, dlg, imol, cs, ntc);
+          ntc_update_everything(this, dlg, imol, cs, ntc, false);
 	} else {
           clear_up_moving_atoms();
           clear_moving_atoms_object();
@@ -4854,7 +4855,7 @@ graphics_info_t::modify_ntc(int atom_index, int imol) {
         auto maybeCs = modify_ntc_data->get(altconf);
 
 	if (is_valid_model_molecule(imol) && maybeCs && maybeCs.value().classification) {
-          ntc_update_everything(this, dlg, imol, maybeCs.value(), ntc);
+          ntc_update_everything(this, dlg, imol, maybeCs.value(), ntc, true);
 	} else {
           clear_up_moving_atoms();
           clear_moving_atoms_object();
