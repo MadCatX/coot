@@ -4,6 +4,7 @@
 
 #include "dot_plot.hh"
 
+#include <cassert>
 #include <limits>
 #include <vector>
 
@@ -22,28 +23,26 @@ struct PlotWidget {
     // Pointer tracking
     int pointer_x;
     int pointer_y;
-    int pointer_accum_delta_y; // Needed for touchpad scroll tracking hack
 
     OnPointSelected on_point_selected;
 
+    GtkEventController *scroller;
     GtkDrawingArea *area;
 };
 
 static
-void plot_zoom_in(PlotWidget *pw);
+void plot_zoom(PlotWidget *pw, gdouble delta);
 
 static
-void plot_zoom_out(PlotWidget *pw);
+double zoom(const DotPlotAxis &axis, gdouble delta) {
+    assert(delta != 0.0);
 
-    static
-double zoom_in(const DotPlotAxis &axis) {
-    double p = axis.maximum * 0.75;
+    constexpr double SCALE = 0.25;
+
+    double factor = SCALE * delta;
+    double p = axis.maximum + axis.maximum * factor;
+
     return p > axis.minimum ? p : axis.maximum;
-}
-
-static
-double zoom_out(const DotPlotAxis &axis) {
-    return axis.maximum / 0.75;
 }
 
 static
@@ -83,14 +82,10 @@ gboolean on_plot_draw(GtkDrawingArea *area, cairo_t *cr, gpointer data) {
 }
 
 static
-gboolean on_plot_scroll_event(GtkDrawingArea *area, GdkEventScroll *event, gpointer data) {
+gboolean on_plot_scroll_event(GtkEventControllerScroll *scroller, gdouble dx, gdouble dy, gpointer data) {
     PlotWidget *pw = static_cast<PlotWidget *>(data);
 
-    if (event->direction == GDK_SCROLL_UP) {
-        plot_zoom_in(pw);
-    } else if (event->direction == GDK_SCROLL_DOWN) {
-        plot_zoom_out(pw);
-    }
+    plot_zoom(pw, dy);
 
     return TRUE;
 }
@@ -99,18 +94,9 @@ static
 gboolean on_plot_pointer_motion_event(GtkDrawingArea *area, GdkEventMotion *motion, gpointer data) {
     PlotWidget *pw = static_cast<PlotWidget *>(data);
 
-    if (motion->state & GDK_CONTROL_MASK) {
-        int delta = pw->pointer_y - motion->y;
-        pw->pointer_accum_delta_y += delta;
+    gboolean handled = FALSE;
 
-        if (pw->pointer_accum_delta_y > +20) {
-            plot_zoom_in(pw);
-            pw->pointer_accum_delta_y = 0;
-        } else if (pw->pointer_accum_delta_y < -20) {
-            plot_zoom_out(pw);
-            pw->pointer_accum_delta_y = 0;
-        }
-    } else if (motion->state & GDK_BUTTON1_MASK) {
+    if (motion->state & GDK_BUTTON1_MASK) {
         int dx = motion->x - pw->pointer_x;
         int dy = motion->y - pw->pointer_y;
 
@@ -124,27 +110,22 @@ gboolean on_plot_pointer_motion_event(GtkDrawingArea *area, GdkEventMotion *moti
 
         gtk_widget_queue_draw(GTK_WIDGET(pw->area));
 
-        pw->pointer_accum_delta_y = 0;
+        handled = TRUE;
     }
 
     pw->pointer_x = motion->x;
     pw->pointer_y = motion->y;
 
-    return TRUE;
+    return handled;
 }
 
 static
-void plot_zoom_in(PlotWidget *pw) {
-    pw->x_axis.maximum = zoom_in(pw->x_axis);
-    pw->y_axis.maximum = zoom_in(pw->y_axis);
+void plot_zoom(PlotWidget *pw, gdouble delta) {
+    if (delta == 0.0)
+        return;
 
-    gtk_widget_queue_draw(GTK_WIDGET(pw->area));
-}
-
-static
-void plot_zoom_out(PlotWidget *pw) {
-    pw->x_axis.maximum = zoom_out(pw->x_axis);
-    pw->y_axis.maximum = zoom_out(pw->y_axis);
+    pw->x_axis.maximum = zoom(pw->x_axis, delta);
+    pw->y_axis.maximum = zoom(pw->y_axis, delta);
 
     gtk_widget_queue_draw(GTK_WIDGET(pw->area));
 }
@@ -178,9 +159,11 @@ PlotWidget * ntc_plot_widget_make(GtkDrawingArea *area, const std::string &xAxis
 
     pw->on_point_selected = onPointSelected;
 
+    pw->scroller = gtk_event_controller_scroll_new(GTK_WIDGET(area), GTK_EVENT_CONTROLLER_SCROLL_VERTICAL);
+
     // Wire up event handlers
     gtk_widget_add_events(GTK_WIDGET(area), GDK_BUTTON_PRESS_MASK | GDK_SCROLL_MASK | GDK_POINTER_MOTION_MASK);
-    g_signal_connect(area, "scroll-event", G_CALLBACK(on_plot_scroll_event), pw);
+    g_signal_connect(pw->scroller, "scroll", G_CALLBACK(on_plot_scroll_event), pw);
     g_signal_connect(area, "button-press-event", G_CALLBACK(on_plot_click_event), pw);
     g_signal_connect(area, "motion-notify-event", G_CALLBACK(on_plot_pointer_motion_event), pw);
 
