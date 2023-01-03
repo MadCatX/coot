@@ -66,13 +66,13 @@ void display_connectivities(NtCConnSimilPlotsDialog *dlg) {
 
     if (prevIt != dlg->connectivities->previous.cend()) {
         for (const auto &prev : prevIt->conns) {
-            prevPoints.emplace_back(prev.connectivity.C5PrimeDistance, prev.connectivity.O3PrimeDistance, 1.0, 1.0, 0.0, prev.NtC);
+            prevPoints.emplace_back(prev.connectivity.C5PrimeDistance, prev.connectivity.O3PrimeDistance, 0.0, 1.0, 1.0, prev.NtC);
         }
     }
 
     if (nextIt != dlg->connectivities->next.cend()) {
         for (const auto &next : nextIt->conns) {
-            nextPoints.emplace_back(next.connectivity.C5PrimeDistance, next.connectivity.O3PrimeDistance, 0.0, 1.0, 1.0, next.NtC);
+            nextPoints.emplace_back(next.connectivity.C5PrimeDistance, next.connectivity.O3PrimeDistance, 0.0, 0.0, 1.0, next.NtC);
         }
     }
 
