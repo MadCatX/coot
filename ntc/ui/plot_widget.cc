@@ -30,6 +30,56 @@ struct PlotWidget {
     GtkDrawingArea *area;
 };
 
+struct CursorCoords {
+    CursorCoords() :
+        x{-1}, y{-1}
+    {
+    }
+
+    CursorCoords(int x, int y) :
+        x{x}, y{y}
+    {
+    }
+
+    int x;
+    int y;
+
+    bool isValid() const {
+        return x != -1 && y != -1;
+    }
+};
+
+static
+double axis_span(const DotPlotAxis &axis) {
+    return axis.maximum - axis.minimum;
+}
+
+static
+CursorCoords get_cursor_relative(GtkWidget *w) {
+    assert(w != nullptr);
+
+    GdkDisplay *disp = gtk_widget_get_display(w);
+    if (!disp)
+        return {};
+
+    GdkSeat *seat = gdk_display_get_default_seat(disp);
+    if (!seat)
+        return {};
+
+    GdkDevice *pointer_dev = gdk_seat_get_pointer(seat);
+    if (!pointer_dev)
+        return {};
+
+    GdkWindow *window = gtk_widget_get_window(w);
+    if (!window)
+        return {};
+
+    gint x, y;
+    gdk_window_get_device_position(window, pointer_dev, &x, &y, NULL);
+
+    return { int(x), int(y) };
+}
+
 static
 void plot_zoom(PlotWidget *pw, gdouble delta);
 
@@ -37,12 +87,23 @@ static
 double zoom(const DotPlotAxis &axis, gdouble delta) {
     assert(delta != 0.0);
 
-    constexpr double SCALE = 0.25;
+    constexpr double SCALE = 0.10;
 
     double factor = SCALE * delta;
     double p = axis.maximum + axis.maximum * factor;
 
     return p > axis.minimum ? p : axis.maximum;
+}
+
+static
+void rescale_axis(double v, double zoom_delta, DotPlotAxis &axis) {
+    double L1 = axis.minimum;
+    double R1 = axis.maximum;
+    double R2 = zoom(axis, zoom_delta);
+    double S = (v * (R2 - R1) + L1 * (R1 - R2)) / (L1 - R1);
+
+    axis.maximum = R2 + S;
+    axis.minimum += S;
 }
 
 static
@@ -124,10 +185,26 @@ void plot_zoom(PlotWidget *pw, gdouble delta) {
     if (delta == 0.0)
         return;
 
-    pw->x_axis.maximum = zoom(pw->x_axis, delta);
-    pw->y_axis.maximum = zoom(pw->y_axis, delta);
+    GtkWidget *warea = GTK_WIDGET(pw->area);
 
-    gtk_widget_queue_draw(GTK_WIDGET(pw->area));
+    CursorCoords cc = get_cursor_relative(warea);
+    if (!cc.isValid())
+        return;
+
+    int width = gtk_widget_get_allocated_width(warea) - pw->options.leftOffsetPx - pw->options.rightOffsetPx;
+    if (width < 1)
+        width = 1;
+    double v_x  = axis_span(pw->x_axis) * (cc.x - pw->options.leftOffsetPx) / width + pw->x_axis.minimum;
+
+    int height = gtk_widget_get_allocated_height(warea) - pw->options.bottomOffsetPx - pw->options.topOffsetPx;
+    if (height < 1)
+        height = 1;
+    double v_y = axis_span(pw->y_axis) * (height - cc.y + pw->options.topOffsetPx) / height + pw->y_axis.minimum;
+
+    rescale_axis(v_x, delta, pw->x_axis);
+    rescale_axis(v_y, delta, pw->y_axis);
+
+    gtk_widget_queue_draw(warea);
 }
 
 PlotWidget * ntc_plot_widget_make(GtkDrawingArea *area, const std::string &xAxisTitle, const std::string &yAxisTitle, int tickStep, OnPointSelected onPointSelected) {
