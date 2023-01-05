@@ -31,6 +31,24 @@ void CopyCharArray(char (&dst)[Size], const char (&src)[Size]) {
 }
 
 static
+void assign_alt_confs(mmdb::Residue *assignee, mmdb::Residue *assigner) {
+    for (int aixR = 0; aixR < assigner->GetNumberOfAtoms(); aixR++) {
+        mmdb::Atom *atomR = assigner->GetAtom(aixR);
+        std::string nameR = trim(atomR->GetAtomName());
+
+        for (int aixE = 0; aixE < assignee->GetNumberOfAtoms(); aixE++) {
+            mmdb::Atom *atomE = assignee->GetAtom(aixE);
+            std::string nameE = trim(atomE->GetAtomName());
+
+            if (nameR == nameE) {
+                CopyCharArray(atomE->altLoc, atomR->altLoc);
+                break;
+            }
+        }
+    }
+}
+
+static
 mmdb::Residue * get_standard_residue_instance(const std::string &residueName, mmdb::Manager *standardResidues) {
     int selHnd = standardResidues->NewSelection();
     standardResidues->Select(
@@ -74,6 +92,7 @@ void fix_up_atom_names(mmdb::Residue *relabelee, mmdb::Residue *relabeler) {
 
             if (nameR == nameE) {
                 atomE->SetAtomName(atomR->GetAtomName());
+                break;
             }
         }
     }
@@ -304,11 +323,12 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
     // Relabel first residue
     mmdb::Residue *residueE = chainE->GetResidue(0);
     mmdb::Residue *residueR = chainR->GetResidue(0);
-    residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here
+    residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here because we could end up with a wrong base
     if (relabelAtomNames) {
         std::string nameR = refmac_residue_name(residueE->GetResName());
         mmdb::Residue *reference = get_standard_residue_instance(nameR, standard_residues.mol);
         if (reference) {
+            assign_alt_confs(residueE, residueR);
             fix_up_atom_names(residueE, reference);
         }
 
@@ -318,11 +338,12 @@ void relabel_mmdb_step(mmdb::Manager *relabelee, mmdb::Manager *relabeler, bool 
     // Relabel second residue
     residueE = chainE->GetResidue(1);
     residueR = chainR->GetResidue(1);
-    residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here
+    residueE->SetResID(residueE->GetResName(), residueR->GetSeqNum(), residueR->GetInsCode()); // Getting name from the relabelee is not a bug, we must not change it here because we could end up with a wrong base
     if (relabelAtomNames) {
         std::string nameR = refmac_residue_name(residueE->GetResName());
         mmdb::Residue *reference = get_standard_residue_instance(nameR, standard_residues.mol);
         if (reference) {
+            assign_alt_confs(residueE, residueR);
             fix_up_atom_names(residueE, reference);
         }
 
@@ -357,7 +378,19 @@ void replace_bases(mmdb::Manager *replacee, mmdb::Manager *replacer) {
                     continue;
                 }
 
+                // HACK: If the replacee has altconfs, apply them undiscriminately on all atoms of the structure.
+                // This is super wrong but a proper solution is annoying because we will have to figure out which atoms were replaced
+                // by what and apply altlocs accordingly...
+                mmdb::AltLoc altconfE;
+                CopyCharArray(altconfE, residueE->GetAtom(0)->altLoc); // Just grab the first atom and expand it. The current logic is dumb anyway.
+
                 coot::util::mutate_base(residueE, standardBase, false);
+
+                // Now apply the altconfs
+                for (int aix = 0; aix < residueE->GetNumberOfAtoms(); aix++) {
+                    auto atom = residueE->GetAtom(aix);
+                    CopyCharArray(atom->altLoc, altconfE);
+                }
 
                 delete standardBase;
             }
