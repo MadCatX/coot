@@ -5226,8 +5226,10 @@ graphics_info_t::setup_key_bindings() {
 
    auto l7 = []() {
                 int imol_scroll = graphics_info_t::scroll_wheel_map;
-                if (graphics_info_t::is_valid_map_molecule(imol_scroll))
-                   graphics_info_t::molecules[imol_scroll].pending_contour_level_change_count--;
+                if (!graphics_info_t::is_valid_map_molecule(imol_scroll))
+                   return gboolean(FALSE);
+
+                 graphics_info_t::molecules[imol_scroll].pending_contour_level_change_count--;
                 if (graphics_info_t::glareas.size() > 0)
                    int contour_idle_token = g_idle_add(idle_contour_function, graphics_info_t::glareas[0]);
                 graphics_info_t g;
@@ -5238,8 +5240,10 @@ graphics_info_t::setup_key_bindings() {
 
    auto l8 = []() {
                 int imol_scroll = graphics_info_t::scroll_wheel_map;
-                if (graphics_info_t::is_valid_map_molecule(imol_scroll))
-                   graphics_info_t::molecules[imol_scroll].pending_contour_level_change_count++;
+                if (!graphics_info_t::is_valid_map_molecule(imol_scroll))
+                   return gboolean(FALSE);
+
+                graphics_info_t::molecules[imol_scroll].pending_contour_level_change_count++;
                 if (graphics_info_t::glareas.size() > 0)
                    int contour_idle_token = g_idle_add(idle_contour_function, graphics_info_t::glareas[0]);
                 graphics_info_t g;
