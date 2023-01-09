@@ -419,7 +419,7 @@ void
 coot::restraints_container_t::remove_trans_peptide_restraint(mmdb::Residue *first, mmdb::Residue *second) {
 
    unsigned int n_rest = size();
-   for (unsigned int i=0; i<=n_rest; i++) {
+   for (unsigned int i=0; i<n_rest; i++) {
       simple_restraint &restraint = restraints_vec[i];
       if (restraint.restraint_type == coot::TRANS_PEPTIDE_RESTRAINT) {
          mmdb::Residue *r_11 = atom[restraint.atom_index_1]->residue;
