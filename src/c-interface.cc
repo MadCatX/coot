@@ -7193,7 +7193,7 @@ void
 run_script(const char *filename) {
    std::string fn(filename);
 
-   if (coot::util::file_exists(fn)) {
+   if (!coot::util::file_exists(fn)) {
       std::cout << "WARNING:: Can't run script: " << fn
                 << " no such file." << std::endl;
    } else {
