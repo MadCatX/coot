@@ -752,22 +752,6 @@ on_coords_filechooser_dialog_response_gtkbuilder_callback(GtkDialog       *dialo
    }
 }
 
-extern "C" G_MODULE_EXPORT
-void
-on_coords_filechooser_dialog_file_activated_gtkbuilder_callback(GtkFileChooser* dialog,
-                                                                gpointer user_data) {
-
-   // 20220427-PE I am not sure that this is needed now. Double click on a filename
-   // seems to work for datasets - and they don't have a file_activated callback.
-
-   // 20220319-PE shouldn't need to connect to this says the documentation - hmmm.....
-   // const char *fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-   //  handle_read_draw_molecule_with_recentre(fn, 1);
-   save_directory_from_filechooser(GTK_WIDGET(dialog));
-   gtk_widget_hide(GTK_WIDGET(dialog));
-
-}
-
 
 #include "rsr-functions.hh"
 

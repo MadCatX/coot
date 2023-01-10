@@ -6222,7 +6222,6 @@ the Ctrl key when moving the mouse.</property>
     <property name="title" translatable="yes">Coot: Select Coordinate Filename</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
-    <signal name="file-activated" handler="on_coords_filechooser_dialog_file_activated_gtkbuilder_callback" swapped="no"/>
     <signal name="response" handler="on_coords_filechooser_dialog_response_gtkbuilder_callback" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox">
