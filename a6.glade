@@ -24604,7 +24604,6 @@ Then use "Run Refmac..." from the "Model/Fit/Refine" dialog.
     <property name="use-header-bar"> 0 </property>
     <property name="type_hint">dialog</property>
     <signal name="delete-event" handler="on_run_script_filechooser_dialog_delete_event_gtkbuilder_callback" swapped="no"/>
-    <signal name="file-activated" handler="on_run_script_filechooser_dialog_file_activated_gtkbuilder_callback" swapped="no"/>
     <signal name="response" handler="on_run_script_filechooser_dialog_response_gtkbuilder_callback" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox">

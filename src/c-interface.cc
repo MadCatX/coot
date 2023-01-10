@@ -7386,17 +7386,7 @@ run_guile_script(const char *filename) {
 
 void
 run_python_script(const char *filename_in) {
-
 #ifdef USE_PYTHON
-
-   std::string s = coot::util::intelligent_debackslash(filename_in);
-#if 0 // as it was for Python2
-   std::string simple = "execfile(";
-   simple += single_quote(s);
-   simple += ")";
-   std::cout << "Running python script " << s  << std::endl;
-   PyRun_SimpleString(simple.c_str());
-#endif
 
    if (coot::util::file_exists(filename_in)) {
       FILE *fp = fopen(filename_in, "r");

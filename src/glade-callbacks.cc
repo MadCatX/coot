@@ -9634,18 +9634,6 @@ on_run_script_filechooser_dialog_response_gtkbuilder_callback(GtkDialog * dialog
 
 }
 
-extern "C" G_MODULE_EXPORT
-void
-on_run_script_filechooser_dialog_file_activated_gtkbuilder_callback(GtkFileChooser* dialog,
-                                                                    gpointer user_data) {
-
-   GtkWidget *file_chooser = widget_from_builder("run_script_filechooser_dialog");
-   const char *script_filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
-   run_script(script_filename);
-   gtk_widget_hide(file_chooser);
-}
-
-
 
 extern "C" G_MODULE_EXPORT
 void
