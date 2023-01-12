@@ -2369,6 +2369,8 @@ GtkWidget *create_and_pack_gtkglarea(GtkWidget *vbox, bool use_gtk_builder) {
    // the use_gtk_builder flag really means "was invoked from the path that..."
 
    GtkWidget *w = gtk_gl_area_new();
+   if (!w)
+      return nullptr;
 
    auto get_gl_widget_dimension_scale_factor  = [] () {
                                                    int sf = 1;
@@ -3935,12 +3937,15 @@ graphics_info_t::render(bool to_screendump_framebuffer_flag, const std::string &
                                 };
 
    unsigned int frame_time_history_list_max_n_elements = 500;
-   GtkWidget *glarea = glareas[0];
-   if (glarea) {
+   GtkGLArea *gl_area = glareas.empty() ? nullptr : GTK_GL_AREA(glareas[0]);
+
+   if (gl_area) {
       auto tp_now = std::chrono::high_resolution_clock::now();
       frame_time_history_list.push_back(tp_now);
       if (frame_time_history_list.size() >= (frame_time_history_list_max_n_elements+1))
          frame_time_history_list.pop_front();
+   } else {
+      std::cerr << "No GLArea to render to" << std::endl;
    }
 
    if (! to_screendump_framebuffer_flag) {
@@ -3956,8 +3961,6 @@ graphics_info_t::render(bool to_screendump_framebuffer_flag, const std::string &
       return state;
 
    } else {
-
-      GtkGLArea *gl_area = GTK_GL_AREA(glareas[0]);
       GtkAllocation allocation;
       gtk_widget_get_allocation(GTK_WIDGET(gl_area), &allocation);
       int w = allocation.width;
